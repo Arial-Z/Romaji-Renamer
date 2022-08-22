@@ -44,9 +44,13 @@ do
         if grep "$title" $animes_titles
         then
                 echo "show already rename : $title" >> $LOG_PATH
-				line_title=$(grep -n ""$title":" $animes_titles | cut -d : -f 1)
         else
                 mal_id=$(get-mal-id)
+                if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
+                then
+                        echo "invalid MAL ID : $title" >> $LOG_PATH
+                        continue
+                fi
                 title_mal=$(get-mal-title)
                 mal_score=$(get-mal-rating)
                 echo "tvdb : $tvdb_id - MAL : $mal_id / $title_mal - $title" >> $LOG_PATH
@@ -57,4 +61,3 @@ do
                 sleep 3
         fi
 done < <(tail -n +2 $SCRIPT_FOLDER/animes-id.csv)
-
