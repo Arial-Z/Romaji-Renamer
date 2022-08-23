@@ -20,7 +20,7 @@ SCRIPT_FOLDER=/home/arialz/scripts/plex-renamer
 PMM_FOLDER=/home/plexmetamanager
 PMM_CONFIG=$PMM_FOLDER/config/temp.yml
 LOG_PATH=/home/arialz/log/plex-renamer_$(date +%Y.%m.%d).log
-animes_titles=/home/arialz/github/PMM-Arialz/metadata/animes-titles.yml
+animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml
 
 # get library titles and tvdb-ID list by PMM
 rm $PMM_FOLDER/config/temp.cache
@@ -94,17 +94,17 @@ do
 		echo "  \"$title_mal\":" >> $animes_titles
 		echo "    alt_title: \"$title_plex\"" >> $animes_titles
 		echo "    sort_title: \"$title_mal\"" >> $animes_titles
-		echo "    user_rating: $score_mal" >> $animes_titles
+		echo "    audience_rating: $score_mal" >> $animes_titles
 		echo "added to metadata : $title_mal / $title_plex / score : $score_mal" >> $LOG_PATH
 		sleep 1.2
 	else
                 ratingline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
                 ratingline=$((ratingline+1))
-                if sed -n "${ratingline}p" $animes_titles | grep "user_rating:"
+                if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
                 then
                         sed -i "${ratingline}d" $animes_titles
                         mal_score=$(get-mal-rating)
-                        sed -i "${ratingline}i\    user_rating: ${mal_score}" $animes_titles
+                        sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
                         echo "updated score : $mal_score" >> $LOG_PATH
                         sleep 1.2
                 fi
