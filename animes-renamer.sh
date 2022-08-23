@@ -42,50 +42,71 @@ fi
 # get corresponding MAL title and score
 while IFS="|" read -r tvdb_id title_plex
 do
-	if awk -F"|" '{print $1}' $SCRIPT_FOLDER/override-ID.csv | tail -n +2 | grep $tvdb_id     		# check if in override
+	if [ -f $SCRIPT_FOLDER/ID.csv ] # check if ID.csv exist
 	then
-		overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID.csv | cut -d : -f 1)
-		mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID.csv | awk -F"|" '{print $2}')
-		title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID.csv | awk -F"|" '{print $3}')
-		echo "override found for : $title_mal / $title_plex" >> $LOG_PATH
-		echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID.csv
-	else
-		mal_id=$(get-mal-id)
-		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
+		if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID.csv | grep $tvdb_id
 		then
-			echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
-			continue
+			if awk -F"|" '{print $1}' $SCRIPT_FOLDER/override-ID.csv | tail -n +2 | grep $tvdb_id     		# check if in override
+			then
+				overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID.csv | cut -d : -f 1)
+				mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID.csv | awk -F"|" '{print $2}')
+				title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID.csv | awk -F"|" '{print $3}')
+				echo "override found for : $title_mal / $title_plex" >> $LOG_PATH
+				echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID.csv
+			else
+				mal_id=$(get-mal-id)
+				if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
+				then
+					echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
+				fi
+				title_mal=$(get-mal-title)
+				echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID.csv
+				sleep 2.2
+			fi
 		fi
-		title_mal=$(get-mal-title)
-		echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID.csv
-		sleep 2
+	else
+		if awk -F"|" '{print $1}' $SCRIPT_FOLDER/override-ID.csv | tail -n +2 | grep $tvdb_id     		# check if in override
+		then
+			overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID.csv | cut -d : -f 1)
+			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID.csv | awk -F"|" '{print $2}')
+			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID.csv | awk -F"|" '{print $3}')
+			echo "override found for : $title_mal / $title_plex" >> $LOG_PATH
+			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID.csv
+		else
+			mal_id=$(get-mal-id)
+			if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
+			then
+			echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
+			fi
+			title_mal=$(get-mal-title)
+			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID.csv
+			sleep 2.2
+		fi
 	fi
 done < $SCRIPT_FOLDER/animes.csv
 
 # write PMM metadata file
 while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
-	if grep "$title_mal" $animes_titles
+	if ! grep "$title_mal" $animes_titles
 	then
-		if sed -e "${ratingline}d" | grep "user_rating:"
-		then
-			ratingline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
-			ratingline=$((delline+1))
-			sed -i "${ratingline}d" $animes_titles
-			mal_score=$(get-mal-rating)
-			sleep 2
-			sed -i "${ratingline}i    user_rating: ${mal_score}" $animes_titles
-			echo "updated score : $score_mal" >> $LOG_PATH
-		else
-			continue
-		fi
-	else
+		score_mal=$(get-mal-rating)
 		echo "  \"$title_mal\":" >> $animes_titles
 		echo "    alt_title: \"$title_plex\"" >> $animes_titles
 		echo "    sort_title: \"$title_mal\"" >> $animes_titles
-		score_mal=$(get-mal-rating)
 		echo "    user_rating: $score_mal" >> $animes_titles
 		echo "added to metadata : $title_mal / $title_plex / score : $score_mal" >> $LOG_PATH
-		sleep 2
-	fi
+		sleep 1.2
+	else
+                ratingline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
+                ratingline=$((ratingline+1))
+                if sed -n "${ratingline}p" $animes_titles | grep "user_rating:"
+                then
+                        sed -i "${ratingline}d" $animes_titles
+                        mal_score=$(get-mal-rating)
+                        sed -i "${ratingline}i\    user_rating: ${mal_score}" $animes_titles
+                        echo "updated score : $mal_score" >> $LOG_PATH
+                        sleep 1.2
+                fi
+        fi
 done < $SCRIPT_FOLDER/ID.csv
