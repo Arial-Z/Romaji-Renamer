@@ -3,7 +3,7 @@
 # function
 function get-mal-id ()
 {
-        jq ".[] | select(".tvdb_id"==${tvdb_id})" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq ."mal_id" | sort -n | head -1
+jq ".[] | select(".tvdb_id"==${tvdb_id})" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq ."mal_id" | sort -n | head -1
 }
 
 function get-mal-title ()
@@ -33,54 +33,59 @@ head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end -$line_start -
 rm $SCRIPT_FOLDER/meta.log
 awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog.txt > $SCRIPT_FOLDER/animes.csv
 rm $SCRIPT_FOLDER/cleanlog.txt
-if [ -f "$SCRIPT_FOLDER/override-ID.csv" ];
+curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json # get pmm animes mapping
+if [ ! -f $animes_titles ] # check if $animes_titles exist
 then
-    cat $SCRIPT_FOLDER/override-ID.csv $SCRIPT_FOLDER/ID.csv > $SCRIPT_FOLDER/full-ID.csv
-else
-    cat $SCRIPT_FOLDER/override-ID.csv > $SCRIPT_FOLDER/full-ID.csv
+	echo "metadata:" > $animes_titles
 fi
-curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json
 
 # get corresponding MAL title and score
-while IFS="|" read -r tvdb_id title
+while IFS="|" read -r tvdb_id title_plex
 do
-        if awk -F"|" '{print $1}' $SCRIPT_FOLDER/full-ID.csv | tail -n +2 | grep $tvdb_id     # check if already parsed
-        then
-                echo "$title ID already found" >> $LOG_PATH
-        else
-                mal_id=$(get-mal-id)
-                if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
-                then
-                        echo "invalid MAL ID / tvdb : $tvdb_id / $title" >> $LOG_PATH
-                        continue
-                fi
-                title_mal=$(get-mal-title)
-                echo "$tvdb_id|$mal_id|$title_mal|$title" >> $SCRIPT_FOLDER/ID.csv
-                echo "$tvdb_id|$mal_id|$title_mal" >> $LOG_PATH
-                sleep 2
-        fi
+	if awk -F"|" '{print $1}' $SCRIPT_FOLDER/override-ID.csv | tail -n +2 | grep $tvdb_id     		# check if in override
+	then
+		overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID.csv | cut -d : -f 1)
+		mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID.csv | awk -F"|" '{print $2}')
+		title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID.csv | awk -F"|" '{print $3}')
+		echo "override found for tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
+		echo "tvdb : $tvdb_id / MAL : $mal_id / $title_mal / $title_plex" >> $SCRIPT_FOLDER/ID.csv
+	else
+		mal_id=$(get-mal-id)
+		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
+		then
+			echo "invalid MAL ID / tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
+			continue
+		fi
+		title_mal=$(get-mal-title)
+		echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID.csv
+		sleep 2
+	fi
 done < $SCRIPT_FOLDER/animes.csv
 
 # write PMM metadata file
-while IFS="|" read -r tvdb_id mal_id title_mal title
+while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
-	if awk -F"|" '{print $1}' $SCRIPT_FOLDER/full-ID.csv | tail -n +2 | grep $tvdb_id     # check if already parsed
+	if grep "$title_mal" $animes_titles
 	then
-		if grep "$title_mal" $animes_titles
+		if sed -e "${ratingline}d" | grep "user_rating:"
 		then
-			line_rating=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1))
-			line_rating=$((line_rating+1))
+			ratingline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
+			ratingline=$((delline+1))
+			sed -i "${ratingline}d" $animes_titles
 			mal_score=$(get-mal-rating)
-			perl -l -p -e 'print "    user_rating: $mal_score" if $. == $line_rating' $animes_titles
-			echo "Update Rating : $title_mal" >> $LOG_PATH
-		else
-			echo "tvdb : $tvdb_id - MAL : $mal_id / $title_mal" >> $LOG_PATH
-			echo "  \"$title_mal\":" >> $animes_titles
-			echo "    alt_title: \"$title\"" >> $animes_titles
-			echo "    sort_title: \"$title_mal\"" >> $animes_titles
-			mal_score=$(get-mal-rating)
-			echo "    user_rating: $mal_score" >> $animes_titles
 			sleep 2
+			sed -i "${ratingline}i" "    user_rating: ${mal_score}" $animes_titles
+			echo "updated score : $score_mal" >> $LOG_PATH
+		else
+			continue
 		fi
+	else
+		echo "  \"$title_mal\":" >> $animes_titles
+		echo "    alt_title: \"$title_plex\"" >> $animes_titles
+		echo "    sort_title: \"$title_mal\"" >> $animes_titles
+		score_mal=$(get-mal-rating)
+		echo "    user_rating: $score_mal" >> $animes_titles
+		echo "added to metadata : $title_mal / $title_plex / score : $score_mal" >> $LOG_PATH
+		sleep 2
 	fi
-done < $SCRIPT_FOLDER/full-ID.csv
+done < $SCRIPT_FOLDER/ID.csv
