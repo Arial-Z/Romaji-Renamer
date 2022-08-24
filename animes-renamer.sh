@@ -9,7 +9,7 @@ wget "https://api.jikan.moe/v4/anime/$mal_id" -O $SCRIPT_FOLDER/infos/$mal_id.js
 sleep 1.2
 }
 function get-mal-title () {
-jq .data.title -r $SCRIPT_FOLDER/infos/$mal_id.json | sed 's/^.//;s/.$//'
+jq .data.title -r $SCRIPT_FOLDER/infos/$mal_id.json
 }
 function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/infos/$mal_id.json
@@ -137,4 +137,3 @@ do
                 fi
         fi
 done < $SCRIPT_FOLDER/ID-animes.csv
-$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/config.yml
