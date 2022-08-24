@@ -1,28 +1,22 @@
 #!/bin/bash
 
 # function
-function get-mal-id ()
-{
+function get-mal-id () {
 jq ".[] | select(".tvdb_id"==${tvdb_id})" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq ."mal_id" | sort -n | head -1
 }
-function get-mal-infos ()
-{
+function get-mal-infos () {
 wget "https://api.jikan.moe/v4/anime/$mal_id" -O $SCRIPT_FOLDER/infos/$mal_id.json 
 sleep 1.2
 }
-function get-mal-title ()
-{
+function get-mal-title () {
 jq .data.title -r $SCRIPT_FOLDER/infos/$mal_id.json | sed 's/^.//;s/.$//'
 }
-function get-mal-rating ()
-{
+function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/infos/$mal_id.json
 }
-function get-mal-poster ()
-{
-mal-poster-url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/infos/$mal_id.json)
-wget "$mal-poster-url" -O $SCRIPT_FOLDER/posters/$mal_id.jpg
-echo "Poster downloaded for : $title_mal / $title_plex" >> $LOG_PATH
+function get-mal-poster () {
+mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/infos/$mal_id.json)
+wget "$mal_poster_url" -O $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 2
 }
 
@@ -34,7 +28,7 @@ LOG_PATH=/home/arialz/log/plex-renamer_$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml
 
 # get library titles and tvdb-ID list by PMM
-rm $PMM_FOLDER/config/temp.cache
+rm $PMM_FOLDER/config/temp-animes.yml
 rm $SCRIPT_FOLDER/animes.csv
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
