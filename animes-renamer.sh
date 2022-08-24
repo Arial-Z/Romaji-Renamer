@@ -5,18 +5,29 @@ function get-mal-id ()
 {
 jq ".[] | select(".tvdb_id"==${tvdb_id})" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq ."mal_id" | sort -n | head -1
 }
-
+function get-mal-infos ()
+{
+wget "https://api.jikan.moe/v4/anime/$mal_id" -O $SCRIPT_FOLDER/infos/$mal_id.json 
+sleep 1.2
+}
 function get-mal-title ()
 {
-curl "https://api.jikan.moe/v4/anime/$mal_id" | jq .data.title | sed 's/^.//;s/.$//'
+jq .data.title -r $SCRIPT_FOLDER/infos/$mal_id.json | sed 's/^.//;s/.$//'
 }
 function get-mal-rating ()
 {
-curl "https://api.jikan.moe/v4/anime/$mal_id" | jq .data.score
+jq .data.score -r $SCRIPT_FOLDER/infos/$mal_id.json
+}
+function get-mal-poster ()
+{
+mal-poster-url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/infos/$mal_id.json)
+wget "$mal-poster-url" -O $SCRIPT_FOLDER/posters/$mal_id.jpg
+echo "Poster downloaded for : $title_mal / $title_plex" >> $LOG_PATH
+sleep 2
 }
 
 ## folder and file emplacement
-SCRIPT_FOLDER=/home/arialz/scripts/plex-renamer
+SCRIPT_FOLDER=/home/arialz/github/Plex-Animes-Renamer
 PMM_FOLDER=/home/plexmetamanager
 PMM_CONFIG=$PMM_FOLDER/config/temp.yml
 LOG_PATH=/home/arialz/log/plex-renamer_$(date +%Y.%m.%d).log
@@ -38,6 +49,16 @@ if [ ! -f $animes_titles ] # check if $animes_titles exist
 then
         echo "metadata:" > $animes_titles
 fi
+if [ ! -d $SCRIPT_FOLDER/infos ] # check if $animes_titles exist
+then
+        mkdir $SCRIPT_FOLDER/infos
+else
+	rm $SCRIPT_FOLDER/infos/*
+fi
+if [ ! -d $SCRIPT_FOLDER/posters ] # check if $animes_titles exist
+then
+        mkdir $SCRIPT_FOLDER/posters
+fi
 
 # get corresponding MAL title and score
 while IFS="|" read -r tvdb_id title_plex
@@ -51,17 +72,18 @@ do
                                 overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-animes.csv | cut -d : -f 1)
                                 mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.csv | awk -F"|" '{print $2}')
                                 title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.csv | awk -F"|" '{print $3}')
-                                echo "override found for : $title_mal / $title_plex" >> $LOG_PATH
+                                get-mal-infos
+				echo "override found for : $title_mal / $title_plex" >> $LOG_PATH
                                 echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
-                        else
+			else
                                 mal_id=$(get-mal-id)
                                 if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
                                 then
                                         echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
                                 fi
+				get-mal-infos
                                 title_mal=$(get-mal-title)
                                 echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
-                                sleep 2.2
                         fi
                 fi
         else
@@ -70,7 +92,8 @@ do
                         overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-animes.csv | cut -d : -f 1)
                         mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.csv | awk -F"|" '{print $2}')
                         title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.csv | awk -F"|" '{print $3}')
-                        echo "override found for : $title_mal / $title_plex" >> $LOG_PATH
+                        get-mal-infos
+			echo "override found for : $title_mal / $title_plex" >> $LOG_PATH
                         echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
                 else
                         mal_id=$(get-mal-id)
@@ -78,9 +101,9 @@ do
                         then
                         echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
                         fi
+			get-mal-infos
                         title_mal=$(get-mal-title)
                         echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
-                        sleep 2.2
                 fi
         fi
 done < $SCRIPT_FOLDER/list-animes.csv
@@ -90,15 +113,27 @@ while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
         if ! grep "$title_mal" $animes_titles
         then
+                if [ ! -f $SCRIPT_FOLDER/infos/$mal_id.json ] # check if $animes_titles exist
+		then
+			get-mal-infos
+		fi
                 score_mal=$(get-mal-rating)
+		get-mal-poster
                 echo "  \"$title_mal\":" >> $animes_titles
                 echo "    alt_title: \"$title_plex\"" >> $animes_titles
                 echo "    sort_title: \"$title_mal\"" >> $animes_titles
                 echo "    audience_rating: $score_mal" >> $animes_titles
-                echo "added to metadata : $title_mal / $title_plex / score : $score_mal" >> $LOG_PATH
-                sleep 1.2
+                if [ -f $SCRIPT_FOLDER/posters/$mal_id.jpg ] # check if $animes_titles exist
+		then
+			echo "    file_poster: $SCRIPT_FOLDER/posters/$mal_title.jpg" >> $animes_titles
+		fi
+		echo "added to metadata : $title_mal / $title_plex / score : $score_mal" >> $LOG_PATH
         else
-                ratingline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
+                if [ ! -f $SCRIPT_FOLDER/infos/$mal_id.json ] # check if $animes_titles exist
+		then
+			get-mal-infos
+		fi
+		ratingline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
                 ratingline=$((ratingline+1))
                 if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
                 then
@@ -106,7 +141,6 @@ do
                         mal_score=$(get-mal-rating)
                         sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
                         echo "updated score : $mal_score" >> $LOG_PATH
-                        sleep 1.2
                 fi
         fi
 done < $SCRIPT_FOLDER/ID-animes.csv
