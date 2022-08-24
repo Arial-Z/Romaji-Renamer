@@ -2,7 +2,7 @@
 
 # function
 function get-mal-id () {
-jq '.[] | select(.imdb_id == "${imdb_id}" )' -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq ."mal_id" | sort -n | head -1
+jq ".[] | select(".imdb_id" == ${imdb_id} )" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq ."mal_id" | sort -n | head -1
 }
 function get-mal-infos () {
 wget "https://api.jikan.moe/v4/anime/$mal_id" -O $SCRIPT_FOLDER/infos/$mal_id.json 
@@ -26,7 +26,7 @@ PMM_FOLDER=/home/plexmetamanager
 LOG_PATH=/home/arialz/log/movies-renamer_$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/movies-titles.yml
 
-# get library titles and tvdb-ID list by PMM
+# get library titles and imdb-ID list by PMM
 rm $PMM_FOLDER/config/temp-movies.cache
 rm $SCRIPT_FOLDER/movie.csv
 cd $PMM_FOLDER
@@ -93,18 +93,18 @@ do
                         mal_id=$(get-mal-id)
                         if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
                         then
-                        echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
+                        echo "invalid MAL ID for : imdb : $imdb_id / $title_plex" >> $LOG_PATH
                         fi
 			get-mal-infos
                         title_mal=$(get-mal-title)
-                        echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
+                        echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
                 fi
         fi
 done < $SCRIPT_FOLDER/list-movies.csv
 sleep 30
 
 # write PMM metadata file
-while IFS="|" read -r tvdb_id mal_id title_mal title_plex
+while IFS="|" read -r imdb_id mal_id title_mal title_plex
 do
         if ! grep "$title_mal" $animes_titles
         then
