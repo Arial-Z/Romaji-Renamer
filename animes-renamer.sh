@@ -118,7 +118,7 @@ do
                 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ] # check poster
 		then
 			get-mal-poster
-			echo "    file_poster: $SCRIPT_FOLDER/posters/$mal_id.jpg" >> $animes_titles
+			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		fi
 		echo "added to metadata : $title_mal / $title_plex / score : $score_mal" >> $LOG_PATH
         else
