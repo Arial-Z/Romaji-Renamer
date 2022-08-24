@@ -28,7 +28,7 @@ LOG_PATH=/home/arialz/log/plex-renamer_$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml
 
 # get library titles and tvdb-ID list by PMM
-rm $PMM_FOLDER/config/temp-animes.yml
+rm $PMM_FOLDER/config/temp-animes.cache
 rm $SCRIPT_FOLDER/animes.csv
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
@@ -107,23 +107,23 @@ while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
         if ! grep "$title_mal" $animes_titles
         then
-                if [ ! -f $SCRIPT_FOLDER/infos/$mal_id.json ] # check if $animes_titles exist
+                if [ ! -f $SCRIPT_FOLDER/infos/$mal_id.json ] # check infos from json
 		then
 			get-mal-infos
 		fi
-                score_mal=$(get-mal-rating)
-		get-mal-poster
                 echo "  \"$title_mal\":" >> $animes_titles
                 echo "    alt_title: \"$title_plex\"" >> $animes_titles
                 echo "    sort_title: \"$title_mal\"" >> $animes_titles
+		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $animes_titles
-                if [ -f $SCRIPT_FOLDER/posters/$mal_id.jpg ] # check if $animes_titles exist
+                if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ] # check poster
 		then
+			get-mal-poster
 			echo "    file_poster: $SCRIPT_FOLDER/posters/$mal_title.jpg" >> $animes_titles
 		fi
 		echo "added to metadata : $title_mal / $title_plex / score : $score_mal" >> $LOG_PATH
         else
-                if [ ! -f $SCRIPT_FOLDER/infos/$mal_id.json ] # check if $animes_titles exist
+                if [ ! -f $SCRIPT_FOLDER/infos/$mal_id.json ] # check infos from json
 		then
 			get-mal-infos
 		fi
@@ -138,3 +138,4 @@ do
                 fi
         fi
 done < $SCRIPT_FOLDER/ID-animes.csv
+$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/config.yml
