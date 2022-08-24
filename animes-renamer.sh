@@ -23,7 +23,6 @@ sleep 2
 ## folder and file emplacement
 SCRIPT_FOLDER=/home/arialz/github/Plex-Animes-Renamer
 PMM_FOLDER=/home/plexmetamanager
-PMM_CONFIG=$PMM_FOLDER/config/temp.yml
 LOG_PATH=/home/arialz/log/plex-renamer_$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml
 
