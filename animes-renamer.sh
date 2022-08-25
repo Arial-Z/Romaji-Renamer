@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source .conf
+source conf.config
 
 # function
 function get-mal-id () {
