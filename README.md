@@ -16,17 +16,17 @@ Bash script to import MAL metadata to plex with PMM metadata file
 
 
 ### Step 1 - Plex, Plex-Meta-Manager and JQ
-First you need plex, Plex-Meta-Manager and JQ
-to install and use Plex-Meta-Manager see : https://github.com/meisnate12/Plex-Meta-Manager
+First you need plex, Plex-Meta-Manager and JQ<br/>
+to install and use Plex-Meta-Manager see : https://github.com/meisnate12/Plex-Meta-Manager<br/>
 you also need to install jq wich is a json parser see : https://stedolan.github.io/jq/
 
 ### Step 2 - Download and extract the script
 Git clone or download zip here : https://github.com/Arial-Z/PMM-Arialz/archive/refs/heads/main.zip
 
 ### Step 3 - Configure the script
-Go to the script folder
-and rename conf.delfaut to config.conf
-edit the path folder and file
+Go to the script folder<br/>
+and rename conf.delfaut to config.conf<br/>
+edit the path folder and file<br/>
 ```
 SCRIPT_FOLDER=/path/to/the/script/folder  
 PMM_FOLDER=/path/to/plexmetamanager
@@ -35,9 +35,9 @@ animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml # Default path to the 
 ```
 
 ### Step 4 - Configure PMM
-Then you need to create a PMM config for exporting anime name and the corresponding tvdb-id
-copy your "config.yml" to "temp-animes.yml"
-and modify the library to only leave your Animes library name
+Then you need to create a PMM config for exporting anime name and the corresponding tvdb-id<br/>
+copy your "config.yml" to "temp-animes.yml"<br/>
+and modify the library to only leave your Animes library name<br/>
 ```
 libraries:
   Animes:
@@ -45,7 +45,7 @@ libraries:
 settings:
 ...
 ```
-Then you need to add the metadata file to your  Animes Library in the PMM config file should look like this with the default path and filename :
+Then you need to add the metadata file to your Animes Library in the PMM config file should look like this with the default path and filename :
 ```
   Animes:
     metadata_path:
@@ -53,12 +53,12 @@ Then you need to add the metadata file to your  Animes Library in the PMM config
     - file: config/animes/animes-mal.yml
 ```
 ### and you're done
-Run the script in the script folder with ./animes-renamer.sh
+Run the script in the script folder with ./animes-renamer.sh<br/>
 You can also add it to cron and make it run before PMM (be carreful it take a little time to run due to Jikan API limit)
 
 ### override-ID-animes.csv
-some animes won't be matched and the metadata will be missing, you can see the error in the log
-to fix this you need to edit this file : override-ID-animes.csv
+some animes won't be matched and the metadata will be missing, you can see the error in the log<br/>
+to fix this you need to edit this file : override-ID-animes.csv<br/>
 it look like this
 ```
 TVDB-ID|MAL-ID|MAL-TITLE
