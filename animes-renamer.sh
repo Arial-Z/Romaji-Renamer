@@ -110,6 +110,10 @@ do
                         echo "updated score : $mal_score" >> $LOG_PATH
                 fi
         else
+		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
+		then
+			get-mal-infos
+		fi
 		echo "  \"$title_mal\":" >> $animes_titles
                 echo "    alt_title: \"$title_plex\"" >> $animes_titles
                 echo "    sort_title: \"$title_mal\"" >> $animes_titles
