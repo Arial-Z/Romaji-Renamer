@@ -100,15 +100,26 @@ do
 		then
 			get-mal-infos
 		fi
-		ratingline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
-                ratingline=$((ratingline+1))
-                if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
+		title_sort_line=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
+                rating_line=$((rating_line+1))
+                if sed -n "${rating_line}p" $animes_titles | grep "audience_rating:"
                 then
-                        sed -i "${ratingline}d" $animes_titles
+                        sed -i "${rating_line}d" $animes_titles
                         mal_score=$(get-mal-rating)
-                        sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
+                        sed -i "${rating_line}i\    audience_rating: ${mal_score}" $animes_titles
                         echo "updated score : $mal_score" >> $LOG_PATH
+		else
+			sed -i "${rating_line}i\    audience_rating: ${mal_score}" $animes_titles
                 fi
+                tags_line=$((title_line+2))
+		if sed -n "${tags_line}p" $animes_titles | grep "genre.sync:"
+		        sed -i "${rating_line}d" $animes_titles
+                        mal_tags=$(get-mal-tags)
+                        sed -i "${tags_line}i\    genre.sync: ${mal_tags}" $animes_titles
+                        echo "updated score : $mal_score" >> $LOG_PATH
+		else
+			sed -i "${tags_line}i\    genre.sync: ${mal_tags}" $animes_titles
+		fi
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
