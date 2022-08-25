@@ -1,7 +1,7 @@
 # Plex-Romaji-Renamer
 
 Bash script to import MAL metadata to plex with a PMM metadata file<br/>
-what are imported :
+what is imported :
   - Romaji title
   - Mal Score
   - Mal tags
