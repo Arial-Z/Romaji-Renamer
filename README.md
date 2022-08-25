@@ -60,7 +60,8 @@ Run the script in the script folder with ./animes-renamer.sh<br/>
 You can also add it to cron and make it run before PMM (be carreful it take a little time to run due to Jikan API limit)
 
 ### override-ID-animes.csv
-some animes won't be matched and the metadata will be missing, you can see the error in the log<br/>
+some animes won't be matched and the metadata will be missing, you can see them error in the log, in PMM metadata files or plex directly<br/>
+Cause are missing MAL ID for the TVDB ID or the first corresponding MAL ID is not the "main" anime<br/>
 to fix this you need to edit this file : override-ID-animes.csv<br/>
 it look like this
 ```
