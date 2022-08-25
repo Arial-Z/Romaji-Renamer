@@ -113,6 +113,7 @@ do
                 fi
                 tags_line=$((title_line+2))
 		if sed -n "${tags_line}p" $animes_titles | grep "genre.sync:"
+		then
 		        sed -i "${rating_line}d" $animes_titles
                         mal_tags=$(get-mal-tags)
                         sed -i "${tags_line}i\    genre.sync: ${mal_tags}" $animes_titles
