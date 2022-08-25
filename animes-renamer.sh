@@ -54,7 +54,7 @@ then
 fi
 if [ ! -f $SCRIPT_FOLDER/ID-animes.csv ]																# check if ID-animes exist
 then
-        mkdir $SCRIPT_FOLDER/posters
+        mkdir $SCRIPT_FOLDER/ID-animes.csv
 fi
 
 # create ID-animes with tvdb_id | mal_id | title_mal  title_plex
