@@ -1,10 +1,12 @@
 # Plex-Romaji-Renamer
 
-Bash script to create and maintain a PMM metadata file for anime with data from MAL (with jikan) :
+Bash script to retrieve metadata from MAL and import it to plex with PMM metadata file
   - Romaji title
   - Mal Score
   - Mal tags
   - Mal Poster
+  
+  Will likely only work with plex TV agent and not Hama
 
 ## Getting Started
 First you need plex, Plex-Meta-Manager and JQ
