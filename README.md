@@ -8,11 +8,12 @@ Bash script to import MAL metadata to plex with PMM metadata file
   
   Will likely only work with plex TV agent and not Hama
   
-  ## How it work
-    - it export your library animes title and tvdbid from PMM
-    - retrieve the MAL ID from PMM animes ID https://github.com/meisnate12/Plex-Meta-Manager-Anime-IDs
-    - Use the Jikan API to get MAL metadata
-    - Create and update a PMM metadata file to import everything in plex when PMM run
+ ## How it work
+  - it export your library animes title and tvdbid from PMM
+  - retrieve the MAL ID from PMM animes ID https://github.com/meisnate12/Plex-Meta-Manager-Anime-IDs
+  - Use the Jikan API to get MAL metadata
+  - Create and update a PMM metadata file to import everything in plex when PMM run
+
 
 ### Step 1 - Plex, Plex-Meta-Manager and JQ
 First you need plex, Plex-Meta-Manager and JQ
