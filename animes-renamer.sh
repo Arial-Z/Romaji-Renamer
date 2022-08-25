@@ -32,7 +32,7 @@ rm $SCRIPT_FOLDER/animes.csv
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
 line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
-line_end=$(grep -n "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
+line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog.txt
 rm $SCRIPT_FOLDER/meta.log
 awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog.txt > $SCRIPT_FOLDER/list-animes.csv
