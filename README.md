@@ -58,7 +58,7 @@ TVDB-ID|MAL-ID|MAL-TITLE
 305074|31964|Boku no Hero Academia
 413555|37914|Chikyuugai Shounen Shoujo
 ```
-create a new line and manually enter the TVDB-ID and MAL-ID title is for readability and do nothing
+create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE is for readability and do nothing, you need to use | as separator
 
 ### Thanks
   - to Plex for Plex
