@@ -51,18 +51,18 @@ Then you need to add the metadata file to your  Animes Library in the PMM config
 some animes won't be matched and the metadata will be missing, you can see the error in the log
 to fix this you need to edit this file : override-ID-animes.csv
 it look like this
-...
+```
 TVDB-ID|MAL-ID|MAL-TITLE
 219771|9513|Beelzebub
 331753|34572|Black Clover
 305074|31964|Boku no Hero Academia
 413555|37914|Chikyuugai Shounen Shoujo
-...
+```
 create a new line and manually enter the TVDB-ID and MAL-ID title is for readability and do nothing
 
 ### Thanks
-to Plex for Plex
-To meisnate12 for Plex-Meta-Manager and Plex-Meta-Manager-Anime-IDs
-To https://jikan.moe/ for their MAL API
-To MAL for being here
-And to a lot of random people from everywhere for all my copy / paste code
+  - to Plex for Plex
+  - To meisnate12 for Plex-Meta-Manager and Plex-Meta-Manager-Anime-IDs
+  - To https://jikan.moe/ for their MAL API
+  - To MAL for being here
+  - And to a lot of random people from everywhere for all my copy / paste code
