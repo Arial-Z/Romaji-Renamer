@@ -19,6 +19,9 @@ mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal
 wget "$mal_poster_url" -O $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 2
 }
+function get-mal-tags () {
+(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $1}' | paste -s -d, -
+}
 
 ## folder and file emplacement
 SCRIPT_FOLDER=/home/arialz/github/Plex-Romaji-Renamer
@@ -28,11 +31,11 @@ animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml
 
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-animes.cache
-rm $SCRIPT_FOLDER/animes.csv
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
 
 # create clean list-animes.csv (tvdb_id | title_plex) from meta.log
+rm $SCRIPT_FOLDER/list-animes.csv
 line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog.txt
@@ -112,12 +115,15 @@ do
                 echo "    sort_title: \"$title_mal\"" >> $animes_titles
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $animes_titles
+		mal_tags=$(get-mal-tags)
+		echo "    genre.sync: ${mal_tags}"
                 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
 			get-mal-poster
 			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		fi
-		echo "added to metadata : $title_mal / $title_plex / score : $score_mal" >> $LOG_PATH
+		
+		echo "added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG_PATH
 
         fi
 done < $SCRIPT_FOLDER/ID-animes.csv
