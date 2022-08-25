@@ -25,7 +25,7 @@ Git clone or download zip here : https://github.com/Arial-Z/PMM-Arialz/archive/r
 
 ### Step 3 - Configure the script
 Go to the script folder<br/>
-and rename conf.delfaut to config.conf<br/>
+and rename config.delfaut to config.conf<br/>
 edit the path folder and file<br/>
 ```
 SCRIPT_FOLDER=/path/to/the/script/folder  
@@ -45,6 +45,8 @@ libraries:
 settings:
 ...
 ```
+You only need plex and tmdb to be configured<br/>
+<br/>
 Then you need to add the metadata file to your Animes Library in the PMM config file should look like this with the default path and filename :
 ```
   Animes:
