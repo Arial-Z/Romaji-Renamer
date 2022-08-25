@@ -26,38 +26,42 @@ PMM_FOLDER=/home/plexmetamanager
 LOG_PATH=/home/arialz/log/plex-renamer_$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml
 
-# get library titles and tvdb-ID list by PMM
+# create pmm meta.log
 rm $PMM_FOLDER/config/temp-animes.cache
 rm $SCRIPT_FOLDER/animes.csv
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
+
+# create clean list-animes.csv (tvdb_id | title_plex) from meta.log
 line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog.txt
 rm $SCRIPT_FOLDER/meta.log
 awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog.txt > $SCRIPT_FOLDER/list-animes.csv
 rm $SCRIPT_FOLDER/cleanlog.txt
-curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json				# get pmm animes mapping
-if [ ! -f $animes_titles ]																		# check if $animes_titles exist
+
+# download pmm animes mapping and check if files and folder exist
+curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json
+if [ ! -f $animes_titles ]
 then
         echo "metadata:" > $animes_titles
 fi
-if [ ! -d $SCRIPT_FOLDER/data ]																		# check if data folder exist
+if [ ! -d $SCRIPT_FOLDER/data ]
 then
         mkdir $SCRIPT_FOLDER/data
 else
 	rm $SCRIPT_FOLDER/data/*
 fi
-if [ ! -d $SCRIPT_FOLDER/posters ]																	# check if posters folder exist
+if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 fi
-if [ ! -f $SCRIPT_FOLDER/ID-animes.csv ]																# check if ID-animes exist
+if [ ! -f $SCRIPT_FOLDER/ID-animes.csv ]
 then
         touch $SCRIPT_FOLDER/ID-animes.csv
 fi
 
-# create ID-animes with tvdb_id | mal_id | title_mal  title_plex
+# create ID-animes.csv ( tvdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r tvdb_id title_plex
 do
 	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-animes.csv | grep $tvdb_id                                                   					# check if not already in ID-animes.csv
@@ -84,7 +88,7 @@ do
 	fi
 done < $SCRIPT_FOLDER/list-animes.csv
 
-# write PMM metadata file
+# write PMM metadata file from ID-animes.csv and jikan API
 while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
         if grep "$title_mal" $animes_titles
