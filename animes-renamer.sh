@@ -100,15 +100,23 @@ do
 		then
 			get-mal-infos
 		fi
-		ratingline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
-                ratingline=$((ratingline+1))
+		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
+                ratingline=$((sorttitleline+1))
                 if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
                 then
                         sed -i "${ratingline}d" $animes_titles
                         mal_score=$(get-mal-rating)
                         sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
                         echo "updated score : $mal_score" >> $LOG_PATH
-                fi
+		fi
+                tagsline=$((sorttitleline+2))
+                if sed -n "${tagsline}p" $animes_titles | grep "audience_rating:"
+                then
+                        sed -i "${tagsline}d" $animes_titles
+                        mal_tags=$(get-mal-tags)
+                        sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $animes_titles
+                        echo "updated tags : $mal_tags" >> $LOG_PATH
+		fi		
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
@@ -120,7 +128,7 @@ do
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
-		echo "    genre.sync: ${mal_tags}"  >> $animes_titles
+		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
                 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
 			get-mal-poster
