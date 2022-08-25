@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source .conf
+
 # function
 function get-mal-id () {
 jq ".[] | select(".tvdb_id"==${tvdb_id})" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq ."mal_id" | sort -n | head -1
@@ -22,13 +24,6 @@ sleep 2
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $1}' | paste -s -d, -
 }
-
-## folder and file emplacement
-SCRIPT_FOLDER=/home/arialz/github/Plex-Romaji-Renamer
-PMM_FOLDER=/home/plexmetamanager
-LOG_PATH=/home/arialz/log/plex-renamer_$(date +%Y.%m.%d).log
-animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml
-
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-animes.cache
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
