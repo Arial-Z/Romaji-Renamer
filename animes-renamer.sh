@@ -120,7 +120,7 @@ do
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
-		echo "    genre.sync: ${mal_tags}"
+		echo "    genre.sync: ${mal_tags}" >> $animes_titles
                 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
 			get-mal-poster
