@@ -1,4 +1,4 @@
-# Plex-Romaji-Renamer
+## Plex-Romaji-Renamer
 
 Bash script to create and maintain a PMM metadata file for anime with data from MAL (with jikan) :
   - Romaji title
@@ -6,7 +6,7 @@ Bash script to create and maintain a PMM metadata file for anime with data from 
   - Mal tags
   - Mal Poster
 
-## Getting Started
+# Getting Started
 First you need plex, Plex-Meta-Manager and JQ
 to install and use see : https://github.com/meisnate12/Plex-Meta-Manager
 you also need to install jq wich is a json parser see : https://stedolan.github.io/jq/
@@ -15,9 +15,7 @@ Then you need to create 1 PMM config for exporting anime name and the correspond
 copy your "config.yml" to "temp-animes.yml"
 and modify the library part like that :
 
-## This file is a template remove the .template to use the file
-
-libraries:                                      # This is called out once within the config.yml file
+libraries:
   Animes:
 
 settings:
