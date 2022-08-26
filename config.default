@@ -1,4 +1,3 @@
-SCRIPT_FOLDER=/path/to/the/script/folder  
 PMM_FOLDER=/path/to/plexmetamanager
 LOG_PATH=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/animes-mal.yml
