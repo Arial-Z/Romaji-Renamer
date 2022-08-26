@@ -103,15 +103,15 @@ do
                         sed -i "${ratingline}d" $animes_titles
                         mal_score=$(get-mal-rating)
                         sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
-                        echo "updated score : $mal_score" >> $LOG_PATH
+                        echo "$title_mal updated score : $mal_score" >> $LOG_PATH
 		fi
                 tagsline=$((sorttitleline+2))
-                if sed -n "${tagsline}p" $animes_titles | grep "audience_rating:"
+                if sed -n "${tagsline}p" $animes_titles | grep "genre.sync:"
                 then
                         sed -i "${tagsline}d" $animes_titles
                         mal_tags=$(get-mal-tags)
                         sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $animes_titles
-                        echo "updated tags : $mal_tags" >> $LOG_PATH
+                        echo "$title_mal updated tags : $mal_tags" >> $LOG_PATH
 		fi		
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
