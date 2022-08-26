@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_FOLDER=`pwd`
+SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
 
 # function
