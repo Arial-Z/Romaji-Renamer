@@ -1,6 +1,7 @@
 #!/bin/bash
 
-source config.conf
+SCRIPT_FOLDER=pwd
+source $SCRIPT_FOLDER/config.conf
 
 # function
 function get-mal-id () {
