@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_FOLDER=pwd
+SCRIPT_FOLDER=`pwd`
 source $SCRIPT_FOLDER/config.conf
 
 # function
