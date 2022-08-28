@@ -19,7 +19,7 @@ what is imported :
 ### Step 1 - Plex, Plex-Meta-Manager and JQ
 First you need plex, Plex-Meta-Manager and JQ<br/>
 to install and use Plex-Meta-Manager see : https://github.com/meisnate12/Plex-Meta-Manager<br/>
-you also need to install jq wich is a json parser see : https://stedolan.github.io/jq/
+you also need to install jq which is a json parser see : https://stedolan.github.io/jq/
 
 ### Step 2 - Download and extract the script
 Git clone or download zip here : https://github.com/Arial-Z/PMM-Arialz/archive/refs/heads/main.zip
