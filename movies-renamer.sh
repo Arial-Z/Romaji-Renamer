@@ -11,7 +11,7 @@ jq ".[] | select( .imdb_id == ${imdb_id} )" -r $SCRIPT_FOLDER/pmm_anime_ids.json
 }
 function get-mal-infos () {
 wget "https://api.jikan.moe/v4/anime/$mal_id" -O $SCRIPT_FOLDER/data/$mal_id.json 
-sleep 1.2
+sleep 2
 }
 function get-mal-title () {
 jq .data.title -r $SCRIPT_FOLDER/data/$mal_id.json
