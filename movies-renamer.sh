@@ -74,7 +74,7 @@ do
 			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.csv | awk -F"|" '{print $3}')
 			get-mal-infos
 			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG_PATH
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
 		else
 			mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
@@ -84,7 +84,7 @@ do
 			get-mal-infos
 			title_mal=$(get-mal-title)
 			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.csv" >> $LOG_PATH
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.csv" >> $LOG
 		fi
 	fi
 done < $SCRIPT_FOLDER/list-movies.csv
@@ -105,7 +105,7 @@ do
                         sed -i "${ratingline}d" $movies_titles
                         mal_score=$(get-mal-rating)
                         sed -i "${ratingline}i\    audience_rating: ${mal_score}" $movies_titles
-                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG_PATH
+                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
 		fi
                 tagsline=$((sorttitleline+2))
                 if sed -n "${tagsline}p" $movies_titles | grep "genre.sync:"
@@ -113,7 +113,7 @@ do
                         sed -i "${tagsline}d" $movies_titles
                         mal_tags=$(get-mal-tags)
                         sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $movies_titles
-                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG_PATH
+                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi		
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
@@ -133,7 +133,7 @@ do
 			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		fi
 		
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG_PATH
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 
         fi
 done < $SCRIPT_FOLDER/ID-movies.csv
