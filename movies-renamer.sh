@@ -36,7 +36,7 @@ line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/meta.log | cu
 line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-movies.txt
 rm $SCRIPT_FOLDER/meta.log
-awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-movies.txt > $SCRIPT_FOLDER/list-movies.csv
+awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  "\""substr($6,8)"\"",substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-movies.txt > $SCRIPT_FOLDER/list-movies.csv
 rm $SCRIPT_FOLDER/cleanlog-movies.txt
 
 # download pmm animes mapping and check if files and folder exist
@@ -60,35 +60,35 @@ then
         touch $SCRIPT_FOLDER/ID-movies.csv
 fi
 
-# create ID-movies.csv ( tvdb_id | mal_id | title_mal | title_plex )
+# create ID-movies.csv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r imdb_id title_plex
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-movies.csv | grep $tvdb_id                                                   					# check if not already in ID-movies.csv
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-movies.csv | grep $imdb_id                                                   					# check if not already in ID-movies.csv
 	then
-		if awk -F"|" '{print $1}' $SCRIPT_FOLDER/override-ID-movies.csv | tail -n +2 | grep $tvdb_id								# check if in override
+		if awk -F"|" '{print $1}' $SCRIPT_FOLDER/override-ID-movies.csv | tail -n +2 | grep $imdb_id								# check if in override
 		then
-			overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-movies.csv | cut -d : -f 1)
+			overrideline=$(grep -n "$imdb_id" $SCRIPT_FOLDER/override-ID-movies.csv | cut -d : -f 1)
 			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.csv | awk -F"|" '{print $2}')
 			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.csv | awk -F"|" '{print $3}')
 			get-mal-infos
-			echo "override found for : $title_mal / $title_plex" >> $LOG_PATH
-			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
+			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG_PATH
 		else
 			mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
 		then
-			echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $LOG_PATH
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : imdb : $imdb_id / $title_plex" >> $ERROR_LOG
 		fi
 			get-mal-infos
 			title_mal=$(get-mal-title)
-			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
-			echo "$title_mal / $title_plex added to ID-movies.csv" >> $LOG_PATH
+			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.csv" >> $LOG_PATH
 		fi
 	fi
 done < $SCRIPT_FOLDER/list-movies.csv
 
 # write PMM metadata file from ID-movies.csv and jikan API
-while IFS="|" read -r tvdb_id mal_id title_mal title_plex
+while IFS="|" read -r imdb_id mal_id title_mal title_plex
 do
         if grep "$title_mal" $movies_titles
         then
@@ -103,7 +103,7 @@ do
                         sed -i "${ratingline}d" $movies_titles
                         mal_score=$(get-mal-rating)
                         sed -i "${ratingline}i\    audience_rating: ${mal_score}" $movies_titles
-                        echo "$title_mal updated score : $mal_score" >> $LOG_PATH
+                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG_PATH
 		fi
                 tagsline=$((sorttitleline+2))
                 if sed -n "${tagsline}p" $movies_titles | grep "genre.sync:"
@@ -111,7 +111,7 @@ do
                         sed -i "${tagsline}d" $movies_titles
                         mal_tags=$(get-mal-tags)
                         sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $movies_titles
-                        echo "$title_mal updated tags : $mal_tags" >> $LOG_PATH
+                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG_PATH
 		fi		
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
@@ -131,7 +131,7 @@ do
 			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		fi
 		
-		echo "added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG_PATH
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG_PATH
 
         fi
 done < $SCRIPT_FOLDER/ID-movies.csv
