@@ -5,7 +5,7 @@ source $SCRIPT_FOLDER/config.conf
 
 # function
 function get-mal-id () {
-jq '.[] | select( .imdb_id == ${imdb_id} )' -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
+jq ".[] | select( .imdb_id == ${imdb_id} )" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
 wget "https://api.jikan.moe/v4/anime/$mal_id" -O $SCRIPT_FOLDER/data/$mal_id.json 
@@ -26,8 +26,8 @@ function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $1}' | paste -s -d, -
 }
 # create pmm meta.log
-rm $PMM_FOLDER/config/temp-animes.cache
-$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
+rm $PMM_FOLDER/config/temp-movies.cache
+$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
 
 # create clean list-movies.csv (imdb_id | title_plex) from meta.log
@@ -61,7 +61,7 @@ then
 fi
 
 # create ID-movies.csv ( tvdb_id | mal_id | title_mal | title_plex )
-while IFS="|" read -r tvdb_id title_plex
+while IFS="|" read -r imdb_id title_plex
 do
 	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-movies.csv | grep $tvdb_id                                                   					# check if not already in ID-movies.csv
 	then
