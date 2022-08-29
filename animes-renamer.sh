@@ -2,8 +2,8 @@
 
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
-LOG=$LOG_PATH/$(date +%Y.%m.%d).log
-ERROR_LOG=$LOG_PATH/error.log
+LOG=$LOG_FOLDER/animes_$(date +%Y.%m.%d).log
+ERROR_LOG=$LOG_FOLDER/error.log
 
 # function
 function get-mal-id () {
