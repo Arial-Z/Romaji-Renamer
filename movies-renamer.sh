@@ -29,7 +29,7 @@ function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $1}' | paste -s -d, -
 }
 function echo-ID () {
-echo -e "$imdb_id'\t'$mal_id'\t'$title_mal'\t'$title_plex" >> $SCRIPT_FOLDER/ID-movies.tsv
+echo -e "$imdb_id\t$mal_id\t$title_mal\t$title_plex" >> $SCRIPT_FOLDER/ID-movies.tsv
 echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.tsv" >> $LOG
 }
 
@@ -99,8 +99,6 @@ done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 # write PMM metadata file from ID-movies.tsv and jikan API
 while IFS="|" read -r imdb_id mal_id title_mal title_plex
 do
-        if (echo $movies_titles | grep "$title_mal")
-	then
                 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
 			get-mal-infos
@@ -142,7 +140,6 @@ do
 		
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 
-        fi
 done < $SCRIPT_FOLDER/ID-movies.tsv
 
 #clean temp files
