@@ -2,7 +2,7 @@
 
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
-LOG=$LOG_FOLDER/animes_$(date +%Y.%m.%d).log
+LOG=$LOG_FOLDER/movies_$(date +%Y.%m.%d).log
 ERROR_LOG=$LOG_FOLDER/error.log
 
 # function
@@ -29,24 +29,24 @@ function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $1}' | paste -s -d, -
 }
 # create pmm meta.log
-rm $PMM_FOLDER/config/temp-animes.cache
-$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
+rm $PMM_FOLDER/config/temp-movies.cache
+$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
 
-# create clean list-animes.csv (tvdb_id | title_plex) from meta.log
-rm $SCRIPT_FOLDER/list-animes.csv
-line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
-line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
-head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-animes.txt
+# create clean list-movies.csv (imdb_id | title_plex) from meta.log
+rm $SCRIPT_FOLDER/list-movies.csv
+line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
+line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
+head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-movies.txt
 rm $SCRIPT_FOLDER/meta.log
-awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-animes.txt > $SCRIPT_FOLDER/list-animes.csv
-rm $SCRIPT_FOLDER/cleanlog-animes.txt
+awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  "\""substr($6,8)"\"",substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-movies.txt > $SCRIPT_FOLDER/list-movies.csv
+rm $SCRIPT_FOLDER/cleanlog-movies.txt
 
 # download pmm animes mapping and check if files and folder exist
 curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json
-if [ ! -f $animes_titles ]
+if [ ! -f $movies_titles ]
 then
-        echo "metadata:" > $animes_titles
+        echo "metadata:" > $movies_titles
 fi
 if [ ! -d $SCRIPT_FOLDER/data ]
 then
@@ -58,83 +58,83 @@ if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 fi
-if [ ! -f $SCRIPT_FOLDER/ID-animes.csv ]
+if [ ! -f $SCRIPT_FOLDER/ID-movies.csv ]
 then
-        touch $SCRIPT_FOLDER/ID-animes.csv
+        touch $SCRIPT_FOLDER/ID-movies.csv
 fi
 
-# create ID-animes.csv ( tvdb_id | mal_id | title_mal | title_plex )
-while IFS="|" read -r tvdb_id title_plex
+# create ID-movies.csv ( imdb_id | mal_id | title_mal | title_plex )
+while IFS="|" read -r imdb_id title_plex
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-animes.csv | grep $tvdb_id                                                   					# check if not already in ID-animes.csv
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-movies.csv | grep $imdb_id                                                   					# check if not already in ID-movies.csv
 	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep $tvdb_id								# check if in override
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-movies.tsv | tail -n +2 | grep $imdb_id								# check if in override
 		then
-			overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
-			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"|" '{print $2}')
-			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"|" '{print $3}')
+			overrideline=$(grep -n "$imdb_id" $SCRIPT_FOLDER/override-ID-movies.tsv | cut -d : -f 1)
+			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"|" '{print $2}')
+			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"|" '{print $3}')
 			get-mal-infos
-			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
-			echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG			
+			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
 		else
 			mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $ERROR_LOG
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : imdb : $imdb_id / $title_plex" >> $ERROR_LOG
 		fi
 			get-mal-infos
 			title_mal=$(get-mal-title)
-			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
-			echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID-animes.csv" >> $LOG
+			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.csv" >> $LOG
 		fi
 	fi
-done < $SCRIPT_FOLDER/list-animes.csv
+done < $SCRIPT_FOLDER/list-movies.csv
 
-# write PMM metadata file from ID-animes.csv and jikan API
-while IFS="|" read -r tvdb_id mal_id title_mal title_plex
+# write PMM metadata file from ID-movies.csv and jikan API
+while IFS="|" read -r imdb_id mal_id title_mal title_plex
 do
-        if grep "$title_mal" $animes_titles
+        if grep "$title_mal" $movies_titles
         then
                 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
 			get-mal-infos
 		fi
-		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
+		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $movies_titles | cut -d : -f 1)
                 ratingline=$((sorttitleline+1))
-                if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
+                if sed -n "${ratingline}p" $movies_titles | grep "audience_rating:"
                 then
-                        sed -i "${ratingline}d" $animes_titles
+                        sed -i "${ratingline}d" $movies_titles
                         mal_score=$(get-mal-rating)
-                        sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
-                        echo "$(date +%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
+                        sed -i "${ratingline}i\    audience_rating: ${mal_score}" $movies_titles
+                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
 		fi
                 tagsline=$((sorttitleline+2))
-                if sed -n "${tagsline}p" $animes_titles | grep "genre.sync:"
+                if sed -n "${tagsline}p" $movies_titles | grep "genre.sync:"
                 then
-                        sed -i "${tagsline}d" $animes_titles
+                        sed -i "${tagsline}d" $movies_titles
                         mal_tags=$(get-mal-tags)
-                        sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $animes_titles
-                        echo "$(date +%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
+                        sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $movies_titles
+                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi		
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
 			get-mal-infos
 		fi
-		echo "  \"$title_mal\":" >> $animes_titles
-                echo "    alt_title: \"$title_plex\"" >> $animes_titles
-                echo "    sort_title: \"$title_mal\"" >> $animes_titles
+		echo "  \"$title_mal\":" >> $movies_titles
+                echo "    alt_title: \"$title_plex\"" >> $movies_titles
+                echo "    sort_title: \"$title_mal\"" >> $movies_titles
 		score_mal=$(get-mal-rating)
-                echo "    audience_rating: $score_mal" >> $animes_titles
+                echo "    audience_rating: $score_mal" >> $movies_titles
 		mal_tags=$(get-mal-tags)
-		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
+		echo "    genre.sync: anime,${mal_tags}"  >> $movies_titles
                 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
 			get-mal-poster
-			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
+			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		fi
 		
-		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 
         fi
-done < $SCRIPT_FOLDER/ID-animes.csv
+done < $SCRIPT_FOLDER/ID-movies.csv
