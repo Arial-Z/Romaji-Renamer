@@ -146,4 +146,4 @@ do
 done < $SCRIPT_FOLDER/ID-movies.tsv
 
 #clean temp files
-rm $PMM_FOLDER/tmp/*
+rm $SCRIPT_FOLDER/tmp/*
