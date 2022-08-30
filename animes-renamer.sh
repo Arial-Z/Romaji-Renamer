@@ -47,7 +47,8 @@ then
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
-        mkdir $SCRIPT_FOLDER/ID
+	mkdir $SCRIPT_FOLDER/ID
+	touch $SCRIPT_FOLDER/ID/animes.csv
 elif [ ! -f $SCRIPT_FOLDER/ID/animes.csv ]
 then
 	touch $SCRIPT_FOLDER/ID/animes.csv
