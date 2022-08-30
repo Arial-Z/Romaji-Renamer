@@ -27,15 +27,25 @@ sleep 2
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $1}' | paste -s -d, -
 }
-function echo-ID () {
-echo -e "$tvdb_id\t$mal_id\t$title_mal\t$title_plex" >> $SCRIPT_FOLDER/ID-animes.tsv
-echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.tsv" >> $LOG
-}
+# create pmm meta.log
+rm $PMM_FOLDER/config/temp-animes.cache
+$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
+mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
 
-#create and check needed folder and files
-if [ ! -f $movies_titles ]
+# create clean list-animes.csv (tvdb_id | title_plex) from meta.log
+rm $SCRIPT_FOLDER/list-animes.csv
+line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
+line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
+head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-animes.txt
+rm $SCRIPT_FOLDER/meta.log
+awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-animes.txt > $SCRIPT_FOLDER/list-animes.csv
+rm $SCRIPT_FOLDER/cleanlog-animes.txt
+
+# download pmm animes mapping and check if files and folder exist
+curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json
+if [ ! -f $animes_titles ]
 then
-        echo "metadata:" > $movies_titles
+        echo "metadata:" > $animes_titles
 fi
 if [ ! -d $SCRIPT_FOLDER/data ]
 then
@@ -43,45 +53,28 @@ then
 else
 	rm $SCRIPT_FOLDER/data/*
 fi
-if [ ! -d $SCRIPT_FOLDER/tmp ]
-then
-        mkdir $SCRIPT_FOLDER/tmp
-fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 fi
-if [ ! -f $SCRIPT_FOLDER/ID-animes.tsv ]
+if [ ! -f $SCRIPT_FOLDER/ID-animes.csv ]
 then
-        touch $SCRIPT_FOLDER/ID-animes.tsv
+        touch $SCRIPT_FOLDER/ID-animes.csv
 fi
 
-# create pmm meta.log
-rm $PMM_FOLDER/config/temp-animes.cache
-$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
-mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
-
-# create clean list-animes.tsv (tvdb_id | title_plex) from meta.log
-line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
-awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
-
-# download pmm animes mapping and check if files and folder exist
-curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
-
-# create ID-animes.tsv ( tvdb_id | mal_id | title_mal | title_plex )
+# create ID-animes.csv ( tvdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r tvdb_id title_plex
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID-animes.tsv | grep $tvdb_id                                                   					# check if not already in ID-animes.tsv
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-animes.csv | grep $tvdb_id                                                   					# check if not already in ID-animes.csv
 	then
 		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep $tvdb_id								# check if in override
 		then
 			overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
-			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
-			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
+			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"|" '{print $2}')
+			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"|" '{print $3}')
 			get-mal-infos
-			echo-ID
+			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
+			echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG			
 		else
 			mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
@@ -90,15 +83,16 @@ do
 		fi
 			get-mal-infos
 			title_mal=$(get-mal-title)
-			echo-ID
+			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
+			echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID-animes.csv" >> $LOG
 		fi
 	fi
-done < $SCRIPT_FOLDER/tmp/list-animes.tsv
+done < $SCRIPT_FOLDER/list-animes.csv
 
-# write PMM metadata file from ID-animes.tsv and jikan API
+# write PMM metadata file from ID-animes.csv and jikan API
 while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
-        if grep "$title_mal" <<< $animes_titles
+        if grep "$title_mal" $animes_titles
         then
                 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
@@ -142,7 +136,4 @@ do
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 
         fi
-done < $SCRIPT_FOLDER/ID-animes.tsv
-
-#clean temp files
-rm $SCRIPT_FOLDER/tmp/*
+done < $SCRIPT_FOLDER/ID-animes.csv
