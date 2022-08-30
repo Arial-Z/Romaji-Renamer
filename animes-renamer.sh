@@ -10,7 +10,8 @@ function get-mal-id () {
 jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
-curl -O $SCRIPT_FOLDER/data/$mal_id.json "https://api.jikan.moe/v4/anime/$mal_id"
+sleep 0.5
+curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json 
 sleep 2
 }
 function get-mal-title () {
@@ -20,6 +21,7 @@ function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/$mal_id.json
 }
 function get-mal-poster () {
+sleep 0.5
 mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
 wget "$mal_poster_url" -O $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 2
