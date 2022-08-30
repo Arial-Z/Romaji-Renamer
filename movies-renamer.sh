@@ -30,16 +30,6 @@ sleep 2
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
-# create pmm meta.log
-rm $PMM_FOLDER/config/temp-movies.cache
-$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
-mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
-
-# create clean list-movies.csv (imdb_id | title_plex) from meta.log
-line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-movies.txt
-awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.csv
 
 # download pmm animes mapping and check if files and folder exist
 if [ ! -f $movies_titles ]
@@ -70,6 +60,17 @@ else
 	rm $SCRIPT_FOLDER/tmp/*
 fi
 curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
+
+# create pmm meta.log
+rm $PMM_FOLDER/config/temp-movies.cache
+$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
+mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
+
+# create clean list-movies.csv (imdb_id | title_plex) from meta.log
+line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
+line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
+head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-movies.txt
+awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.csv
 
 # create ID/movies.csv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r imdb_id title_plex
