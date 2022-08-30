@@ -36,16 +36,13 @@ $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $P
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
 
 # create clean list-movies.csv (imdb_id | title_plex) from meta.log
-rm $SCRIPT_FOLDER/list-movies.csv
 line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-movies.txt
-rm $SCRIPT_FOLDER/meta.log
-awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-movies.txt > $SCRIPT_FOLDER/list-movies.csv
+awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.csv
 rm $SCRIPT_FOLDER/cleanlog-movies.txt
 
 # download pmm animes mapping and check if files and folder exist
-curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json
 if [ ! -f $movies_titles ]
 then
         echo "metadata:" > $movies_titles
@@ -60,19 +57,20 @@ if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 fi
-if [ ! -f $SCRIPT_FOLDER/ID ]
+if [ ! -d $SCRIPT_FOLDER/ID ]
 then
-        mkdir $SCRIPT_FOLDER/ID
+	mkdir $SCRIPT_FOLDER/ID
 elif [ ! -f $SCRIPT_FOLDER/ID/movies.csv ]
 then
 	touch $SCRIPT_FOLDER/ID/movies.csv
 fi
-if [ ! -f $SCRIPT_FOLDER/tmp ]
+if [ ! -d $SCRIPT_FOLDER/tmp ]
 then
         mkdir $SCRIPT_FOLDER/tmp
 else
 	rm $SCRIPT_FOLDER/tmp/*
 fi
+curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
 
 # create ID/movies.csv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r imdb_id title_plex
@@ -99,7 +97,7 @@ do
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID/movies.csv" >> $LOG
 		fi
 	fi
-done < $SCRIPT_FOLDER/list-movies.csv
+done < $SCRIPT_FOLDER/tmp/list-movies.csv
 
 # write PMM metadata file from ID/movies.csv and jikan API
 while IFS="|" read -r imdb_id mal_id title_mal title_plex

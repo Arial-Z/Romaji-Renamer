@@ -31,7 +31,6 @@ function get-mal-tags () {
 }
 
 # download pmm animes mapping and check if files and folder exist
-curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json
 if [ ! -f $animes_titles ]
 then
         echo "metadata:" > $animes_titles
@@ -46,18 +45,21 @@ if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 fi
-if [ ! -f $SCRIPT_FOLDER/ID ]
+if [ ! -d $SCRIPT_FOLDER/ID ]
 then
         mkdir $SCRIPT_FOLDER/ID
 elif [ ! -f $SCRIPT_FOLDER/ID/animes.csv ]
+then
 	touch $SCRIPT_FOLDER/ID/animes.csv
 fi
-if [ ! -f $SCRIPT_FOLDER/tmp ]
+if [ ! -d $SCRIPT_FOLDER/tmp ]
 then
         mkdir $SCRIPT_FOLDER/tmp
 else
 	rm $SCRIPT_FOLDER/tmp/*
 fi
+curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
+
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-animes.cache
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
