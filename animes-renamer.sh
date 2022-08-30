@@ -7,7 +7,7 @@ ERROR_LOG=$LOG_FOLDER/error.log
 
 # function
 function get-mal-id () {
-jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
+jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
 sleep 0.5
