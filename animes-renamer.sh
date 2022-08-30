@@ -80,8 +80,8 @@ do
 		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep $tvdb_id								# check if in override
 		then
 			overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
-			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"|" '{print $2}')
-			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"|" '{print $3}')
+			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
+			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
 			get-mal-infos
 			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID/animes.csv
 			echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG			
