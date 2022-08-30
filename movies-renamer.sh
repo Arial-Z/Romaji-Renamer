@@ -8,7 +8,7 @@ ERROR_LOG=$LOG_FOLDER/error.log
 # function
 function get-mal-id () {
 imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
-jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
+jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
 sleep 0.5
@@ -49,6 +49,7 @@ fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
 	mkdir $SCRIPT_FOLDER/ID
+	touch $SCRIPT_FOLDER/ID/movies.csv
 elif [ ! -f $SCRIPT_FOLDER/ID/movies.csv ]
 then
 	touch $SCRIPT_FOLDER/ID/movies.csv
