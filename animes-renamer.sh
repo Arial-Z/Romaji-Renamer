@@ -139,6 +139,5 @@ do
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
-
         fi
 done < $SCRIPT_FOLDER/ID/animes.csv
