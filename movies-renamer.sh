@@ -8,7 +8,7 @@ ERROR_LOG=$LOG_FOLDER/error.log
 # function
 function get-mal-id () {
 imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
-jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
+jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
 sleep 0.5
@@ -28,7 +28,7 @@ curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 2
 }
 function get-mal-tags () {
-(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $1}' | paste -s -d, -
+(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-movies.cache
@@ -60,15 +60,24 @@ if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 fi
-if [ ! -f $SCRIPT_FOLDER/ID-movies.csv ]
+if [ ! -f $SCRIPT_FOLDER/ID ]
 then
-        touch $SCRIPT_FOLDER/ID-movies.csv
+        mkdir $SCRIPT_FOLDER/ID
+elif [ ! -f $SCRIPT_FOLDER/ID/movies.csv ]
+then
+	touch $SCRIPT_FOLDER/ID/movies.csv
+fi
+if [ ! -f $SCRIPT_FOLDER/tmp ]
+then
+        mkdir $SCRIPT_FOLDER/tmp
+else
+	rm $SCRIPT_FOLDER/tmp/*
 fi
 
-# create ID-movies.csv ( imdb_id | mal_id | title_mal | title_plex )
+# create ID/movies.csv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r imdb_id title_plex
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-movies.csv | grep $imdb_id                                                   					# check if not already in ID-movies.csv
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.csv | grep $imdb_id                                                   					# check if not already in ID/movies.csv
 	then
 		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-movies.tsv | tail -n +2 | grep $imdb_id								# check if in override
 		then
@@ -76,7 +85,7 @@ do
 			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"|" '{print $2}')
 			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"|" '{print $3}')
 			get-mal-infos
-			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
+			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID/movies.csv
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
 		else
 			mal_id=$(get-mal-id)
@@ -86,13 +95,13 @@ do
 		fi
 			get-mal-infos
 			title_mal=$(get-mal-title)
-			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.csv" >> $LOG
+			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID/movies.csv
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID/movies.csv" >> $LOG
 		fi
 	fi
 done < $SCRIPT_FOLDER/list-movies.csv
 
-# write PMM metadata file from ID-movies.csv and jikan API
+# write PMM metadata file from ID/movies.csv and jikan API
 while IFS="|" read -r imdb_id mal_id title_mal title_plex
 do
         if grep "$title_mal" $movies_titles
@@ -139,4 +148,4 @@ do
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 
         fi
-done < $SCRIPT_FOLDER/ID-movies.csv
+done < $SCRIPT_FOLDER/ID/movies.csv
