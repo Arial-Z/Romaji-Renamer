@@ -10,7 +10,7 @@ function get-mal-id () {
 jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
-wget "https://api.jikan.moe/v4/anime/$mal_id" -O $SCRIPT_FOLDER/data/$mal_id.json 
+curl -O $SCRIPT_FOLDER/data/$mal_id.json "https://api.jikan.moe/v4/anime/$mal_id"
 sleep 2
 }
 function get-mal-title () {
