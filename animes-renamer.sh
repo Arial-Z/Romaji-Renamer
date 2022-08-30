@@ -27,18 +27,22 @@ sleep 2
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $1}' | paste -s -d, -
 }
+function echo-ID () {
+echo "$tvdb_id\t$mal_id\t$title_mal\t$title_plex" >> $SCRIPT_FOLDER/ID-animes.tsv
+echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.tsv" >> $LOG
+}
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-animes.cache
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
 
-# create clean list-animes.csv (tvdb_id | title_plex) from meta.log
-rm $SCRIPT_FOLDER/list-animes.csv
+# create clean list-animes.tsv (tvdb_id | title_plex) from meta.log
+rm $SCRIPT_FOLDER/list-animes.tsv
 line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-animes.txt
 rm $SCRIPT_FOLDER/meta.log
-awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-animes.txt > $SCRIPT_FOLDER/list-animes.csv
+awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-animes.txt > $SCRIPT_FOLDER/list-animes.tsv
 rm $SCRIPT_FOLDER/cleanlog-animes.txt
 
 # download pmm animes mapping and check if files and folder exist
@@ -53,28 +57,31 @@ then
 else
 	rm $SCRIPT_FOLDER/data/*
 fi
+if [ ! -d $SCRIPT_FOLDER/tmp ]
+then
+        mkdir $SCRIPT_FOLDER/tmp
+fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 fi
-if [ ! -f $SCRIPT_FOLDER/ID-animes.csv ]
+if [ ! -f $SCRIPT_FOLDER/ID-animes.tsv ]
 then
-        touch $SCRIPT_FOLDER/ID-animes.csv
+        touch $SCRIPT_FOLDER/ID-animes.tsv
 fi
 
-# create ID-animes.csv ( tvdb_id | mal_id | title_mal | title_plex )
+# create ID-animes.tsv ( tvdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r tvdb_id title_plex
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-animes.csv | grep $tvdb_id                                                   					# check if not already in ID-animes.csv
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID-animes.tsv | grep $tvdb_id                                                   					# check if not already in ID-animes.tsv
 	then
 		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep $tvdb_id								# check if in override
 		then
 			overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
-			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"|" '{print $2}')
-			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"|" '{print $3}')
+			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
+			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
 			get-mal-infos
-			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
-			echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG			
+			echo-ID
 		else
 			mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
@@ -83,13 +90,12 @@ do
 		fi
 			get-mal-infos
 			title_mal=$(get-mal-title)
-			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-animes.csv
-			echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID-animes.csv" >> $LOG
+			echo-ID
 		fi
 	fi
 done < $SCRIPT_FOLDER/list-animes.csv
 
-# write PMM metadata file from ID-animes.csv and jikan API
+# write PMM metadata file from ID-animes.tsv and jikan API
 while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
         if grep "$title_mal" $animes_titles
@@ -136,4 +142,4 @@ do
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 
         fi
-done < $SCRIPT_FOLDER/ID-animes.csv
+done < $SCRIPT_FOLDER/ID-animes.tsv
