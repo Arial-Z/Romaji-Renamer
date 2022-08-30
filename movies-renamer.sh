@@ -67,11 +67,11 @@ while IFS="|" read -r imdb_id title_plex
 do
 	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID-movies.csv | grep $imdb_id                                                   					# check if not already in ID-movies.csv
 	then
-		if awk -F"|" '{print $1}' $SCRIPT_FOLDER/override-ID-movies.csv | tail -n +2 | grep $imdb_id								# check if in override
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-movies.tsv | tail -n +2 | grep $imdb_id								# check if in override
 		then
-			overrideline=$(grep -n "$imdb_id" $SCRIPT_FOLDER/override-ID-movies.csv | cut -d : -f 1)
-			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.csv | awk -F"|" '{print $2}')
-			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.csv | awk -F"|" '{print $3}')
+			overrideline=$(grep -n "$imdb_id" $SCRIPT_FOLDER/override-ID-movies.tsv | cut -d : -f 1)
+			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"|" '{print $2}')
+			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"|" '{print $3}')
 			get-mal-infos
 			echo "$imdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID-movies.csv
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
