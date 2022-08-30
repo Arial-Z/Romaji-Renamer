@@ -31,25 +31,11 @@ function echo-ID () {
 echo "$tvdb_id\t$mal_id\t$title_mal\t$title_plex" >> $SCRIPT_FOLDER/ID-animes.tsv
 echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID-movies.tsv" >> $LOG
 }
-# create pmm meta.log
-rm $PMM_FOLDER/config/temp-animes.cache
-$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
-mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
 
-# create clean list-animes.tsv (tvdb_id | title_plex) from meta.log
-rm $SCRIPT_FOLDER/list-animes.tsv
-line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
-line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
-head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-animes.txt
-rm $SCRIPT_FOLDER/meta.log
-awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-animes.txt > $SCRIPT_FOLDER/list-animes.tsv
-rm $SCRIPT_FOLDER/cleanlog-animes.txt
-
-# download pmm animes mapping and check if files and folder exist
-curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json
-if [ ! -f $animes_titles ]
+#create and check needed folder and files
+if [ ! -f $movies_titles ]
 then
-        echo "metadata:" > $animes_titles
+        echo "metadata:" > $movies_titles
 fi
 if [ ! -d $SCRIPT_FOLDER/data ]
 then
@@ -69,6 +55,23 @@ if [ ! -f $SCRIPT_FOLDER/ID-animes.tsv ]
 then
         touch $SCRIPT_FOLDER/ID-animes.tsv
 fi
+
+# create pmm meta.log
+rm $PMM_FOLDER/config/temp-animes.cache
+$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
+mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER
+
+# create clean list-animes.tsv (tvdb_id | title_plex) from meta.log
+rm $SCRIPT_FOLDER/list-animes.tsv
+line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
+line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
+head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-animes.txt
+rm $SCRIPT_FOLDER/meta.log
+awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-animes.txt > $SCRIPT_FOLDER/list-animes.tsv
+rm $SCRIPT_FOLDER/cleanlog-animes.txt
+
+# download pmm animes mapping and check if files and folder exist
+curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/pmm_anime_ids.json
 
 # create ID-animes.tsv ( tvdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r tvdb_id title_plex
