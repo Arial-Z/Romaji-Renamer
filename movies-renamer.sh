@@ -99,7 +99,7 @@ done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 # write PMM metadata file from ID-movies.tsv and jikan API
 while IFS="|" read -r imdb_id mal_id title_mal title_plex
 do
-        if grep "$title_mal" <<< $movies_titles
+        if (echo $movies_titles | grep "$title_mal")
         then
                 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
