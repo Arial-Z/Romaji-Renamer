@@ -96,7 +96,7 @@ do
 			echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID/animes.csv" >> $LOG
 		fi
 	fi
-done < $SCRIPT_FOLDER/list-animes.csv
+done < $SCRIPT_FOLDER/tmp/list-animes.csv
 
 # write PMM metadata file from ID/animes.csv and jikan API
 while IFS="|" read -r tvdb_id mal_id title_mal title_plex
