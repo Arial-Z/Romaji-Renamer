@@ -39,7 +39,7 @@ line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/meta.log | cu
 line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/cleanlog-movies.txt
 rm $SCRIPT_FOLDER/meta.log
-awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  "\""substr($6,8)"\"",substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-movies.txt > $SCRIPT_FOLDER/list-movies.csv
+awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/cleanlog-movies.txt > $SCRIPT_FOLDER/list-movies.csv
 rm $SCRIPT_FOLDER/cleanlog-movies.txt
 
 # download pmm animes mapping and check if files and folder exist
