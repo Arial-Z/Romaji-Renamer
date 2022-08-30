@@ -124,8 +124,8 @@ do
                         mal_tags=$(get-mal-tags)
                         sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $animes_titles
                         echo "$(date +%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
-		fi		
-        else
+		fi
+	else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
 			get-mal-infos
@@ -137,12 +137,7 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
-                if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
-		then
-			get-mal-poster
-			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
-		fi
-		
+		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 
         fi
