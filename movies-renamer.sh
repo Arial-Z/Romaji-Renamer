@@ -126,19 +126,6 @@ do
                         sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $movies_titles
                         echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
-		posterline=$((sorttitleline+3))
-		if sed -n "${posterline}p" $movies_titles | grep "file_poster:"
-                then
-                        sed -i "${posterline}d" $movies_titles
-			if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
-			then
-				get-mal-poster
-				sed -i "${posterline}i\    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" $movies_titles
-			else
-				sed -i "${posterline}i\    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" $movies_titles
-			fi
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated Poster" >> $LOG
-		fi
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
