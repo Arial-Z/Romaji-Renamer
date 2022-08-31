@@ -65,6 +65,7 @@ bash path/to/movies-renamer.sh
 You can also add it to cron and make it run before PMM (be carreful it take a little time to run due to Jikan API limit)
 
 ### override-ID
+#### Animes
 some animes won't be matched and the metadata will be missing, you can see them error in the log, in PMM metadata files or plex directly<br/>
 Cause are missing MAL ID for the TVDB ID / IMDB ID or the first corresponding MAL ID is not the "main" anime<br/>
 <br/>
@@ -81,6 +82,7 @@ TVDB-ID	MAL-ID	MAL-TITLE
 ```
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 <br/>
+#### Movies
 to fix movies you need to edit this file : override-ID-movies.tsv<br/>
 it look like this, be carreful to use <p>tab</p> as separator
 ```
