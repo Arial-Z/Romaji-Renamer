@@ -7,7 +7,7 @@ what is imported :
   - Mal tags
   - Mal Poster
   
-  Will likely only work with plex TV agent and not Hama
+  Will likely only work with Plex TV agent / Plex Movie Agent and not Hama
   
  ## How it work
   - it export your library animes title and tvdbid from PMM
@@ -32,7 +32,8 @@ edit the path folder and file<br/>
 SCRIPT_FOLDER=/path/to/the/script/folder  
 PMM_FOLDER=/path/to/plexmetamanager
 LOG_PATH=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log # Default log in the script folder (you can change it)
-animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml # Default path to the metadata files for PMM (you can change it)
+animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml # Default path to the animes metadata files for PMM (you can change it)
+movies_titles=$PMM_FOLDER/config/animes/movies-titles.yml # Default path to the movies metadata files for PMM (you can change it)
 ```
 
 ### Step 4 - Configure PMM
@@ -56,7 +57,11 @@ Then you need to add the metadata file to your Animes Library in the PMM config 
     - file: config/animes/animes-mal.yml
 ```
 ### and you're done
-Run the script in the script folder with ./animes-renamer.sh<br/>
+Run the script in the script folder with bash :<br/>
+```
+bash path/to/animes-renamer.sh
+bash path/to/movies-renamer.sh
+```
 You can also add it to cron and make it run before PMM (be carreful it take a little time to run due to Jikan API limit)
 
 ### override-ID-animes.csv
