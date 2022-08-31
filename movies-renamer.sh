@@ -13,7 +13,7 @@ jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.
 function get-mal-infos () {
 sleep 0.5
 curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json 
-sleep 2
+sleep 1.5
 }
 function get-mal-title () {
 jq .data.title -r $SCRIPT_FOLDER/data/$mal_id.json
@@ -25,7 +25,7 @@ function get-mal-poster () {
 sleep 0.5
 mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
 curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
-sleep 2
+sleep 1.5
 }
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
@@ -125,7 +125,20 @@ do
                         mal_tags=$(get-mal-tags)
                         sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $movies_titles
                         echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
-		fi		
+		fi
+		posterline=$((sorttitleline+3))
+		if sed -n "${posterline}p" $movies_titles | grep "file_poster:"
+                then
+                        sed -i "${posterline}d" $movies_titles
+			if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
+			then
+				get-mal-poster
+				sed -i "${posterline}i\    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" $movies_titles
+			else
+				sed -i "${posterline}i\    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" $movies_titles
+			fi
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated Poster" >> $LOG
+		fi
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
@@ -138,7 +151,13 @@ do
                 echo "    audience_rating: $score_mal" >> $movies_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $movies_titles
-		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
+		if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
+		then
+			get-mal-poster
+			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
+		else
+			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
+		fi
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
         fi
 done < $SCRIPT_FOLDER/ID/movies.csv
