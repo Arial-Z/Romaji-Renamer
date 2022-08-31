@@ -69,7 +69,7 @@ some animes won't be matched and the metadata will be missing, you can see them 
 Cause are missing MAL ID for the TVDB ID / IMDB ID or the first corresponding MAL ID is not the "main" anime<br/>
 #### Animes
 to fix animes you need to edit this file : override-ID-animes.tsv<br/>
-it look like this, be carreful to use <p>tab</p> as separator
+it look like this, be carreful to use **tab** as separator
 ```
 TVDB-ID	MAL-ID	MAL-TITLE
 219771	9513	Beelzebub
@@ -82,7 +82,7 @@ TVDB-ID	MAL-ID	MAL-TITLE
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
 to fix movies you need to edit this file : override-ID-movies.tsv<br/>
-it look like this, be carreful to use <p>tab</p> as separator
+it look like this, be carreful to use **tab** as separator
 ```
 IMDB-ID	MAL-ID	MAL-TITLE
 tt16360006	50549	Bubble
