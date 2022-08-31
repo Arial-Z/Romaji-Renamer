@@ -7,7 +7,7 @@ what is imported :
   - Mal tags
   - Mal Poster
   
-  Will likely only work with plex TV agent and not Hama
+  Will likely only work with Plex TV agent / Plex Movie Agent and not Hama
   
  ## How it work
   - it export your library animes title and tvdbid from PMM
@@ -32,7 +32,8 @@ edit the path folder and file<br/>
 SCRIPT_FOLDER=/path/to/the/script/folder  
 PMM_FOLDER=/path/to/plexmetamanager
 LOG_PATH=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log # Default log in the script folder (you can change it)
-animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml # Default path to the metadata files for PMM (you can change it)
+animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml # Default path to the animes metadata files for PMM (you can change it)
+movies_titles=$PMM_FOLDER/config/animes/movies-titles.yml # Default path to the movies metadata files for PMM (you can change it)
 ```
 
 ### Step 4 - Configure PMM
@@ -56,22 +57,46 @@ Then you need to add the metadata file to your Animes Library in the PMM config 
     - file: config/animes/animes-mal.yml
 ```
 ### and you're done
-Run the script in the script folder with ./animes-renamer.sh<br/>
+Run the script with bash :<br/>
+```
+bash path/to/animes-renamer.sh
+bash path/to/movies-renamer.sh
+```
 You can also add it to cron and make it run before PMM (be carreful it take a little time to run due to Jikan API limit)
 
-### override-ID-animes.csv
+### override-ID
 some animes won't be matched and the metadata will be missing, you can see them error in the log, in PMM metadata files or plex directly<br/>
-Cause are missing MAL ID for the TVDB ID or the first corresponding MAL ID is not the "main" anime<br/>
-to fix this you need to edit this file : override-ID-animes.csv<br/>
-it look like this
+Cause are missing MAL ID for the TVDB ID / IMDB ID or the first corresponding MAL ID is not the "main" anime<br/>
+#### Animes
+to fix animes you need to edit this file : override-ID-animes.tsv<br/>
+it look like this, be carreful to use **tab** as separator
 ```
-TVDB-ID|MAL-ID|MAL-TITLE
-219771|9513|Beelzebub
-331753|34572|Black Clover
-305074|31964|Boku no Hero Academia
-413555|37914|Chikyuugai Shounen Shoujo
+TVDB-ID	MAL-ID	MAL-TITLE
+219771	9513	Beelzebub
+331753	34572	Black Clover
+305074	31964	Boku no Hero Academia
+413555	37914	Chikyuugai Shounen Shoujo
+79525	1575	Code Geass: Hangyaku no Lelouch
+79895	918	Gintama
 ```
-create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE
+create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
+#### Movies
+to fix movies you need to edit this file : override-ID-movies.tsv<br/>
+it look like this, be carreful to use **tab** as separator
+```
+IMDB-ID	MAL-ID	MAL-TITLE
+tt16360006	50549	Bubble
+tt9598270	34439	Code Geass: Hangyaku no Lelouch II - Handou
+tt9844256	34440	Code Geass: Hangyaku no Lelouch III - Oudou
+tt8100900	34438	Code Geass: Hangyaku no Lelouch I - Koudou
+tt9277666	6624	Kara no Kyoukai Remix: Gate of Seventh Heaven
+tt1155650	2593	Kara no Kyoukai Movie 1: Fukan Fuukei
+tt1155651	3782	Kara no Kyoukai Movie 2: Satsujin Kousatsu (Zen)
+tt1155652	3783	Kara no Kyoukai Movie 3: Tsuukaku Zanryuu
+tt1233474	4280	Kara no Kyoukai Movie 4: Garan no Dou
+tt1278060	4282	Kara no Kyoukai Movie 5: Mujun Rasen
+```
+create a new line and manually enter the IMDB-ID and MAL-ID, MAL-TITLE
 
 ### Thanks
   - to Plex for Plex
