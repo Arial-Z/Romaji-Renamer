@@ -23,7 +23,7 @@ jq .data.score -r $SCRIPT_FOLDER/data/$mal_id.json
 function get-mal-poster () {
 sleep 0.5
 mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
-wget "$mal_poster_url" -O $PMM_FOLDER/config/animes/posters/$mal_id.jpg
+wget "$mal_poster_url" -O $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 2
 }
 function get-mal-tags () {
@@ -41,13 +41,9 @@ then
 else
 	rm $SCRIPT_FOLDER/data/*
 fi
-if [ ! -d $PMM_FOLDER/config/animes ]
+if [ ! -d $SCRIPT_FOLDER/posters ]
 then
-        mkdir $PMM_FOLDER/config/animes
-fi
-if [ ! -d $PMM_FOLDER/config/animes/posters ]
-then
-        mkdir $PMM_FOLDER/config/animes/posters
+        mkdir $SCRIPT_FOLDER/posters
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
@@ -144,9 +140,9 @@ do
 		if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
 			get-mal-poster
-			echo "    file_poster: $PMM_FOLDER/config/animes/posters/${mal_id}.jpg" >> $animes_titles
+			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		else
-			echo "    file_poster: $PMM_FOLDER/config/animes/posters/${mal_id}.jpg" >> $animes_titles
+			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		fi
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
         fi
