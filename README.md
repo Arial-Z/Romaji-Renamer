@@ -6,6 +6,7 @@ what is imported :
   - Mal Score
   - Mal tags
   - Airing status (As Label)
+  - Top 100 movies (As Label)
   - Mal Poster
   
   Designed for Plex TV agent / Plex Movie Agent, Hama is untested
