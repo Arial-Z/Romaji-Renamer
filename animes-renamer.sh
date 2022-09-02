@@ -195,7 +195,7 @@ do
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
 		if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/ongoing.csv | grep $mal_id
 		then
-			echo "    label.sync: Ongoing" >> $animes_titles
+			echo "    label: Ongoing" >> $animes_titles
 		else
 			echo "    label.remove: Ongoing" >> $animes_titles
 		fi
