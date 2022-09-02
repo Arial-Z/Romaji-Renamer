@@ -106,7 +106,7 @@ done < $SCRIPT_FOLDER/tmp/list-movies.csv
 # write PMM metadata file from ID/movies.csv and jikan API
 while IFS="|" read -r imdb_id mal_id title_mal title_plex
 do
-        if grep "${mal_id}" $movies_titles
+        if grep ${mal_id} $movies_titles
         then
                 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
