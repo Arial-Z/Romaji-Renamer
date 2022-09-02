@@ -126,7 +126,7 @@ then
 			line=$(grep -n "\<$mal_id\>" $SCRIPT_FOLDER/ID/movies.tsv | cut -d : -f 1)
 			imdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $1}')
 			title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $3}')
-			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-movies.tsv
+			printf "$imdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-movies.tsv
 		fi
 	done < $SCRIPT_FOLDER/tmp/top-movies.tsv
 fi
