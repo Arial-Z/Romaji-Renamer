@@ -146,7 +146,7 @@ fi
 # write PMM metadata file from ID/animes.tsv and jikan API
 while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
 do
-	if grep -P "([0-9].*${mal_id})\<$mal_id\>" $animes_titles				# test if anime already in the metadata file and then replace some metadata
+	if grep "\"$title_mal\":" $animes_titles				# test if anime already in the metadata file and then replace some metadata
 	then
 		get-mal-infos						# check / download json data
 		get-mal-poster						# check / download poster
@@ -171,7 +171,7 @@ do
 		if sed -n "${labelline}p" $animes_titles | grep "label"			# replace the Ongoing label according to MAL airing list
 		then
 			sed -i "${labelline}d" $animes_titles
-			if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\<$mal_id\>"
+			if awk -F"\t" '{print $3}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\"$title_mal\":"
 			then
 				sed -i "${labelline}i\    label: Ongoing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Ongoing" >> $LOG
@@ -197,7 +197,6 @@ do
 		fi
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
-		echo "#   mal_id: $mal_id" >> $animes_titles
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv

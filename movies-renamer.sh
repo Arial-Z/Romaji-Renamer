@@ -135,7 +135,7 @@ fi
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
 do
-	if grep -P "([0-9].*${mal_id})\<$mal_id\>" $movies_titles
+	if grep "\"$title_mal\":" $movies_titles
 	then
 		get-mal-infos
 		get-mal-poster
@@ -178,7 +178,7 @@ do
                 echo "    audience_rating: $score_mal" >> $movies_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $movies_titles
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\<$mal_id\>"		# Movies-top-100 label
+		if awk -F"\t" '{print $3}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"		# Movies-top-100 label
 		then
 			echo "    label: AM-100" >> $movies_titles
 		else
@@ -186,7 +186,6 @@ do
 		fi
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
-		echo "#   mal_id: $mal_id" >> $movies_titles
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/ID/movies.tsv
