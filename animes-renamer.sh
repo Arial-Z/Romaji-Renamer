@@ -145,7 +145,6 @@ do
 			get-mal-infos
 		fi
 		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
-		echo "$sorttitleline" >> $LOG
                 ratingline=$((sorttitleline+1))
                 if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
                 then
@@ -163,7 +162,6 @@ do
                         echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
 		labelline=$((sorttitleline+3))
-		echo "$labelline" >> $LOG
                 if sed -n "${labelline}p" $animes_titles | grep "label."
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal label Found" >> $LOG
@@ -171,10 +169,10 @@ do
 			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep $mal_id
 			then
 				sed -i "${labelline}i\    label.sync: Airing" >> $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from Airing" >> $LOG
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Airing" >> $LOG
 			else
 				sed -i "${labelline}i\    label.remove: Airing" >> $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Airing" >> $LOG
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Airing" >> $LOG
 			fi
 		else
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal label NOT Found" >> $LOG
