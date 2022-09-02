@@ -29,7 +29,6 @@ then
 sleep 0.5
 	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
 	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
-	touch $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 1.5
 fi
 }
