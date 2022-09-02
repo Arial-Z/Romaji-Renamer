@@ -84,9 +84,9 @@ awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($
 # create ID/movies.tsv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS=$'\t' read -r imdb_id mal_id title_mal
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep '\s{$imdb_id}\>'
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$imdb_id\>"
 	then
-		line=$(grep -n '\s{$imdb_id}\>' $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
+		line=$(grep -n "\<$imdb_id\>" $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-movies.tsv | awk -F"\t" '{print $2}')
 		printf "$imdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 		echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
@@ -94,7 +94,7 @@ do
 done < $SCRIPT_FOLDER/override-ID-movies.tsv
 while IFS=$'\t' read -r imdb_id title_plex
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep '\s{$imdb_id}\>'
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$imdb_id\>"
 	then
 		mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
@@ -121,12 +121,12 @@ then
         done
         while read -r mal_id
         do
-                if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/movies.tsv | grep '\s$mal_id\>'		# create the top movies list
+                if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$mal_id\>"		# create the top movies list
 		then
 			line=$(grep -n "\<$mal_id\>" $SCRIPT_FOLDER/ID/movies.tsv | cut -d : -f 1)
 			imdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $1}')
 			title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $3}')
-			printf "$imdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-movies.tsv
+			printf "$i_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-movies.tsv
 		fi
 	done < $SCRIPT_FOLDER/tmp/top-movies.tsv
 fi
@@ -135,7 +135,7 @@ fi
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
 do
-	if grep '\s$mal_id\>' $movies_titles
+	if grep '\.$' "\<$mal_id\>" $movies_titles
 	then
 		get-mal-infos
 		get-mal-poster
@@ -160,7 +160,7 @@ do
 		if sed -n "${topmoviesline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
 		then
 			sed -i "${topmoviesline}d" $movies_titles
-			if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/top-movies.tsv | grep '\s$mal_id\>'
+			if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\<$mal_id\>"
 			then
 				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to AM-100" >> $LOG
@@ -178,7 +178,7 @@ do
                 echo "    audience_rating: $score_mal" >> $movies_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $movies_titles
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/top-movies.tsv | grep '\s$mal_id\>'		# Movies-top-100 label
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\<$mal_id\>"		# Movies-top-100 label
 		then
 			echo "    label: AM-100" >> $movies_titles
 		else
