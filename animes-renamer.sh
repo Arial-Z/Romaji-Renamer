@@ -88,7 +88,10 @@ do
 			overrideline=$(grep -n ^$tvdb_id$ $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
 			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
+			if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
+			then
 			get-mal-infos
+			fi
 			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID/animes.csv
 			echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG			
 		else
