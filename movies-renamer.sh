@@ -45,6 +45,8 @@ fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
+else
+	find $SCRIPT_FOLDER/posters/* -mtime +7 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
@@ -126,6 +128,9 @@ do
                         sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $movies_titles
                         echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
+		malidline=$((sorttitleline+4))
+		sed -i "${malidline}i\    mal_id: $mal_id" $animes_titles
+		fi
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
@@ -145,6 +150,7 @@ do
 		else
 			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		fi
+		echo "#   mal_id: $mal_id" >> $movies_titles
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
         fi
 done < $SCRIPT_FOLDER/ID/movies.csv

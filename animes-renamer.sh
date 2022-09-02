@@ -47,6 +47,8 @@ fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
+else
+	find $SCRIPT_FOLDER/posters/* -mtime +7 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
@@ -140,7 +142,11 @@ while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
         if grep "$mal_id" $animes_titles
         then
-                if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
+                if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
+		then
+			get-mal-poster
+		fi
+		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
 			get-mal-infos
 		fi
@@ -173,9 +179,7 @@ do
 				sed -i "${labelline}i\    label.remove: Airing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Airing" >> $LOG
 			fi
-		malidline=$((sorttitleline+5))
-		sed -i "${malidline}i\    mal_id: $mal_id" $animes_titles
-		fi
+		fi	
 	else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
@@ -201,7 +205,7 @@ do
 		else
 			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		fi
-		echo "    mal_id: $mal_id" >> $animes_titles
+		echo "#   mal_id: $mal_id" >> $animes_titles
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
         fi
 done < $SCRIPT_FOLDER/ID/animes.csv
