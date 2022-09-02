@@ -128,8 +128,9 @@ then
 			title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $3}')
 			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-movies.tsv
 		fi
-        done < $SCRIPT_FOLDER/tmp/top-movies.tsv
+	done < $SCRIPT_FOLDER/tmp/top-movies.tsv
 fi
+
 
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
@@ -167,6 +168,7 @@ do
 				sed -i "${topmoviesline}i\    label.remove: AM-100" $movies_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from AM-100" >> $LOG
 			fi
+		fi
 	else
 		get-mal-infos
 		echo "  \"$title_mal\":" >> $movies_titles
