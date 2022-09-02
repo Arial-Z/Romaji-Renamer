@@ -138,7 +138,7 @@ fi
 # write PMM metadata file from ID/animes.csv and jikan API
 while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
-        if grep "$title_mal" $animes_titles
+        if grep "$mal_id" $animes_titles
         then
                 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
@@ -165,7 +165,7 @@ do
                 if sed -n "${labelline}p" $animes_titles | grep "label."
 		then
 			sed -i "${labelline}d" $animes_titles
-			if awk -F"|" '{print $3}' $SCRIPT_FOLDER/data/airing.csv | grep "${title_mal}"
+			if awk -F"|" '{print $3}' $SCRIPT_FOLDER/data/airing.csv | grep "^${mal_id}$"
 			then
 				sed -i "${labelline}i\    label.sync: Airing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Airing" >> $LOG
@@ -173,6 +173,8 @@ do
 				sed -i "${labelline}i\    label.remove: Airing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Airing" >> $LOG
 			fi
+		malidline=$((sorttitleline+5))
+		sed -i "${malidline}i\    mal_id: $mal_id" $animes_titles
 		fi
 	else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
@@ -186,7 +188,7 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
-		if awk -F"|" '{print $3}' $SCRIPT_FOLDER/data/airing.csv | grep "${title_mal}"
+		if awk -F"|" '{print $3}' $SCRIPT_FOLDER/data/airing.csv | grep "^${mal_id}$"
 		then
 			echo "    label.sync: Airing" >> $animes_titles
 		else
@@ -199,6 +201,7 @@ do
 		else
 			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		fi
+		echo "    mal_id: $mal_id" >> $animes_titles
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
         fi
 done < $SCRIPT_FOLDER/ID/animes.csv
