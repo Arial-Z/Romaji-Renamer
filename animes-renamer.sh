@@ -165,7 +165,7 @@ do
                 if sed -n "${labelline}p" $animes_titles | grep "label."
 		then
 			sed -i "${labelline}d" $animes_titles
-			if awk -F"|" '{print $3}' $SCRIPT_FOLDER/data/airing.csv | grep "^${mal_id}$"
+			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep "^${mal_id}$"
 			then
 				sed -i "${labelline}i\    label.sync: Airing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Airing" >> $LOG
@@ -188,7 +188,7 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
-		if awk -F"|" '{print $3}' $SCRIPT_FOLDER/data/airing.csv | grep "^${mal_id}$"
+		if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep "^${mal_id}$"
 		then
 			echo "    label.sync: Airing" >> $animes_titles
 		else
