@@ -164,18 +164,15 @@ do
 		labelline=$((sorttitleline+3))
                 if sed -n "${labelline}p" $animes_titles | grep "label."
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal label Found" >> $LOG
 			sed -i "${labelline}d" $animes_titles
 			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep $mal_id
 			then
-				sed -i "${labelline}i\    label.sync: Airing" >> $animes_titles
+				sed -i "${labelline}i\    label.sync: Airing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Airing" >> $LOG
 			else
-				sed -i "${labelline}i\    label.remove: Airing" >> $animes_titles
+				sed -i "${labelline}i\    label.remove: Airing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Airing" >> $LOG
 			fi
-		else
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal label NOT Found" >> $LOG
 		fi
 	else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
