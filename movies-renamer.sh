@@ -178,7 +178,7 @@ do
                 echo "    audience_rating: $score_mal" >> $movies_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $movies_titles
-		if awk -F"\t" '{print $3}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"		# Movies-top-100 label
+		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"		# Movies-top-100 label
 		then
 			echo "    label: AM-100" >> $movies_titles
 		else
