@@ -135,7 +135,7 @@ fi
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
 do
-	if grep '\.$' "\<$mal_id\>" $movies_titles
+	if grep -v "\<.$mal_id\>" |grep "\<$mal_id\>" $movies_titles
 	then
 		get-mal-infos
 		get-mal-poster
