@@ -162,6 +162,7 @@ do
                         echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
 		labelline=$((sorttitleline+3))
+		echo "$labelline"
                 if sed -n "${labelline}p" $animes_titles | grep "label."
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal label Found" >> $LOG
