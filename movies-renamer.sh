@@ -57,10 +57,10 @@ fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
 	mkdir $SCRIPT_FOLDER/ID
-	touch $SCRIPT_FOLDER/ID/movies.csv
-elif [ ! -f $SCRIPT_FOLDER/ID/movies.csv ]
+	touch $SCRIPT_FOLDER/ID/movies.tsv
+elif [ ! -f $SCRIPT_FOLDER/ID/movies.tsv ]
 then
-	touch $SCRIPT_FOLDER/ID/movies.csv
+	touch $SCRIPT_FOLDER/ID/movies.tsv
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]
 then
@@ -75,13 +75,13 @@ rm $PMM_FOLDER/config/temp-movies.cache
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
 
-# create clean list-movies.csv (imdb_id | title_plex) from meta.log
+# create clean list-movies.tsv (imdb_id | title_plex) from meta.log
 line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-movies.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
 
-# create ID/movies.csv ( imdb_id | mal_id | title_mal | title_plex )
+# create ID/movies.tsv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS=$'\t' read -r imdb_id mal_id title_mal
 do
 	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$imdb_id\>"
@@ -108,7 +108,7 @@ do
 	fi
 done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 
-# write PMM metadata file from ID/movies.csv and jikan API
+# write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
 do
 	if grep "\<$mal_id\>" $movies_titles
