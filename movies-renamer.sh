@@ -82,34 +82,34 @@ head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_st
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
 
 # create ID/movies.csv ( imdb_id | mal_id | title_mal | title_plex )
-while IFS=$'\t' read -r tvdb_id mal_id title_mal
+while IFS=$'\t' read -r imdb_id mal_id title_mal
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$tvdb_id\>"
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$imdb_id\>"
 	then
-		line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
+		line=$(grep -n "\<$imdb_id\>" $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-movies.tsv | awk -F"\t" '{print $2}')
-		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+		printf "$imdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 		echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/override-ID-movies.tsv
-while IFS=$'\t' read -r tvdb_id title_plex
+while IFS=$'\t' read -r imdb_id title_plex
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$tvdb_id\>"
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$imdb_id\>"
 	then
 		mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $ERROR_LOG
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $imdb_id / $title_plex" >> $ERROR_LOG
 		fi
 		get-mal-infos
 		title_mal=$(get-mal-title)
-		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+		printf "$imdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 		echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID/movies.tsv" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 
 # write PMM metadata file from ID/movies.csv and jikan API
-while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
+while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
 do
 	if grep "\<$mal_id\>" $movies_titles
 	then
