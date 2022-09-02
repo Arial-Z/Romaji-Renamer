@@ -174,7 +174,7 @@ do
 			sed -i "${labelline}d" $animes_titles
 			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/ongoing.csv | grep $mal_id
 			then
-				sed -i "${labelline}i\    label.sync: Ongoing" $animes_titles
+				sed -i "${labelline}i\    label: Ongoing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Ongoing" >> $LOG
 			else
 				sed -i "${labelline}i\    label.remove: Ongoing" $animes_titles
