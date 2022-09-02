@@ -79,9 +79,9 @@ awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7
 # create ID/movies.csv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r imdb_id title_plex
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.csv | grep "^${imdb_id}$"                                                   					# check if not already in ID/movies.csv
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.csv | grep "${imdb_id}"                                                   					# check if not already in ID/movies.csv
 	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-movies.tsv | tail -n +2 | grep "^${imdb_id}$"								# check if in override
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-movies.tsv | tail -n +2 | grep "${imdb_id}"								# check if in override
 		then
 			overrideline=$(grep -n "^${imdb_id}$" $SCRIPT_FOLDER/override-ID-movies.tsv | cut -d : -f 1)
 			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"\t" '{print $2}')
@@ -106,7 +106,7 @@ done < $SCRIPT_FOLDER/tmp/list-movies.csv
 # write PMM metadata file from ID/movies.csv and jikan API
 while IFS="|" read -r imdb_id mal_id title_mal title_plex
 do
-        if grep "^${mal_id}$" $movies_titles
+        if grep "${mal_id}" $movies_titles
         then
                 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
