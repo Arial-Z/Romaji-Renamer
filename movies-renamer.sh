@@ -130,7 +130,6 @@ do
 		fi
 		malidline=$((sorttitleline+4))
 		sed -i "${malidline}i\    mal_id: $mal_id" $animes_titles
-		fi
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
