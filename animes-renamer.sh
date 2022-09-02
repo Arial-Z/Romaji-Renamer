@@ -10,9 +10,12 @@ function get-mal-id () {
 jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
+if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
+then
 sleep 0.5
 curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json 
 sleep 1.5
+fi
 }
 function get-mal-title () {
 jq .data.title -r $SCRIPT_FOLDER/data/$mal_id.json
@@ -88,10 +91,7 @@ do
 			overrideline=$(grep -n ^$tvdb_id$ $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
 			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
-			if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
-			then
 			get-mal-infos
-			fi
 			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID/animes.csv
 			echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG			
 		else
@@ -185,10 +185,7 @@ do
 			fi
 		fi	
 	else
-		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
-		then
-			get-mal-infos
-		fi
+		get-mal-infos
 		echo "  \"$title_mal\":" >> $animes_titles
                 echo "    alt_title: \"$title_plex\"" >> $animes_titles
                 echo "    sort_title: \"$title_mal\"" >> $animes_titles
