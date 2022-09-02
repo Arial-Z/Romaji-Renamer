@@ -82,20 +82,20 @@ mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
 line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
-awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.csv
+awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
 
 # create ID/animes.tsv ( tvdb_id | mal_id | title_mal | title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_mal
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
 	then
-		line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/tmp/list-animes.csv | cut -d : -f 1)
-		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
+		line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
+		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-animes.tsv | awk -F"\t" '{print $2}')
 		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 		echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
 	fi
-done < $SCRIPT_FOLDER//override-ID-animes.tsv
-while IFS="|" read -r tvdb_id title_plex
+done < $SCRIPT_FOLDER/override-ID-animes.tsv
+while IFS=$'\t' read -r tvdb_id title_plex
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
 	then
@@ -109,7 +109,7 @@ do
 		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 		echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID/animes.tsv" >> $LOG
 	fi
-done < $SCRIPT_FOLDER/tmp/list-animes.csv
+done < $SCRIPT_FOLDER/tmp/list-animes.tsv
 
 #Create a currently ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
 if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]
