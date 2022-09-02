@@ -24,11 +24,14 @@ function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/$mal_id.json
 }
 function get-mal-poster () {
+if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
+then
 sleep 0.5
-mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
-wget "$mal_poster_url" -O $SCRIPT_FOLDER/posters/$mal_id.jpg
-touch $SCRIPT_FOLDER/posters/$mal_id.jpg
+	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
+	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
+	touch $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 1.5
+fi
 }
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
@@ -146,14 +149,8 @@ while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
         if grep ^$mal_id$ $animes_titles
         then
-                if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
-		then
-			get-mal-poster
-		fi
-		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
-		then
-			get-mal-infos
-		fi
+		get-mal-poster
+		get-mal-infos
 		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
                 ratingline=$((sorttitleline+1))
                 if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
@@ -199,9 +196,7 @@ do
 		else
 			echo "    label.remove: Ongoing" >> $animes_titles
 		fi
-		if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
-		then
-			get-mal-poster
+		get-mal-poster
 			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		else
 			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
