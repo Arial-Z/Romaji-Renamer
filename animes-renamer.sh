@@ -167,9 +167,11 @@ do
 			sed -i "${labelline}d" $animes_titles
 			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep $mal_id
 			then
-				sed -i "${labelline}i\    label.sync: Airing"  >> $animes_titles
+				sed -i "${labelline}i\    label.sync: Airing" >> $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from Airing" >> $LOG
 			else
-				sed -i "${labelline}i\    label.remove: Airing"  >> $animes_titles
+				sed -i "${labelline}i\    label.remove: Airing" >> $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Airing" >> $LOG
 			fi
 		fi
 	else
@@ -186,9 +188,9 @@ do
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
 		if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep $mal_id
 		then
-			echo "    label.sync: Airing"  >> $animes_titles
+			echo "    label.sync: Airing" >> $animes_titles
 		else
-			echo "    label.remove: Airing"  >> $animes_titles
+			echo "    label.remove: Airing" >> $animes_titles
 		fi
 		if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
