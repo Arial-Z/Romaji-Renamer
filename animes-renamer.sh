@@ -132,7 +132,7 @@ then
                 then
 			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $ERROR_LOG
 		else
-				if awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"		# get the mal ID again but of the main anime
+				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"		# get the mal ID again but main anime and create ongoing list
 				then
 				line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
 				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')

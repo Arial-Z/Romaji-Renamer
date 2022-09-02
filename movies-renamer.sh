@@ -121,7 +121,7 @@ then
         done
         while read -r mal_id
         do
-                if awk -F"|" '{print $2}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$mal_id\>"		# create the top movies list
+                if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$mal_id\>"		# create the top movies list
 		then
 			line=$(grep -n "\<$mal_id\>" $SCRIPT_FOLDER/ID/movies.tsv | cut -d : -f 1)
 			imdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $1}')
