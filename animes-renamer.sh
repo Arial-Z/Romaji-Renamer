@@ -81,11 +81,11 @@ awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,
 # create ID/animes.csv ( tvdb_id | mal_id | title_mal | title_plex )
 while IFS="|" read -r tvdb_id title_plex
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep $tvdb_id                                                  					# check if not already in ID/animes.csv
+	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep ^$tvdb_id$                                                  					# check if not already in ID/animes.csv
 	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep $tvdb_id								# check if in override
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep ^$tvdb_id$								# check if in override
 		then
-			overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
+			overrideline=$(grep -n ^$tvdb_id$ $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
 			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
 			get-mal-infos
@@ -127,9 +127,9 @@ then
                 then
 			echo "invalid TVDB ID for : MAL : $mal_id"
 		else
-			if awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep $tvdb_id
+			if awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep ^$tvdb_id$
 			then
-				line=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/ID/animes.csv | cut -d : -f 1)
+				line=$(grep -n ^$tvdb_id$ $SCRIPT_FOLDER/ID/animes.csv | cut -d : -f 1)
 				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $2}')
 				title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $3}')
 				echo "$tvdb_id|$mal_id|$title_mal" >> $SCRIPT_FOLDER/data/ongoing.csv
@@ -141,7 +141,7 @@ fi
 # write PMM metadata file from ID/animes.csv and jikan API
 while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
-        if grep $mal_id $animes_titles
+        if grep ^$mal_id$ $animes_titles
         then
                 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
@@ -169,7 +169,7 @@ do
                         echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
 		labelline=$((sorttitleline+3))
-                if sed -n "${labelline}p" $animes_titles | grep "label."
+                if sed -n "${labelline}p" $animes_titles | grep "label"
 		then
 			sed -i "${labelline}d" $animes_titles
 			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/ongoing.csv | grep ^$mal_id$
