@@ -108,6 +108,29 @@ do
 	fi
 done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 
+#Create an MAL top 100 movies
+if [ ! -f $SCRIPT_FOLDER/data/top-movies.tsv ]		#check if already exist in data folder is stored for 2 days 
+then
+        topmoviesgpage=1
+        while [ $ongoingpage -lt 5 ];			#get the airing list from jikan API max 4 pages (100 movies)
+        do
+                curl "https://api.jikan.moe/v4/top/anime?type=movie&page=$topmoviesgpage" > $SCRIPT_FOLDER/tmp/top-movies-tmp.json
+                sleep 2
+                jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/top-movies.tsv		# store the mal ID of the ongoing show
+                ((topmoviesgpage++))
+        done
+        while read -r mal_id
+        do
+                if awk -F"|" '{print $2}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$mal_id\>"		# create the top movies list
+		then
+			line=$(grep -n "\<$mal_id\>" $SCRIPT_FOLDER/ID/movies.tsv | cut -d : -f 1)
+			imdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $1}')
+			title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $3}')
+			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-movies.tsv
+		fi
+        done < $SCRIPT_FOLDER/tmp/top-movies.tsv
+fi
+
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
 do
@@ -132,6 +155,18 @@ do
 			sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $movies_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
+		topmoviesline=$((sorttitleline+3))
+		if sed -n "${topmoviesline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
+		then
+			sed -i "${topmoviesline}d" $movies_titles
+			if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\<$mal_id\>"
+			then
+				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to AM-100" >> $LOG
+			else
+				sed -i "${topmoviesline}i\    label.remove: AM-100" $movies_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from AM-100" >> $LOG
+			fi
 	else
 		get-mal-infos
 		echo "  \"$title_mal\":" >> $movies_titles
@@ -141,6 +176,12 @@ do
                 echo "    audience_rating: $score_mal" >> $movies_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $movies_titles
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\<$mal_id\>"		# Movies-top-100 label
+		then
+			echo "    label: AM-100" >> $movies_titles
+		else
+			echo "    label.remove: AM-100" >> $movies_titles
+		fi
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		echo "#   mal_id: $mal_id" >> $movies_titles
