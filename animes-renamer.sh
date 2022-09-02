@@ -7,7 +7,7 @@ ERROR_LOG=$LOG_FOLDER/error.log
 
 # function
 function get-mal-id () {
-jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json |jq .mal_id | sort -n | head -1
+jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
 sleep 0.5
@@ -29,6 +29,9 @@ sleep 2
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
+function get-tvdb-id () {
+jq ".[] | select( .mal_id == ${mal_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq '.tvdb_id' | sort -n | head -1
+}
 
 # download pmm animes mapping and check if files and folder exist
 if [ ! -f $animes_titles ]
@@ -39,7 +42,7 @@ if [ ! -d $SCRIPT_FOLDER/data ]
 then
         mkdir $SCRIPT_FOLDER/data
 else
-	rm $SCRIPT_FOLDER/data/*
+	find $SCRIPT_FOLDER/data/* -mmin +1440 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
@@ -99,6 +102,39 @@ do
 	fi
 done < $SCRIPT_FOLDER/tmp/list-animes.csv
 
+#Create a currently airing list at $SCRIPT_FOLDER/data/airing.csv
+if [ ! -f $SCRIPT_FOLDER/data/airing.csv ]
+then
+        airingpage=1
+        while [ $airingpage -lt 10 ];
+        do
+                curl "https://api.jikan.moe/v4/anime?status=airing&page=$airingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/airing-tmp.json
+                sleep 2
+                if grep "\"items\":{\"count\":0," $SCRIPT_FOLDER/tmp/airing-tmp.json
+                then
+                        break
+                fi
+		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/airing-tmp.json >> $SCRIPT_FOLDER/tmp/airing.csv
+                ((airingpage++))
+        done
+        while read -r mal_id
+        do
+                tvdb_id=$(get-tvdb-id)
+                if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]
+                then
+			echo "invalid TVDB ID for : MAL : $mal_id"
+		else
+			if awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep $tvdb_id
+			then
+				line=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/ID/animes.csv | cut -d : -f 1)
+				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $2}')
+				title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $3}')
+				echo "$tvdb_id|$mal_id|$title_mal" >> $SCRIPT_FOLDER/data/airing.csv
+			fi
+		fi
+        done < $SCRIPT_FOLDER/tmp/airing.csv
+fi
+
 # write PMM metadata file from ID/animes.csv and jikan API
 while IFS="|" read -r tvdb_id mal_id title_mal title_plex
 do
@@ -125,6 +161,15 @@ do
                         sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $animes_titles
                         echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
+		labelline=$((sorttitleline+3))
+                if sed -n "${labelline}p" $animes_titles | grep "label."
+                then
+                        sed -i "${labelline}d" $animes_titles
+                        mal_tags=$(get-mal-tags)
+                        sed -i "${labelline}i\    label.remove: airing" $animes_titles
+		else
+			sed -i "${labelline}i\    label.remove: airing" $animes_titles
+		fi
 	else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
@@ -137,6 +182,7 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
+		if 
 		if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
 			get-mal-poster
