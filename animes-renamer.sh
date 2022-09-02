@@ -48,7 +48,7 @@ if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 else
-	find $SCRIPT_FOLDER/posters/* -mtime +7 -exec rm {} \;
+	find $SCRIPT_FOLDER/posters/* -mtime +15 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
@@ -104,20 +104,20 @@ do
 	fi
 done < $SCRIPT_FOLDER/tmp/list-animes.csv
 
-#Create a currently airing list at $SCRIPT_FOLDER/data/airing.csv
-if [ ! -f $SCRIPT_FOLDER/data/airing.csv ]
+#Create a currently ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
+if [ ! -f $SCRIPT_FOLDER/data/ongoing.csv ]
 then
-        airingpage=1
-        while [ $airingpage -lt 10 ];
+        ongoingpage=1
+        while [ $ongoingpage -lt 10 ];
         do
-                curl "https://api.jikan.moe/v4/anime?status=airing&page=$airingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/airing-tmp.json
+                curl "https://api.jikan.moe/v4/anime?status=ongoing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 sleep 2
-                if grep "\"items\":{\"count\":0," $SCRIPT_FOLDER/tmp/airing-tmp.json
+                if grep "\"items\":{\"count\":0," $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 then
                         break
                 fi
-		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/airing-tmp.json >> $SCRIPT_FOLDER/tmp/airing.csv
-                ((airingpage++))
+		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.csv
+                ((ongoingpage++))
         done
         while read -r mal_id
         do
@@ -131,10 +131,10 @@ then
 				line=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/ID/animes.csv | cut -d : -f 1)
 				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $2}')
 				title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $3}')
-				echo "$tvdb_id|$mal_id|$title_mal" >> $SCRIPT_FOLDER/data/airing.csv
+				echo "$tvdb_id|$mal_id|$title_mal" >> $SCRIPT_FOLDER/data/ongoing.csv
 			fi
 		fi
-        done < $SCRIPT_FOLDER/tmp/airing.csv
+        done < $SCRIPT_FOLDER/tmp/ongoing.csv
 fi
 
 # write PMM metadata file from ID/animes.csv and jikan API
@@ -171,13 +171,13 @@ do
                 if sed -n "${labelline}p" $animes_titles | grep "label."
 		then
 			sed -i "${labelline}d" $animes_titles
-			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep "^${mal_id}$"
+			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/ongoing.csv | grep "^${mal_id}$"
 			then
-				sed -i "${labelline}i\    label.sync: Airing" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Airing" >> $LOG
+				sed -i "${labelline}i\    label.sync: Ongoing" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Ongoing" >> $LOG
 			else
-				sed -i "${labelline}i\    label.remove: Airing" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Airing" >> $LOG
+				sed -i "${labelline}i\    label.remove: Ongoing" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
 		fi	
 	else
@@ -192,11 +192,11 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
-		if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep "^${mal_id}$"
+		if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/ongoing.csv | grep "^${mal_id}$"
 		then
-			echo "    label.sync: Airing" >> $animes_titles
+			echo "    label.sync: Ongoing" >> $animes_titles
 		else
-			echo "    label.remove: Airing" >> $animes_titles
+			echo "    label.remove: Ongoing" >> $animes_titles
 		fi
 		if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then

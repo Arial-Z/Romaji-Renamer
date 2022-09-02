@@ -46,7 +46,7 @@ if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 else
-	find $SCRIPT_FOLDER/posters/* -mtime +7 -exec rm {} \;
+	find $SCRIPT_FOLDER/posters/* -mtime +15 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
