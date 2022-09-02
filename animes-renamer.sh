@@ -164,11 +164,13 @@ do
 		labelline=$((sorttitleline+3))
                 if sed -n "${labelline}p" $animes_titles | grep "label."
                 then
-                        sed -i "${labelline}d" $animes_titles
-                        mal_tags=$(get-mal-tags)
-                        sed -i "${labelline}i\    label.remove: airing" $animes_titles
-		else
-			sed -i "${labelline}i\    label.remove: airing" $animes_titles
+			sed -i "${labelline}d" $animes_titles
+			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep $mal_id
+			then
+				sed -i "${labelline}i\    label.sync: Airing"  >> $animes_titles
+			else
+				sed -i "${labelline}i\    label.remove: Airing"  >> $animes_titles
+			fi
 		fi
 	else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
@@ -182,6 +184,12 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
+		if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/airing.csv | grep $mal_id
+		then
+			echo "    label.sync: Airing"  >> $animes_titles
+		else
+			echo "    label.remove: Airing"  >> $animes_titles
+		fi
 		if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
 			get-mal-poster
