@@ -5,9 +5,10 @@ what is imported :
   - Romaji title
   - Mal Score
   - Mal tags
+  - Airing status (As Label)
   - Mal Poster
   
-  Will likely only work with Plex TV agent / Plex Movie Agent and not Hama
+  Designed for Plex TV agent / Plex Movie Agent, Hama is untested
   
  ## How it work
   - it export your library animes title and tvdbid from PMM
