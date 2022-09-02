@@ -41,7 +41,7 @@ if [ ! -d $SCRIPT_FOLDER/data ]
 then
         mkdir $SCRIPT_FOLDER/data
 else
-	find $SCRIPT_FOLDER/data/* -mmin +1440 -exec rm {} \;
+	find $SCRIPT_FOLDER/data/* -mtime +2 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then

@@ -43,7 +43,7 @@ if [ ! -d $SCRIPT_FOLDER/data ]
 then
         mkdir $SCRIPT_FOLDER/data
 else
-	find $SCRIPT_FOLDER/data/* -mmin +1440 -exec rm {} \;
+	find $SCRIPT_FOLDER/data/* -mtime +2 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
@@ -111,7 +111,7 @@ then
         ongoingpage=1
         while [ $ongoingpage -lt 10 ];
         do
-                curl "https://api.jikan.moe/v4/anime?status=ongoing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
+                curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 sleep 2
                 if grep "\"items\":{\"count\":0," $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 then
