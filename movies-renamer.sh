@@ -112,7 +112,7 @@ done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 if [ ! -f $SCRIPT_FOLDER/data/top-movies.tsv ]		#check if already exist in data folder is stored for 2 days 
 then
         topmoviesgpage=1
-        while [ $ongoingpage -lt 5 ];			#get the airing list from jikan API max 4 pages (100 movies)
+        while [ $topmoviesgpage -lt 5 ];			#get the airing list from jikan API max 4 pages (100 movies)
         do
                 curl "https://api.jikan.moe/v4/top/anime?type=movie&page=$topmoviesgpage" > $SCRIPT_FOLDER/tmp/top-movies-tmp.json
                 sleep 2
