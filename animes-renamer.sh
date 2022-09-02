@@ -182,7 +182,6 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
-		if 
 		if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]														# check if poster exist
 		then
 			get-mal-poster
