@@ -129,7 +129,7 @@ do
                         echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
 		malidline=$((sorttitleline+4))
-		sed -i "${malidline}i\#   mal_id: $mal_id" $animes_titles
+		sed -i "${malidline}i\#   mal_id: $mal_id" $movies_titles
         else
 		if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]														# check if data exist
 		then
