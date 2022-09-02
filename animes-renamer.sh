@@ -82,7 +82,7 @@ while IFS="|" read -r tvdb_id title_plex
 do
 	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep $tvdb_id                                                   					# check if not already in ID/animes.csv
 	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep $tvdb_id								# check if in override
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep "^${tvdb_id}$"								# check if in override
 		then
 			overrideline=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
@@ -126,7 +126,7 @@ then
                 then
 			echo "invalid TVDB ID for : MAL : $mal_id"
 		else
-			if awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep $tvdb_id
+			if awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep "^${tvdb_id}$"
 			then
 				line=$(grep -n "$tvdb_id" $SCRIPT_FOLDER/ID/animes.csv | cut -d : -f 1)
 				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $2}')
