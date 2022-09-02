@@ -12,9 +12,9 @@ jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.
 function get-mal-infos () {
 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]
 then
-sleep 0.5
-curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json 
-sleep 1.5
+	sleep 0.5
+	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json 
+	sleep 1.5
 fi
 }
 function get-mal-title () {
@@ -60,10 +60,10 @@ fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
 	mkdir $SCRIPT_FOLDER/ID
-	touch $SCRIPT_FOLDER/ID/animes.csv
-elif [ ! -f $SCRIPT_FOLDER/ID/animes.csv ]
+	touch $SCRIPT_FOLDER/ID/animes.tsv
+elif [ ! -f $SCRIPT_FOLDER/ID/animes.tsv ]
 then
-	touch $SCRIPT_FOLDER/ID/animes.csv
+	touch $SCRIPT_FOLDER/ID/animes.tsv
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]
 then
@@ -84,46 +84,46 @@ line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/tmp/meta.log |
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
 awk -F"|" '{ OFS = "|" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.csv
 
-# create ID/animes.csv ( tvdb_id | mal_id | title_mal | title_plex )
+# create ID/animes.tsv ( tvdb_id | mal_id | title_mal | title_plex )
+while IFS=$'\t' read -r tvdb_id mal_id title_mal
+do
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
+	then
+		line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/tmp/list-animes.csv | cut -d : -f 1)
+		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
+		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+		echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
+	fi
+done < $SCRIPT_FOLDER//override-ID-animes.tsv
 while IFS="|" read -r tvdb_id title_plex
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep ^$tvdb_id$                                                  					# check if not already in ID/animes.csv
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
 	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | tail -n +2 | grep ^$tvdb_id$								# check if in override
-		then
-			overrideline=$(grep -n ^$tvdb_id$ $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
-			mal_id=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
-			title_mal=$(sed -n "${overrideline}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
-			get-mal-infos
-			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID/animes.csv
-			echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG			
-		else
-			mal_id=$(get-mal-id)
+		mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $ERROR_LOG
 		fi
-			get-mal-infos
-			title_mal=$(get-mal-title)
-			echo "$tvdb_id|$mal_id|$title_mal|$title_plex" >> $SCRIPT_FOLDER/ID/animes.csv
-			echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID/animes.csv" >> $LOG
-		fi
+		get-mal-infos
+		title_mal=$(get-mal-title)
+		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+		echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID/animes.tsv" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/tmp/list-animes.csv
 
 #Create a currently ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
-if [ ! -f $SCRIPT_FOLDER/data/ongoing.csv ]
+if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]
 then
         ongoingpage=1
         while [ $ongoingpage -lt 10 ];
         do
-                curl "https://api.jikan.moe/v4/anime?status=airingg&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
+                curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 sleep 2
                 if grep "\"items\":{\"count\":0," $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 then
                         break
                 fi
-		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.csv
+		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv
                 ((ongoingpage++))
         done
         while read -r mal_id
@@ -133,46 +133,46 @@ then
                 then
 			echo "invalid TVDB ID for : MAL : $mal_id"
 		else
-			if awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.csv | grep ^$tvdb_id$
+			if awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
 			then
-				line=$(grep -n ^$tvdb_id$ $SCRIPT_FOLDER/ID/animes.csv | cut -d : -f 1)
-				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $2}')
-				title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.csv | awk -F"|" '{print $3}')
-				echo "$tvdb_id|$mal_id|$title_mal" >> $SCRIPT_FOLDER/data/ongoing.csv
+				line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
+				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
+				title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $3}')
+				printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 			fi
 		fi
-        done < $SCRIPT_FOLDER/tmp/ongoing.csv
+        done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 fi
 
-# write PMM metadata file from ID/animes.csv and jikan API
-while IFS="|" read -r tvdb_id mal_id title_mal title_plex
+# write PMM metadata file from ID/animes.tsv and jikan API
+while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
 do
-        if grep ^$mal_id$ $animes_titles
-        then
-		get-mal-poster
+	if grep "\<$mal_id\>" $animes_titles
+	then
 		get-mal-infos
+		get-mal-poster
 		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
-                ratingline=$((sorttitleline+1))
-                if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
-                then
-                        sed -i "${ratingline}d" $animes_titles
-                        mal_score=$(get-mal-rating)
-                        sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
-                        echo "$(date +%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
+		ratingline=$((sorttitleline+1))
+		if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"
+		then
+			sed -i "${ratingline}d" $animes_titles
+			mal_score=$(get-mal-rating)
+			sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
+			echo "$(date +%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
 		fi
-                tagsline=$((sorttitleline+2))
-                if sed -n "${tagsline}p" $animes_titles | grep "genre.sync:"
-                then
-                        sed -i "${tagsline}d" $animes_titles
-                        mal_tags=$(get-mal-tags)
-                        sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $animes_titles
-                        echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
+		tagsline=$((sorttitleline+2))
+		if sed -n "${tagsline}p" $animes_titles | grep "genre.sync:"
+		then
+			sed -i "${tagsline}d" $animes_titles
+			mal_tags=$(get-mal-tags)
+			sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $animes_titles
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
 		labelline=$((sorttitleline+3))
-                if sed -n "${labelline}p" $animes_titles | grep "label"
+		if sed -n "${labelline}p" $animes_titles | grep "label"
 		then
 			sed -i "${labelline}d" $animes_titles
-			if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/ongoing.csv | grep ^$mal_id$
+			if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\<$mal_id\>"
 			then
 				sed -i "${labelline}i\    label: Ongoing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Ongoing" >> $LOG
@@ -180,7 +180,7 @@ do
 				sed -i "${labelline}i\    label.remove: Ongoing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
-		fi	
+		fi
 	else
 		get-mal-infos
 		echo "  \"$title_mal\":" >> $animes_titles
@@ -190,18 +190,15 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles
-		if awk -F"|" '{print $2}' $SCRIPT_FOLDER/data/ongoing.csv | grep ^$mal_id$
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\<$mal_id\>"
 		then
 			echo "    label: Ongoing" >> $animes_titles
 		else
 			echo "    label.remove: Ongoing" >> $animes_titles
 		fi
 		get-mal-poster
-			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
-		else
-			echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
-		fi
+		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles
 		echo "#   mal_id: $mal_id" >> $animes_titles
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
-        fi
-done < $SCRIPT_FOLDER/ID/animes.csv
+	fi
+done < $SCRIPT_FOLDER/ID/animes.tsv
