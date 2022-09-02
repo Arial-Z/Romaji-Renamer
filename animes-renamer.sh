@@ -146,7 +146,7 @@ fi
 # write PMM metadata file from ID/animes.tsv and jikan API
 while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
 do
-	if grep "\<$mal_id\>" $animes_titles				# test if anime already in the metadata file and then replace some metadata
+	if grep -P "'([0-9].*${mal_id})\<$mal_id\>" $movies_titles				# test if anime already in the metadata file and then replace some metadata
 	then
 		get-mal-infos						# check / download json data
 		get-mal-poster						# check / download poster
