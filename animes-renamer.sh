@@ -12,7 +12,7 @@ jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.
 function get-mal-infos () {
 sleep 0.5
 curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json 
-sleep 2
+sleep 1.5
 }
 function get-mal-title () {
 jq .data.title -r $SCRIPT_FOLDER/data/$mal_id.json
@@ -24,7 +24,8 @@ function get-mal-poster () {
 sleep 0.5
 mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
 wget "$mal_poster_url" -O $SCRIPT_FOLDER/posters/$mal_id.jpg
-sleep 2
+touch $SCRIPT_FOLDER/posters/$mal_id.jpg
+sleep 1.5
 }
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
@@ -48,7 +49,7 @@ if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 else
-	find $SCRIPT_FOLDER/posters/* -mtime +15 -exec rm {} \;
+	find $SCRIPT_FOLDER/posters/* -mtime +30 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then

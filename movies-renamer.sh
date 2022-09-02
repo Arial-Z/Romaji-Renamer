@@ -25,6 +25,7 @@ function get-mal-poster () {
 sleep 0.5
 mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
 curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
+touch $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 1.5
 }
 function get-mal-tags () {
@@ -46,7 +47,7 @@ if [ ! -d $SCRIPT_FOLDER/posters ]
 then
         mkdir $SCRIPT_FOLDER/posters
 else
-	find $SCRIPT_FOLDER/posters/* -mtime +15 -exec rm {} \;
+	find $SCRIPT_FOLDER/posters/* -mtime +30 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
