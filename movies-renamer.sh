@@ -153,7 +153,7 @@ do
 		then
 			sed -i "${tagsline}d" $movies_titles
 			mal_tags=$(get-mal-tags)
-			sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $movies_titles
+			sed -i "${tagsline}i\    genre.sync: Anime,${mal_tags}" $movies_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
 		topmoviesline=$((sorttitleline+3))
@@ -177,7 +177,7 @@ do
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $movies_titles
 		mal_tags=$(get-mal-tags)
-		echo "    genre.sync: anime,${mal_tags}"  >> $movies_titles
+		echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles
 		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"		# Movies-top-100 label
 		then
 			echo "    label: AM-100" >> $movies_titles
