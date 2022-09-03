@@ -229,6 +229,7 @@ do
 				else
 					sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
 					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
+				fi
 			fi
 		fi
 	else												# New anime need to write all metadata
