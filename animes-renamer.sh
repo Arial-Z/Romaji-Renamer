@@ -144,8 +144,9 @@ then
 fi
 
 #Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/
-if ! -f $SCRIPT_FOLDER/data/top-animes-100.tsv || ! -f $SCRIPT_FOLDER/data/top-animes-250.tsv		#check if already exist data folder is stored for 2 days 
+if [ ! -f $SCRIPT_FOLDER/data/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
 then
+	rm $SCRIPT_FOLDER/data/top-animes*
 	topanimespage=1
 	while [ $topanimespage -lt 11 ];
 	do
