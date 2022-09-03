@@ -160,7 +160,7 @@ do
 		if sed -n "${topmoviesline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
 		then
 			sed -i "${topmoviesline}d" $movies_titles
-			if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\<$mal_id\>"
+			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
 			then
 				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to AM-100" >> $LOG
