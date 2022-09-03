@@ -84,7 +84,7 @@ awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($
 # create ID/movies.tsv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS=$'\t' read -r imdb_id mal_id title_mal
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$imdb_id\>"
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$imdb_id\>"
 	then
 		line=$(grep -n "\<$imdb_id\>" $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-movies.tsv | awk -F"\t" '{print $2}')

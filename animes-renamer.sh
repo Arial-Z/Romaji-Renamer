@@ -86,7 +86,7 @@ awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_mal	title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_mal								# First add the override animes to the ID file
 do
-	if ! awk -F"|" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
 	then
 		line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-animes.tsv | awk -F"\t" '{print $2}')
@@ -118,11 +118,11 @@ then
         do
                 curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 sleep 2
-                if grep "\"items\":{\"count\":0," $SCRIPT_FOLDER/tmp/ongoing-tmp.json			#stop if page is empty
-                then
+                jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv		# store the mal ID of the ongoing show
+		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json			#stop if page is empty
+		then
                         break
                 fi
-		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv		# store the mal ID of the ongoing show
                 ((ongoingpage++))
         done
         while read -r mal_id
@@ -141,6 +141,38 @@ then
 			fi
 		fi
         done < $SCRIPT_FOLDER/tmp/ongoing.tsv
+fi
+
+#Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/
+if [ ! -f $SCRIPT_FOLDER/data/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
+then
+	topanimespage=1
+	while [ $topanimespage -lt 11 ];
+	do
+		curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
+		sleep 2
+		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
+		sleep 2
+		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
+		sleep 2
+		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		((topanimespage++))
+	done
+	sort -t "$(printf "\t")" -nrk2 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
+	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t" '{print $1}' > $SCRIPT_FOLDER/tmp/top-animes-100.tsv
+	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t" '{print $1}' > $SCRIPT_FOLDER/tmp/top-animes-250.tsv
+	while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
+	do
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-100.tsv | grep "\<$mal_id\>"
+		then
+			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-animes-100.tsv
+		elif awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-250.tsv | grep "\<$mal_id\>"
+		then
+			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-animes-250.tsv
+		fi
+done < $SCRIPT_FOLDER/ID/animes.tsv
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
@@ -164,19 +196,27 @@ do
 		then
 			sed -i "${tagsline}d" $animes_titles
 			mal_tags=$(get-mal-tags)
-			sed -i "${tagsline}i\    genre.sync: anime,${mal_tags}" $animes_titles
+			sed -i "${tagsline}i\    genre.sync: Anime,${mal_tags}" $animes_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
 		labelline=$((sorttitleline+3))
 		if sed -n "${labelline}p" $animes_titles | grep "label"			# replace the Ongoing label according to MAL airing list
 		then
 			sed -i "${labelline}d" $animes_titles
-			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\"$title_mal\":"
+			if [ awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\"$title_mal\":" ] && [ awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep "\"$title_mal\":" ];
 			then
-				sed -i "${labelline}i\    label: Ongoing" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added from Ongoing" >> $LOG
+					sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
+				elif [ awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\"$title_mal\":" ] && [ awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep "\"$title_mal\":" ];
+				then
+					sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
+				elif awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\"$title_mal\":"
+				then
+					sed -i "${labelline}i\    label: Ongoing" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
 			else
-				sed -i "${labelline}i\    label.remove: Ongoing" $animes_titles
+				sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
 		fi
@@ -188,7 +228,7 @@ do
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
 		mal_tags=$(get-mal-tags)
-		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
+		echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
 		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\<$mal_id\>"		# Ongoing label according to MAL airing list
 		then
 			echo "    label: Ongoing" >> $animes_titles
