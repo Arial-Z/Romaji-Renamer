@@ -189,7 +189,7 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\<$mal_id\>"		# Ongoing label according to MAL airing list
+		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\<$mal_id\>"		# Ongoing label according to MAL airing list
 		then
 			echo "    label: Ongoing" >> $animes_titles
 		else
