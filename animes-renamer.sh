@@ -207,7 +207,7 @@ do
 			then
 				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
-			elif [[ awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"$title_mal\":" && awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":" ]];
+			elif [[ awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"${title_mal}\":" && awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"${title_mal}\":" ]];
 			then
 				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
