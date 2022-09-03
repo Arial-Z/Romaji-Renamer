@@ -144,7 +144,7 @@ then
 fi
 
 #Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/
-if [ ! -f $SCRIPT_FOLDER/data/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
+if ! -f $SCRIPT_FOLDER/data/top-animes-100.tsv || ! -f $SCRIPT_FOLDER/data/top-animes-250.tsv			#check if already exist data folder is stored for 2 days 
 then
 	topanimespage=1
 	while [ $topanimespage -lt 11 ];
@@ -200,7 +200,7 @@ do
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
 		fi
 		labelline=$((sorttitleline+3))
-		if sed -n "${labelline}p" $animes_titles | grep "label"			# replace the Ongoing label according to MAL airing list
+		if sed -n "${labelline}p" $animes_titles | grep "label"			# replace the Ongoing and TOP label
 		then
 			sed -i "${labelline}d" $animes_titles
 			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"$title_mal\":"
