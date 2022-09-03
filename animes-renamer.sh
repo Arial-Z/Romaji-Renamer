@@ -203,21 +203,32 @@ do
 		if sed -n "${labelline}p" $animes_titles | grep "label"			# replace the Ongoing label according to MAL airing list
 		then
 			sed -i "${labelline}d" $animes_titles
-			if [[ awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"$title_mal\":" ]] && [[ awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":" ]];
+			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"$title_mal\":"
 			then
-				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
-			elif [[ awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"$title_mal\":" ]] && [[ awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":" ]];
-			then
-				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
-			elif awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\"$title_mal\":"
-			then
-				sed -i "${labelline}i\    label: Ongoing" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
+				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
+				then
+					sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
+				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
+				then
+					sed -i "${labelline}i\    label: Ongoing, A-200" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
+				else
+					sed -i "${labelline}i\    label: Ongoing" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
+				fi
 			else
-				sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
+				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
+				then
+					sed -i "${labelline}i\    label: A-100" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-100" >> $LOG
+				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
+				then
+					sed -i "${labelline}i\    label: A-200" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-250" >> $LOG
+				else
+					sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
 		fi
 	else												# New anime need to write all metadata
