@@ -211,7 +211,7 @@ do
 					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
 				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
-					sed -i "${labelline}i\    label: Ongoing, A-200" $animes_titles
+					sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
 					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
 				else
 					sed -i "${labelline}i\    label: Ongoing" $animes_titles
@@ -224,7 +224,7 @@ do
 					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-100" >> $LOG
 				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
-					sed -i "${labelline}i\    label: A-200" $animes_titles
+					sed -i "${labelline}i\    label: A-250" $animes_titles
 					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-250" >> $LOG
 				else
 					sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
