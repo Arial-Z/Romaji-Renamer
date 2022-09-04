@@ -62,7 +62,7 @@ then
 	touch $SCRIPT_FOLDER/ID/animes.tsv
 elif [ ! -f $SCRIPT_FOLDER/ID/animes.tsv ]
 then
-	touch $SCRIPT_FOLDER/ID/animes.tsv
+	rm $SCRIPT_FOLDER/ID/animes.tsv
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]											#check if exist and create temp folder cleaned at the start of every run
 then
@@ -253,3 +253,23 @@ do
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
+
+# Remove from metadata deleted animes
+echo "Running metadata cleanup"  >> $LOG 
+sed '/sort_title:/!d'  $animes_titles > $SCRIPT_FOLDER/tmp/animes-title-metadata.txt
+line=1
+while read -r title_metadata
+do
+        if ! awk -F"\t" '{print "sort_title: \""$3"\""}' $SCRIPT_FOLDER/ID/animes.tsv | grep "${title_metadata}"
+        then
+                lineprevious=$((line - 1))
+                previoustitle=$(sed -n "${lineprevious}p" $SCRIPT_FOLDER/tmp/animes-title-metadata.txt)
+                lineprevioustitle=$(grep -n "${previoustitle}" $animes_titles | cut -d : -f 1)
+                linedelstart=$((lineprevioustitle + 5))
+                linedelend=$((lineprevioustitle + 11))
+                sed -i "${linedelstart},${linedelend}d" $animes_titles
+                title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
+                echo "$title removed from metadata"  >> $LOG
+        fi
+        ((line++))
+done < $SCRIPT_FOLDER/tmp/animes-title-metadata.txt
