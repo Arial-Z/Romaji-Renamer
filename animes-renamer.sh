@@ -148,6 +148,7 @@ then
 			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $MATCH_LOG
 		else
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"		# get the mal ID again but main anime and create ongoing list
+				echo "1"
 				then
 				line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
 				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
@@ -160,7 +161,7 @@ fi
 #Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/animes/
 if [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
 then
-	rm $SCRIPT_FOLDER/data/animes/top-animes*
+	rm $SCRIPT_FOLDER/data/animes/top-animes-*
 	topanimespage=1
 	while [ $topanimespage -lt 11 ];
 	do
@@ -178,6 +179,7 @@ then
 	sort -t "$(printf "\t")" -nrk2 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
 	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
 	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
+	echo "2"
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
