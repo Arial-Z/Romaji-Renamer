@@ -36,10 +36,10 @@ sleep 1.5
 fi
 }
 function get-mal-tags () {
-(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json) | awk '{print $0}' | paste -s -d, -
+(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
 function get-mal-studios() {
-jq '.data.studios[].name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+jq '.data.studios[].name' -r $SCRIPT_FOLDER/data/$mal_id.json
 }
 
 # download pmm animes mapping and check if files and folder exist
@@ -180,7 +180,7 @@ do
 		studiosline=$((sorttitleline+4))
 		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
 		then
-			mal-studios=$(get-mal-studios)
+			mal_studios=$(get-mal-studios)
 			sed -i "${studiosline}i\    studio: ${mal-studios}" $movies_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		fi
@@ -204,7 +204,7 @@ do
 			echo "    label.remove: AM-100" >> $movies_titles
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 		fi
-		mal-studios=$(get-mal-studios)
+		mal_studios=$(get-mal-studios)
 		echo "    studio: ${mal-studios}"  >> $movies_titles
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		get-mal-poster
