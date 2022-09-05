@@ -178,13 +178,13 @@ then
 	do
 		curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		((topanimespage++))
 	done
 	sort -t "$(printf "\t")" -nrk2 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv

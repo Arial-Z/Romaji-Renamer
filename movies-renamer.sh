@@ -131,7 +131,7 @@ then
         do
                 curl "https://api.jikan.moe/v4/top/anime?type=movie&page=$topmoviesgpage" > $SCRIPT_FOLDER/tmp/top-movies-tmp.json
                 sleep 2
-		jq '.data[] | [.mal_id, .titles[0].title] | @tsv' -r $SCRIPT_FOLDER/tmp/top-movies-tmp.json >> $SCRIPT_FOLDER/data/movies/top-movies.tsv # store the mal ID and title of top 100 movies
+		jq '.data[] | [.mal_id, .title] | @tsv' -r $SCRIPT_FOLDER/tmp/top-movies-tmp.json >> $SCRIPT_FOLDER/data/movies/top-movies.tsv # store the mal ID and title of top 100 movies
                 ((topmoviesgpage++))
         done
 fi
