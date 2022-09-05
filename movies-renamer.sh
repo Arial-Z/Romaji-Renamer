@@ -70,6 +70,15 @@ then
 else
 	rm $SCRIPT_FOLDER/tmp/*
 fi
+if [ ! -d $LOG_FOLDER ]
+then
+	mkdir $$LOG_FOLDER
+elif [ ! -d $LOG_FOLDER/movies ]
+then
+	mkdir $$LOG_FOLDER/movies
+fi
+
+# Download anime mapping json data
 curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
 
 # create pmm meta.log

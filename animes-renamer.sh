@@ -72,6 +72,15 @@ then
 else
 	rm $SCRIPT_FOLDER/tmp/*
 fi
+if [ ! -d $LOG_FOLDER ]
+then
+	mkdir $$LOG_FOLDER
+elif [ ! -d $LOG_FOLDER/animes ]
+then
+	mkdir $$LOG_FOLDER/animes
+fi
+
+# Download anime mapping json data
 curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json		#download local copy of ID mapping
 
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
