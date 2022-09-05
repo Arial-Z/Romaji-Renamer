@@ -258,9 +258,31 @@ do
 		echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
 		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep "\<$mal_id\>"		# Ongoing label according to MAL airing list
 		then
-			echo "    label: Ongoing" >> $animes_titles
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
+			then
+				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
+			then
+				sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
+			else
+				sed -i "${labelline}i\    label: Ongoing" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
+			fi
 		else
-			echo "    label.remove: Ongoing" >> $animes_titles
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
+			then
+				sed -i "${labelline}i\    label: A-100" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-100" >> $LOG
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
+			then
+				sed -i "${labelline}i\    label: A-250" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-250" >> $LOG
+			else
+				sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
+			fi
 		fi
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
