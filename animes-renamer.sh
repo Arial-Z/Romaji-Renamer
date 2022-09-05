@@ -145,7 +145,7 @@ then
                 tvdb_id=$(get-tvdb-id)											# convert the mal id to tvdb id (to get the main anime)
                 if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]						# Ignore anime with no mal to tvdb id conversion
                 then
-			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $ERROR_LOG
+			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $MATCH_LOG
 		else
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"		# get the mal ID again but main anime and create ongoing list
 				then
