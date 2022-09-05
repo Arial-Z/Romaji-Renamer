@@ -140,22 +140,23 @@ then
                 fi
                 ((ongoingpage++))
         done
-        while read -r mal_id
-        do
-                tvdb_id=$(get-tvdb-id)											# convert the mal id to tvdb id (to get the main anime)
-                if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]						# Ignore anime with no mal to tvdb id conversion
-                then
-			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $MATCH_LOG
-		else
-				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"		# get the mal ID again but main anime and create ongoing list
-				then
-				line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
-				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
-				title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $3}')
-				printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+	while IFS=$'\t' -r mal_id
+	do
+		tvdb_id=$(get-tvdb-id)											# convert the mal id to tvdb id (to get the main anime)
+		if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]						# Ignore anime with no mal to tvdb id conversion
+		then
+			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
+		else	# get the mal ID again but main anime and create ongoing list
+			mal_id=$(get-mal-id)
+			if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]	# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+			then
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id Origin : $mal_id / $title_mal" >> $LOG
 			fi
+			get-mal-infos
+			title_mal=$(get-mal-title)
+			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 		fi
-        done < $SCRIPT_FOLDER/tmp/ongoing.tsv
+	done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 fi
 #Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/animes/
 if [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
