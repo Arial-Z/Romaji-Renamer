@@ -4,7 +4,7 @@ SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
 LOG=$LOG_FOLDER/movies/$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/movies/missing-ID-link.log
-ADDED_LOG=$LOG_FOLDER/moviess/added.log
+ADDED_LOG=$LOG_FOLDER/movies/added.log
 DELETED_LOG=$LOG_FOLDER/movies/deleted.log
 
 # function
@@ -63,6 +63,7 @@ then
 elif [ ! -f $SCRIPT_FOLDER/ID/movies.tsv ]
 then
 	rm $SCRIPT_FOLDER/ID/movies.tsv
+	touch $SCRIPT_FOLDER/ID/movies.tsv	
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]
 then
