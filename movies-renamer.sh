@@ -13,33 +13,33 @@ imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
 jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
-if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]
+if [ ! -f $SCRIPT_FOLDER/data/movies/$mal_id.json ]
 then
 	sleep 0.5
-	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json 
+	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/movies/$mal_id.json 
 	sleep 1.5
 fi
 }
 function get-mal-title () {
-jq .data.title -r $SCRIPT_FOLDER/data/$mal_id.json
+jq .data.title -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 }
 function get-mal-rating () {
-jq .data.score -r $SCRIPT_FOLDER/data/$mal_id.json
+jq .data.score -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 }
 function get-mal-poster () {
 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]
 then
 sleep 0.5
-	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
+	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
 	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 1.5
 fi
 }
 function get-mal-tags () {
-(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
+(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
 function get-mal-studios() {
-jq '.data.studios[].name' -r $SCRIPT_FOLDER/data/$mal_id.json
+jq '.data.studios[].name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 }
 
 # download pmm animes mapping and check if files and folder exist
@@ -50,8 +50,11 @@ fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
         mkdir $SCRIPT_FOLDER/data
+elif [ ! -d $SCRIPT_FOLDER/data/movies ]	
+then
+	mkdir $SCRIPT_FOLDER/data/movies
 else
-	find $SCRIPT_FOLDER/data/* -mtime +2 -exec rm {} \;						#delete json data if older than 2 days
+	find $SCRIPT_FOLDER/data/movies/* -mtime +2 -exec rm {} \;						#delete json data if older than 2 days
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
@@ -124,14 +127,14 @@ do
 done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 
 #Create an MAL top 100 movies
-if [ ! -f $SCRIPT_FOLDER/data/top-movies.tsv ]		#check if already exist in data folder is stored for 2 days 
+if [ ! -f $SCRIPT_FOLDER/data/movies/top-movies.tsv ]		#check if already exist in data folder is stored for 2 days 
 then
         topmoviesgpage=1
         while [ $topmoviesgpage -lt 5 ];			#get the airing list from jikan API max 4 pages (100 movies)
         do
                 curl "https://api.jikan.moe/v4/top/anime?type=movie&page=$topmoviesgpage" > $SCRIPT_FOLDER/tmp/top-movies-tmp.json
                 sleep 2
-		jq '.data[] | [.mal_id, .title] | @tsv' -r $SCRIPT_FOLDER/tmp/top-movies-tmp.json >> $SCRIPT_FOLDER/data/top-movies.tsv # store the mal ID and title of top 100 movies
+		jq '.data[] | [.mal_id, .title] | @tsv' -r $SCRIPT_FOLDER/tmp/top-movies-tmp.json >> $SCRIPT_FOLDER/data/movies/top-movies.tsv # store the mal ID and title of top 100 movies
                 ((topmoviesgpage++))
         done
 fi
@@ -165,7 +168,7 @@ do
 		if sed -n "${topmoviesline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
 		then
 			sed -i "${topmoviesline}d" $movies_titles
-			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/movies/top-movies.tsv | grep "\"$title_mal\":"
 			then
 				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100\n" >> $LOG
@@ -193,7 +196,7 @@ do
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
-		if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
+		if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/movies/top-movies.tsv | grep "\"$title_mal\":"
 		then
 			echo "    label: AM-100" >> $movies_titles
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100\n" >> $LOG
