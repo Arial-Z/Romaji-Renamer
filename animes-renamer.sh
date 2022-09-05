@@ -74,10 +74,10 @@ else
 fi
 if [ ! -d $LOG_FOLDER ]
 then
-	mkdir $$LOG_FOLDER
+	mkdir $LOG_FOLDER
 elif [ ! -d $LOG_FOLDER/animes ]
 then
-	mkdir $$LOG_FOLDER/animes
+	mkdir $LOG_FOLDER/animes
 fi
 
 # Download anime mapping json data
