@@ -255,7 +255,7 @@ do
 		studiosline=$((sorttitleline+4))
 		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
 		then
-			mal_studios=$(get-mal-studios)
+			mal-studios=$(get-mal-studios)
 			sed -i "${studiosline}i\    studio: ${mal-studios}" $movies_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		fi
@@ -296,7 +296,7 @@ do
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
 		fi
-		mal_studios=$(get-mal-studios)
+		mal-studios=$(get-mal-studios)
 		echo "    studio: ${mal-studios}"  >> $movies_titles
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		get-mal-poster										# check / download poster
