@@ -258,7 +258,7 @@ do
 		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
 		then
 			mal_studios=$(get-mal-studios)
-			sed -i "${studiosline}i\    studio: ${mal-studios}" $movies_titles
+			sed -i "${studiosline}i\    studio: ${mal_studios}" $animes_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		fi
 	else												# New anime need to write all metadata
@@ -299,8 +299,8 @@ do
 			fi
 		fi
 		mal_studios=$(get-mal-studios)
-		echo "    studio: ${mal-studios}"  >> $movies_titles
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
+		echo "    studio: ${mal_studios}"  >> $animes_titles
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios" >> $LOG
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG

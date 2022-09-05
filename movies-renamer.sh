@@ -183,7 +183,7 @@ do
 		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
 		then
 			mal_studios=$(get-mal-studios)
-			sed -i "${studiosline}i\    studio: ${mal-studios}" $movies_titles
+			sed -i "${studiosline}i\    studio: ${mal_studios}" $movies_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		fi
 	else
@@ -207,8 +207,8 @@ do
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 		fi
 		mal_studios=$(get-mal-studios)
-		echo "    studio: ${mal-studios}"  >> $movies_titles
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
+		echo "    studio: ${mal_studios}"  >> $movies_titles
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios" >> $LOG
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
