@@ -182,10 +182,10 @@ then
 	do
 		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-100.tsv | grep "\<$mal_id\>"
 		then
-			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-animes-100.tsv
+			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
 		elif awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-250.tsv | grep "\<$mal_id\>"
 		then
-			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-animes-250.tsv
+			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
 		fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
 fi
