@@ -158,26 +158,36 @@ then
         done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 fi
 #Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/animes/
-if [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
+if [ ! -f $SCRIPT_FOLDER/data/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
 then
-	rm $SCRIPT_FOLDER/data/animes/top-animes-*
+	rm $SCRIPT_FOLDER/data/top-animes*
 	topanimespage=1
 	while [ $topanimespage -lt 11 ];
 	do
 		curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		((topanimespage++))
 	done
 	sort -t "$(printf "\t")" -nrk2 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
-	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
-	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
+	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t" '{print $1}' > $SCRIPT_FOLDER/tmp/top-animes-100.tsv
+	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t" '{print $1}' > $SCRIPT_FOLDER/tmp/top-animes-250.tsv
+	while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
+	do
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-100.tsv | grep "\<$mal_id\>"
+		then
+			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-animes-100.tsv
+		elif awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-250.tsv | grep "\<$mal_id\>"
+		then
+			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-animes-250.tsv
+		fi
+done < $SCRIPT_FOLDER/ID/animes.tsv
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
