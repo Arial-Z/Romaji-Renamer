@@ -187,7 +187,7 @@ then
 		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		((topanimespage++))
 	done
-	sort -t "$(printf "\t")" -nrk2 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
+	sort -t "$(printf "\t")" -nrk3 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
 	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
 	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
 fi
