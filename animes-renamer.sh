@@ -261,14 +261,14 @@ do
 		echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
 		echo "1"
-		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"
+		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep "\"$title_mal\":"
 		then
 			echo "2"
-			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep "\"$title_mal\":"
 			then
 				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100\n" >> $LOG
-			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep "\"$title_mal\":"
 			then
 				echo "3"
 				sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
@@ -279,12 +279,12 @@ do
 			fi
 			echo "4"
 			else
-				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
+				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep "\"$title_mal\":"
 				then
 					echo "5"
 					sed -i "${labelline}i\    label: A-100" $animes_titles
 					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100\n" >> $LOG
-				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
+				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep "\"$title_mal\":"
 				then
 					echo "6"
 					sed -i "${labelline}i\    label: A-250" $animes_titles
