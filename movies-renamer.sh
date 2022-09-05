@@ -38,6 +38,9 @@ fi
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
+function get-mal-studios() {
+jq 'jq .data.studios[].name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+}
 
 # download pmm animes mapping and check if files and folder exist
 if [ ! -f $movies_titles ]
@@ -174,6 +177,13 @@ do
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 			fi
 		fi
+		studiosline=$((sorttitleline+4))
+		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
+		then
+			mal-studios=$(get-mal-studios)
+			sed -i "${studiosline}i\    studio: ${mal-studios}" $movies_titles
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
+		fi
 	else
 		get-mal-infos
 		echo "  \"$title_mal\":" >> $movies_titles
@@ -185,8 +195,7 @@ do
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
 		if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/movies/top-movies.tsv | grep "\"$title_mal\":"
 		then
 			echo "    label: AM-100" >> $movies_titles
@@ -195,6 +204,9 @@ do
 			echo "    label.remove: AM-100" >> $movies_titles
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 		fi
+		mal-studios=$(get-mal-studios)
+		echo "    studio: ${mal-studios}"  >> $movies_titles
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG

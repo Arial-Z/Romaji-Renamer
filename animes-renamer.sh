@@ -40,6 +40,9 @@ function get-mal-tags () {
 function get-tvdb-id () {
 jq ".[] | select( .mal_id == ${mal_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq '.tvdb_id' | sort -n | head -1
 }
+function get-mal-studios() {
+jq 'jq .data.studios[].name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+}
 
 # download pmm animes mapping and check if files and folder exist
 if [ ! -f $animes_titles ]											#check if metadata files exist and echo first line
@@ -249,6 +252,13 @@ do
 				fi
 			fi
 		fi
+		studiosline=$((sorttitleline+4))
+		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
+		then
+			mal-studios=$(get-mal-studios)
+			sed -i "${studiosline}i\    studio: ${mal-studios}" $movies_titles
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
+		fi
 	else												# New anime need to write all metadata
 		get-mal-infos
 		echo "  \"$title_mal\":" >> $animes_titles
@@ -286,6 +296,9 @@ do
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
 		fi
+		mal-studios=$(get-mal-studios)
+		echo "    studio: ${mal-studios}"  >> $movies_titles
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
