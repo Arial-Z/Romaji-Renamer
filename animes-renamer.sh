@@ -50,6 +50,7 @@ if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for 
 then
         mkdir $SCRIPT_FOLDER/data
 elif [ ! -d $SCRIPT_FOLDER/data/animes ]	
+then
 	mkdir $SCRIPT_FOLDER/data/animes
 else
 	find $SCRIPT_FOLDER/data/animes/* -mtime +1 -exec rm {} \;						#delete json data if older than 2 days

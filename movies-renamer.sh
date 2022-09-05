@@ -47,7 +47,8 @@ fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
         mkdir $SCRIPT_FOLDER/data
-elif [ ! -d $SCRIPT_FOLDER/data/movies ]	
+elif [ ! -d $SCRIPT_FOLDER/data/movies ]
+then	
 	mkdir $SCRIPT_FOLDER/data/movies
 else
 	find $SCRIPT_FOLDER/data/movies/* -mtime +2 -exec rm {} \;						#delete json data if older than 2 days
