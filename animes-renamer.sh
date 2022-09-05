@@ -126,69 +126,70 @@ do
 done < $SCRIPT_FOLDER/tmp/list-animes.tsv
 
 #Create an ongoing list at $SCRIPT_FOLDER/data/animes/ongoing.csv
-if [ ! -f $SCRIPT_FOLDER/data/animes/ongoing.tsv ]		#check if already exist data folder is stored for 2 days 
+if [ ! -f $SCRIPT_FOLDER/data/animes/ongoing.tsv ]              #check if already exist data folder is stored for 2 days
 then
         ongoingpage=1
-        while [ $ongoingpage -lt 10 ];			#get the airing list from jikan API max 9 pages (225 animes)
+        while [ $ongoingpage -lt 10 ];                  #get the airing list from jikan API max 9 pages (225 animes)
         do
                 curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 sleep 2
-                jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv		# store the mal ID of the ongoing show
-		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json			#stop if page is empty
-		then
+                jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv            # store the mal ID of the ongoing show
+                if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json                  #stop if page is empty
+                then
                         break
                 fi
                 ((ongoingpage++))
         done
-	while IFS=$'\t' -r mal_id
-	do
-		tvdb_id=$(get-tvdb-id)											# convert the mal id to tvdb id (to get the main anime)
-		if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]						# Ignore anime with no mal to tvdb id conversion
+        while read -r mal_id
+        do
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep "\<$mal_id\>"
 		then
-			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
-		else	# get the mal ID again but main anime and create ongoing list
-			mal_id=$(get-mal-id)
-			if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]	# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
-			then
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id Origin : $mal_id / $title_mal" >> $LOG
-			fi
-			get-mal-infos
-			title_mal=$(get-mal-title)
+			line=$(grep -n "\<$mal_id\>" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
+			tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $1}')
+			title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
 			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+		else
+			tvdb_id=$(get-tvdb-id)                                                                                  # convert the mal id to tvdb id (to get the main anime)
+			if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]                                             # Ignore anime with no mal to tvdb id conversion
+			then
+				echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
+				continue
+			else    												# get the mal ID again but main anime and create ongoing list
+				mal_id=$(get-mal-id)
+				if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+				then
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id Origin : $mal_id / $title_mal" >> $LOG
+					continue
+				fi
+				get-mal-infos
+				title_mal=$(get-mal-title)
+				printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+			fi
 		fi
-	done < $SCRIPT_FOLDER/tmp/ongoing.tsv
+        done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 fi
+
 #Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/animes/
 if [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
 then
-	rm $SCRIPT_FOLDER/data/animes/top-animes-*
+	rm $SCRIPT_FOLDER/data/animes/top-animes*
 	topanimespage=1
 	while [ $topanimespage -lt 11 ];
 	do
 		curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		((topanimespage++))
 	done
 	sort -t "$(printf "\t")" -nrk2 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
-	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t" '{print $1}' > $SCRIPT_FOLDER/tmp/top-animes-100.tsv
-	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t" '{print $1}' > $SCRIPT_FOLDER/tmp/top-animes-250.tsv
-	while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
-	do
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-100.tsv | grep "\<$mal_id\>"
-		then
-			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
-		elif awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-250.tsv | grep "\<$mal_id\>"
-		then
-			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
-		fi
-done < $SCRIPT_FOLDER/ID/animes.tsv
+	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
+	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
