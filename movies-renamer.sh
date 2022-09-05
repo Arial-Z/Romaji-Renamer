@@ -44,11 +44,13 @@ if [ ! -f $movies_titles ]
 then
         echo "metadata:" > $movies_titles
 fi
-if [ ! -d $SCRIPT_FOLDER/data ]
+if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
         mkdir $SCRIPT_FOLDER/data
+elif [ ! -d $SCRIPT_FOLDER/data/movies ]	
+	mkdir $SCRIPT_FOLDER/data/movies
 else
-	find $SCRIPT_FOLDER/data/* -mtime +2 -exec rm {} \;
+	find $SCRIPT_FOLDER/data/movies/* -mtime +2 -exec rm {} \;						#delete json data if older than 2 days
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
@@ -165,10 +167,10 @@ do
 			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
 			then
 				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
-				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100" >> $LOG
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100\n" >> $LOG
 			else
 				sed -i "${topmoviesline}i\    label.remove: AM-100" $movies_titles
-				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100" >> $LOG
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 			fi
 		fi
 	else
@@ -187,15 +189,15 @@ do
 		if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
 		then
 			echo "    label: AM-100" >> $movies_titles
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100" >> $LOG
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100\n" >> $LOG
 		else
 			echo "    label.remove: AM-100" >> $movies_titles
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100" >> $LOG
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 		fi
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added" >> $LOG
-		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex" >> $ADDED_LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
+		echo "$(date +%H:%M:%S) - added to metadata :\n\t$title_mal / $title_plex" >> $ADDED_LOG
 	fi
 done < $SCRIPT_FOLDER/ID/movies.tsv
 
@@ -214,7 +216,7 @@ do
                 linedelend=$((lineprevioustitle + 11))
                 sed -i "${linedelstart},${linedelend}d" $movies_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
-                echo "$(date +%H:%M:%S) - removed from metadata : $title"  >> $DELETED_LOG
+                echo "$(date +%H:%M:%S) - removed from metadata :\n\t$title"  >> $DELETED_LOG
         fi
         ((line++))
 done < $SCRIPT_FOLDER/tmp/movies-title-metadata.txt

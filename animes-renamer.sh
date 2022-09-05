@@ -49,8 +49,10 @@ fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
         mkdir $SCRIPT_FOLDER/data
+elif [ ! -d $SCRIPT_FOLDER/data/animes ]	
+	mkdir $SCRIPT_FOLDER/data/animes
 else
-	find $SCRIPT_FOLDER/data/* -mtime +2 -exec rm {} \;							#delete json data if older than 2 days
+	find $SCRIPT_FOLDER/data/animes/* -mtime +1 -exec rm {} \;						#delete json data if older than 2 days
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]										#check if exist and create folder for posters
 then
@@ -65,6 +67,7 @@ then
 elif [ ! -f $SCRIPT_FOLDER/ID/animes.tsv ]
 then
 	rm $SCRIPT_FOLDER/ID/animes.tsv
+	touch $SCRIPT_FOLDER/ID/animes.tsv
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]											#check if exist and create temp folder cleaned at the start of every run
 then
@@ -124,36 +127,36 @@ done < $SCRIPT_FOLDER/tmp/list-animes.tsv
 #Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
 if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]		#check if already exist data folder is stored for 2 days 
 then
-        ongoingpage=1
-        while [ $ongoingpage -lt 10 ];			#get the airing list from jikan API max 9 pages (225 animes)
-        do
-                curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
-                sleep 2
-                jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv		# store the mal ID of the ongoing show
+	ongoingpage=1
+	while [ $ongoingpage -lt 10 ];			#get the airing list from jikan API max 9 pages (225 animes)
+	do
+		curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
+		sleep 2
+		jq '.data[] | [.mal_id, .titles[0].title] | @tsv' -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv		# store the mal ID of the ongoing show
 		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json					#stop if page is empty
 		then
-                        break
-                fi
-                ((ongoingpage++))
-        done
-        while read -r mal_id
-        do
-                tvdb_id=$(get-tvdb-id)											# convert the mal id to tvdb id (to get the main anime)
-                if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]						# Ignore anime with no mal to tvdb id conversion
-                then
-			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
-		else
-				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"		# get the mal ID again but main anime and create ongoing list
-				then
-				line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
-				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
-				title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $3}')
-				printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
-			fi
+			break
 		fi
-        done < $SCRIPT_FOLDER/tmp/ongoing.tsv
+		((ongoingpage++))
+	done
+	while IFS=$'\t' -r mal_id title_mal
+	do
+		tvdb_id=$(get-tvdb-id)											# convert the mal id to tvdb id (to get the main anime)
+		if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]						# Ignore anime with no mal to tvdb id conversion
+		then
+			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
+		else	# get the mal ID again but main anime and create ongoing list
+			mal_id=$(get-mal-id)
+			if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]	# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+			then
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id Origin : $mal_id / $title_mal" >> $MATCH_LOG
+			fi
+			get-mal-infos
+			title_mal=$(get-mal-title)
+			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
+		fi
+	done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 fi
-
 #Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/
 if [ ! -f $SCRIPT_FOLDER/data/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
 then
@@ -211,27 +214,27 @@ do
 				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100\n" >> $LOG
 				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-250" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-250\n" >> $LOG
 				else
 					sed -i "${labelline}i\    label: Ongoing" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing\n" >> $LOG
 				fi
 			else
 				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-100" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100\n" >> $LOG
 				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-250" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-250" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-250\n" >> $LOG
 				else
 					sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from Ongoing" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from Ongoing\n" >> $LOG
 				fi
 			fi
 		fi
@@ -252,32 +255,33 @@ do
 			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
 			then
 				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
-				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100" >> $LOG
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100\n" >> $LOG
 			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
 			then
 				sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
-				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-250" >> $LOG
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-250\n" >> $LOG
 			else
 				sed -i "${labelline}i\    label: Ongoing" $animes_titles
-				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing" >> $LOG
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing\n" >> $LOG
 			fi
 			else
 				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-100" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100\n" >> $LOG
 				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-250" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-250" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-250\n" >> $LOG
 				else
 					sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
-					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from Ongoing" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from Ongoing\n" >> $LOG
 			fi
 		fi
 		get-mal-poster										# check / download poster
-		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
-		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex" >> $ADDED_LOG
+		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
+		echo "$(date +%H:%M:%S) - added to metadata :\n\t$title_mal / $title_plex" >> $ADDED_LOG
 	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
 
@@ -296,7 +300,7 @@ do
                 linedelend=$((lineprevioustitle + 11))
                 sed -i "${linedelstart},${linedelend}d" $animes_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
-                echo "$(date +%H:%M:%S) - removed from metadata : $title"  >> $DELETED_LOG
+                echo "$(date +%H:%M:%S) - removed from metadata :\n\t$title"  >> $DELETED_LOG
         fi
         ((line++))
 done < $SCRIPT_FOLDER/tmp/animes-title-metadata.txt
