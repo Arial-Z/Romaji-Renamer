@@ -178,18 +178,18 @@ then
 	do
 		curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
 		((topanimespage++))
 	done
-	sort -t "$(printf "\t")" -nrk3 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
-	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
-	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
+	sort -t "$(printf "\t")" -nrk3 $SCRIPT_FOLDER/tmp/top-animes.tsv > $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv
+	head -n 100 $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
+	head -n 250 $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv | tail -n 150 | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
