@@ -149,9 +149,9 @@ do
 		if sed -n "${ratingline}p" $movies_titles | grep "audience_rating:"
 		then
 			sed -i "${ratingline}d" $movies_titles
-			mal_score=$(get-mal-rating)
-			sed -i "${ratingline}i\    audience_rating: ${mal_score}" $movies_titles
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $mal_score\n" >> $LOG
+			score_mal=$(get-mal-rating)
+			sed -i "${ratingline}i\    audience_rating: ${score_mal}" $movies_titles
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 		fi
 		tagsline=$((sorttitleline+2))
 		if sed -n "${tagsline}p" $movies_titles | grep "genre.sync:"
@@ -182,7 +182,7 @@ do
 		echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to metadata :" >> $LOG
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $movies_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $mal_score\n" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
