@@ -12,30 +12,30 @@ function get-mal-id () {
 jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id | sort -n | head -1
 }
 function get-mal-infos () {
-if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ] 										#check if exist
+if [ ! -f $SCRIPT_FOLDER/data/animes/$mal_id.json ] 										#check if exist
 then
 	sleep 0.5
-	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json 
+	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/animes/$mal_id.json 
 	sleep 1.5
 fi
 }
 function get-mal-title () {
-jq .data.title -r $SCRIPT_FOLDER/data/$mal_id.json
+jq .data.title -r $SCRIPT_FOLDER/data/animes/$mal_id.json
 }
 function get-mal-rating () {
-jq .data.score -r $SCRIPT_FOLDER/data/$mal_id.json
+jq .data.score -r $SCRIPT_FOLDER/data/animes/$mal_id.json
 }
 function get-mal-poster () {
 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]										#check if exist
 then
 sleep 0.5
-	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
+	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
 	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
 sleep 1.5
 fi
 }
 function get-mal-tags () {
-(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
+(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/animes/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/animes/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/animes/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
 function get-tvdb-id () {
 jq ".[] | select( .mal_id == ${mal_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq '.tvdb_id' | sort -n | head -1
@@ -125,8 +125,8 @@ do
 	fi
 done < $SCRIPT_FOLDER/tmp/list-animes.tsv
 
-#Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
-if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]		#check if already exist data folder is stored for 2 days 
+#Create an ongoing list at $SCRIPT_FOLDER/data/animes/ongoing.csv
+if [ ! -f $SCRIPT_FOLDER/data/animes/ongoing.tsv ]		#check if already exist data folder is stored for 2 days 
 then
 	ongoingpage=1
 	while [ $ongoingpage -lt 10 ];			#get the airing list from jikan API max 9 pages (225 animes)
@@ -154,14 +154,14 @@ then
 			fi
 			get-mal-infos
 			title_mal=$(get-mal-title)
-			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
+			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 		fi
 	done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 fi
-#Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/
-if [ ! -f $SCRIPT_FOLDER/data/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
+#Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/animes/
+if [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
 then
-	rm $SCRIPT_FOLDER/data/top-animes*
+	rm $SCRIPT_FOLDER/data/animes/top-animes*
 	topanimespage=1
 	while [ $topanimespage -lt 11 ];
 	do
@@ -177,8 +177,8 @@ then
 		((topanimespage++))
 	done
 	sort -t "$(printf "\t")" -nrk2 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
-	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/top-animes-100.tsv
-	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/top-animes-250.tsv
+	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
+	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
@@ -210,13 +210,13 @@ do
 		if sed -n "${labelline}p" $animes_titles | grep "label"			# replace the Ongoing and TOP label
 		then
 			sed -i "${labelline}d" $animes_titles
-			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"
 			then
-				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
+				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
 					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100\n" >> $LOG
-				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
+				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
 					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-250\n" >> $LOG
@@ -225,11 +225,11 @@ do
 					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing\n" >> $LOG
 				fi
 			else
-				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
+				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-100" $animes_titles
 					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100\n" >> $LOG
-				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
+				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-250" $animes_titles
 					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-250\n" >> $LOG
@@ -251,13 +251,13 @@ do
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
-		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"$title_mal\":"
+		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"
 		then
-			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
 			then
 				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100\n" >> $LOG
-			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
 			then
 				sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-250\n" >> $LOG
@@ -266,11 +266,11 @@ do
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing\n" >> $LOG
 			fi
 			else
-				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
+				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-100" $animes_titles
 					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100\n" >> $LOG
-				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
+				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-250" $animes_titles
 					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-250\n" >> $LOG
