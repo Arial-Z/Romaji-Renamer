@@ -256,13 +256,13 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
-		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep "\<$mal_id\>"		# Ongoing label according to MAL airing list
+		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep "\"$title_mal\":"		# Ongoing label according to MAL airing list
 		then
-			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep "\"$title_mal\":"
 			then
 				echo "    label: Ongoing, A-100" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
-			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep "\"$title_mal\":"
 			then
 				echo "    label: Ongoing, A-250" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
@@ -271,11 +271,11 @@ do
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
 			fi
 		else
-			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep "\"$title_mal\":"
 			then
 				echo "    label: A-100" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-100" >> $LOG
-			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep "\"$title_mal\":"
 			then
 				echo "    label: A-250" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-250" >> $LOG
