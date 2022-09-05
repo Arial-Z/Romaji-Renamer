@@ -141,12 +141,13 @@ do
 		get-mal-poster
 		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $movies_titles | cut -d : -f 1)
 		ratingline=$((sorttitleline+1))
+		echo "$(date +%H:%M:%S) - $title_mal metadata updated :" >> $LOG
 		if sed -n "${ratingline}p" $movies_titles | grep "audience_rating:"
 		then
 			sed -i "${ratingline}d" $movies_titles
 			mal_score=$(get-mal-rating)
 			sed -i "${ratingline}i\    audience_rating: ${mal_score}" $movies_titles
-			echo "$(date +%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $mal_score\n" >> $LOG
 		fi
 		tagsline=$((sorttitleline+2))
 		if sed -n "${tagsline}p" $movies_titles | grep "genre.sync:"
@@ -154,7 +155,7 @@ do
 			sed -i "${tagsline}d" $movies_titles
 			mal_tags=$(get-mal-tags)
 			sed -i "${tagsline}i\    genre.sync: Anime,${mal_tags}" $movies_titles
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
 		fi
 		topmoviesline=$((sorttitleline+3))
 		if sed -n "${topmoviesline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
@@ -163,10 +164,10 @@ do
 			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
 			then
 				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to AM-100" >> $LOG
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100" >> $LOG
 			else
 				sed -i "${topmoviesline}i\    label.remove: AM-100" $movies_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from AM-100" >> $LOG
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100" >> $LOG
 			fi
 		fi
 	else
@@ -174,24 +175,31 @@ do
 		echo "  \"$title_mal\":" >> $movies_titles
                 echo "    alt_title: \"$title_plex\"" >> $movies_titles
                 echo "    sort_title: \"$title_mal\"" >> $movies_titles
+		echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to metadata :" >> $LOG
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $movies_titles
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $mal_score\n" >> $LOG
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles
-		if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"		# Movies-top-100 label
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
+		if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
 		then
 			echo "    label: AM-100" >> $movies_titles
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100" >> $LOG
 		else
 			echo "    label.remove: AM-100" >> $movies_titles
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100" >> $LOG
 		fi
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
-		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $ADDED_LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added" >> $LOG
+		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex" >> $ADDED_LOG
 	fi
 done < $SCRIPT_FOLDER/ID/movies.tsv
 
 # Remove from metadata deleted animes
-echo "Running metadata cleanup"  >> $LOG
+printf "\nRunning metadata cleanup\n"  >> $LOG 
 sed '/sort_title:/!d'  $movies_titles > $SCRIPT_FOLDER/tmp/movies-title-metadata.txt
 line=1
 while read -r title_metadata
@@ -205,7 +213,8 @@ do
                 linedelend=$((lineprevioustitle + 11))
                 sed -i "${linedelstart},${linedelend}d" $movies_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
-                echo "$title removed from metadata" >> $DELETED_LOG
+                echo "$(date +%H:%M:%S) - removed from metadata : $title"  >> $DELETED_LOG
         fi
         ((line++))
 done < $SCRIPT_FOLDER/tmp/movies-title-metadata.txt
+printf "metadata cleanup finished\n"  >> $LOG

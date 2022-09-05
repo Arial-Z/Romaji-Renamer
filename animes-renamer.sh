@@ -130,7 +130,7 @@ then
                 curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 sleep 2
                 jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv		# store the mal ID of the ongoing show
-		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json			#stop if page is empty
+		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json					#stop if page is empty
 		then
                         break
                 fi
@@ -186,12 +186,13 @@ do
 		get-mal-poster						# check / download poster
 		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
 		ratingline=$((sorttitleline+1))
+		echo "$(date +%H:%M:%S) - $title_mal metadata updated :" >> $LOG
 		if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"	# Replace rating (audience)
 		then
 			sed -i "${ratingline}d" $animes_titles
 			mal_score=$(get-mal-rating)
 			sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
-			echo "$(date +%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $mal_score\n" >> $LOG
 		fi
 		tagsline=$((sorttitleline+2))
 		if sed -n "${tagsline}p" $animes_titles | grep "genre.sync:"		# Replace tags (genres, themes and demographics from MAL)
@@ -199,7 +200,7 @@ do
 			sed -i "${tagsline}d" $animes_titles
 			mal_tags=$(get-mal-tags)
 			sed -i "${tagsline}i\    genre.sync: Anime,${mal_tags}" $animes_titles
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
 		fi
 		labelline=$((sorttitleline+3))
 		if sed -n "${labelline}p" $animes_titles | grep "label"			# replace the Ongoing and TOP label
@@ -210,27 +211,27 @@ do
 				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100" >> $LOG
 				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-250" >> $LOG
 				else
 					sed -i "${labelline}i\    label: Ongoing" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing" >> $LOG
 				fi
 			else
 				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-100" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-100" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100" >> $LOG
 				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
 				then
 					sed -i "${labelline}i\    label: A-250" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-250" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-250" >> $LOG
 				else
 					sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from Ongoing" >> $LOG
 				fi
 			fi
 		fi
@@ -239,24 +240,49 @@ do
 		echo "  \"$title_mal\":" >> $animes_titles
                 echo "    alt_title: \"$title_plex\"" >> $animes_titles		
                 echo "    sort_title: \"$title_mal\"" >> $animes_titles
+		echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to metadata :" >> $LOG
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $mal_score\n" >> $LOG
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
-		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep "\<$mal_id\>"		# Ongoing label according to MAL airing list
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
+		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "\"$title_mal\":"
 		then
-			echo "    label: Ongoing" >> $animes_titles
-		else
-			echo "    label.remove: Ongoing" >> $animes_titles
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
+			then
+				sed -i "${labelline}i\    label: Ongoing, A-100" $animes_titles
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-100" >> $LOG
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
+			then
+				sed -i "${labelline}i\    label: Ongoing, A-250" $animes_titles
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing, A-250" >> $LOG
+			else
+				sed -i "${labelline}i\    label: Ongoing" $animes_titles
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to Ongoing" >> $LOG
+			fi
+			else
+				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-100.tsv | grep -w "\"$title_mal\":"
+				then
+					sed -i "${labelline}i\    label: A-100" $animes_titles
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-100" >> $LOG
+				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-animes-250.tsv | grep -w "\"$title_mal\":"
+				then
+					sed -i "${labelline}i\    label: A-250" $animes_titles
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to A-250" >> $LOG
+				else
+					sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
+					printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from Ongoing" >> $LOG
+			fi
 		fi
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
-		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $ADDED_LOG
+		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex" >> $ADDED_LOG
 	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
 
 # Remove from metadata deleted animes
-echo "Running metadata cleanup"  >> $LOG 
+printf "\nRunning metadata cleanup\n"  >> $LOG 
 sed '/sort_title:/!d'  $animes_titles > $SCRIPT_FOLDER/tmp/animes-title-metadata.txt
 line=1
 while read -r title_metadata
@@ -270,7 +296,8 @@ do
                 linedelend=$((lineprevioustitle + 11))
                 sed -i "${linedelstart},${linedelend}d" $animes_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
-                echo "$title removed from metadata"  >> $DELETED_LOG
+                echo "$(date +%H:%M:%S) - removed from metadata : $title"  >> $DELETED_LOG
         fi
         ((line++))
 done < $SCRIPT_FOLDER/tmp/animes-title-metadata.txt
+printf "metadata cleanup finished\n"  >> $LOG
