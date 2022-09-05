@@ -2,8 +2,10 @@
 
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
-LOG=$LOG_FOLDER/movies_$(date +%Y.%m.%d).log
-ERROR_LOG=$LOG_FOLDER/error.log
+LOG=$LOG_FOLDER/movies/$(date +%Y.%m.%d).log
+MATCH_LOG=$LOG_FOLDER/movies/missing-ID-link.log
+ADDED_LOG=$LOG_FOLDER/moviess/added.log
+DELETED_LOG=$LOG_FOLDER/movies/deleted.log
 
 # function
 function get-mal-id () {
@@ -99,7 +101,7 @@ do
 		mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $imdb_id / $title_plex" >> $ERROR_LOG
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $imdb_id / $title_plex" >> $MATCH_LOG
 		fi
 		get-mal-infos
 		title_mal=$(get-mal-title)
@@ -116,21 +118,10 @@ then
         do
                 curl "https://api.jikan.moe/v4/top/anime?type=movie&page=$topmoviesgpage" > $SCRIPT_FOLDER/tmp/top-movies-tmp.json
                 sleep 2
-                jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/top-movies-tmp.json >> $SCRIPT_FOLDER/tmp/top-movies.tsv		# store the mal ID of the ongoing show
+		jq '.data[] | [.mal_id, .titles[0].title] | @tsv' -r $SCRIPT_FOLDER/tmp/top-movies-tmp.json >> $SCRIPT_FOLDER/data/top-movies.tsv # store the mal ID and title of top 100 movies
                 ((topmoviesgpage++))
         done
-        while read -r mal_id
-        do
-                if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$mal_id\>"		# create the top movies list
-		then
-			line=$(grep -n "\<$mal_id\>" $SCRIPT_FOLDER/ID/movies.tsv | cut -d : -f 1)
-			imdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $1}')
-			title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/movies.tsv | awk -F"\t" '{print $3}')
-			printf "$i_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-movies.tsv
-		fi
-	done < $SCRIPT_FOLDER/tmp/top-movies.tsv
 fi
-
 
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
@@ -160,7 +151,7 @@ do
 		if sed -n "${topmoviesline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
 		then
 			sed -i "${topmoviesline}d" $movies_titles
-			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"
 			then
 				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to AM-100" >> $LOG
@@ -178,7 +169,7 @@ do
                 echo "    audience_rating: $score_mal" >> $movies_titles
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles
-		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"		# Movies-top-100 label
+		if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/top-movies.tsv | grep "\"$title_mal\":"		# Movies-top-100 label
 		then
 			echo "    label: AM-100" >> $movies_titles
 		else
@@ -186,7 +177,7 @@ do
 		fi
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
-		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
+		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $ADDED_LOG
 	fi
 done < $SCRIPT_FOLDER/ID/movies.tsv
 
@@ -205,7 +196,7 @@ do
                 linedelend=$((lineprevioustitle + 11))
                 sed -i "${linedelstart},${linedelend}d" $movies_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
-                echo "$title removed from metadata" >> $LOG
+                echo "$title removed from metadata" >> $DELETED_LOG
         fi
         ((line++))
 done < $SCRIPT_FOLDER/tmp/movies-title-metadata.txt

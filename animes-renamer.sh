@@ -2,8 +2,10 @@
 
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
-LOG=$LOG_FOLDER/animes_$(date +%Y.%m.%d).log
-ERROR_LOG=$LOG_FOLDER/error.log
+LOG=$LOG_FOLDER/animes/$(date +%Y.%m.%d).log
+MATCH_LOG=$LOG_FOLDER/animes/missing-ID-link.log
+ADDED_LOG=$LOG_FOLDER/animes/added.log
+DELETED_LOG=$LOG_FOLDER/animes/deleted.log
 
 # function
 function get-mal-id () {
@@ -101,7 +103,7 @@ do
 		mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]	# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $ERROR_LOG
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 		fi
 		get-mal-infos
 		title_mal=$(get-mal-title)
@@ -130,7 +132,7 @@ then
                 tvdb_id=$(get-tvdb-id)											# convert the mal id to tvdb id (to get the main anime)
                 if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]						# Ignore anime with no mal to tvdb id conversion
                 then
-			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $ERROR_LOG
+			echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
 		else
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"		# get the mal ID again but main anime and create ongoing list
 				then
@@ -152,28 +154,18 @@ then
 	do
 		curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
 		sleep 2
-		jq '.data[] | [.mal_id, .score] | @tsv'  -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
+		jq '.data[] | [.mal_id, .titles[0].title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes-all.tsv
 		((topanimespage++))
 	done
 	sort -t "$(printf "\t")" -nrk2 $SCRIPT_FOLDER/tmp/top-animes-all.tsv > $SCRIPT_FOLDER/tmp/top-animes.tsv
-	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t" '{print $1}' > $SCRIPT_FOLDER/tmp/top-animes-100.tsv
-	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t" '{print $1}' > $SCRIPT_FOLDER/tmp/top-animes-250.tsv
-	while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
-	do
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-100.tsv | grep "\<$mal_id\>"
-		then
-			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-animes-100.tsv
-		elif awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/top-animes-250.tsv | grep "\<$mal_id\>"
-		then
-			printf "$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/top-animes-250.tsv
-		fi
-done < $SCRIPT_FOLDER/ID/animes.tsv
+	head -n 100 $SCRIPT_FOLDER/tmp/top-animes.tsv | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/top-animes-100.tsv
+	head -n 250 $SCRIPT_FOLDER/tmp/top-animes.tsv | tail -n 150 | awk -F"\t"'{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/top-animes-250.tsv
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
@@ -250,7 +242,7 @@ do
 		fi
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
-		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
+		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $ADDED_LOG
 	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
 
@@ -269,7 +261,7 @@ do
                 linedelend=$((lineprevioustitle + 11))
                 sed -i "${linedelstart},${linedelend}d" $animes_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
-                echo "$title removed from metadata"  >> $LOG
+                echo "$title removed from metadata"  >> $DELETED_LOG
         fi
         ((line++))
 done < $SCRIPT_FOLDER/tmp/animes-title-metadata.txt
