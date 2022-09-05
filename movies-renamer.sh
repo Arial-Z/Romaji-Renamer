@@ -50,7 +50,8 @@ fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
         mkdir $SCRIPT_FOLDER/data
-elif [ ! -d $SCRIPT_FOLDER/data/movies ]	
+fi
+if [ ! -d $SCRIPT_FOLDER/data/movies ]	
 then
 	mkdir $SCRIPT_FOLDER/data/movies
 else
@@ -80,7 +81,8 @@ fi
 if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
-elif [ ! -d $LOG_FOLDER/movies ]
+fi
+if [ ! -d $LOG_FOLDER/movies ]
 then
 	mkdir $LOG_FOLDER/movies
 fi

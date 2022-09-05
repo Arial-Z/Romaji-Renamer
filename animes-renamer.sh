@@ -52,11 +52,12 @@ fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
         mkdir $SCRIPT_FOLDER/data
-elif [ ! -d $SCRIPT_FOLDER/data/animes ]	
+fi
+if [ ! -d $SCRIPT_FOLDER/data/animes ]	
 then
 	mkdir $SCRIPT_FOLDER/data/animes
 else
-	find $SCRIPT_FOLDER/data/animes/* -mtime +1 -exec rm {} \;						#delete json data if older than 2 days
+	find $SCRIPT_FOLDER/data/animes/* -mtime +1 -exec rm {} \;						#delete json data if older than 1 days
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]										#check if exist and create folder for posters
 then
@@ -82,7 +83,8 @@ fi
 if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
-elif [ ! -d $LOG_FOLDER/animes ]
+fi
+if [ ! -d $LOG_FOLDER/animes ]
 then
 	mkdir $LOG_FOLDER/animes
 fi
