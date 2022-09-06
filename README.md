@@ -8,6 +8,7 @@ what is imported :
   - Airing status (As Label)
   - Top 100 & Top 250 animes (TV, OVA & ONA) (as Label)
   - Top 100 movies (As Label)
+  - Studios
   - Mal Poster
   
   Designed for Plex TV agent / Plex Movie Agent, Hama is untested
