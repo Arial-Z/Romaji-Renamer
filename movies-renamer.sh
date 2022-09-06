@@ -179,14 +179,6 @@ do
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 			fi
 		fi
-		studiosline=$((sorttitleline+4))
-		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
-		then
-			sed -i "${studiosline}d" $movies_titles
-			mal_studios=$(get-mal-studios)
-			sed -i "${studiosline}i\    studio: ${mal_studios}" $movies_titles
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
-		fi
 	else
 		get-mal-infos
 		echo "  \"$title_mal\":" >> $movies_titles
@@ -228,8 +220,8 @@ do
                 lineprevious=$((line - 1))
                 previoustitle=$(sed -n "${lineprevious}p" $SCRIPT_FOLDER/tmp/movies-title-metadata.txt)
                 lineprevioustitle=$(grep -n "${previoustitle}" $animes_titles | cut -d : -f 1)
-                linedelstart=$((lineprevioustitle + 5))
-                linedelend=$((lineprevioustitle + 11))
+                linedelstart=$((lineprevioustitle + 6))
+                linedelend=$((lineprevioustitle + 13))
                 sed -i "${linedelstart},${linedelend}d" $movies_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
                 echo "$(date +%H:%M:%S) - removed from metadata :\n\t$title"  >> $DELETED_LOG
