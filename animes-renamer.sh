@@ -41,7 +41,7 @@ function get-tvdb-id () {
 jq ".[] | select( .mal_id == ${mal_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq '.tvdb_id' | sort -n | head -1
 }
 function get-mal-studios() {
-jq '.data.studios[].name' -r $SCRIPT_FOLDER/data/animes/$mal_id.json
+jq '.data.studios[0] | [.name]| @tsv' -r data/animes/$mal_id.json
 }
 
 # download pmm animes mapping and check if files and folder exist
@@ -261,13 +261,6 @@ do
 				fi
 			fi
 		fi
-		studiosline=$((sorttitleline+4))
-		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
-		then
-			mal_studios=$(get-mal-studios)
-			sed -i "${studiosline}i\    studio: ${mal_studios}" $animes_titles
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
-		fi
 	else												# New anime need to write all metadata
 		get-mal-infos
 		echo "  \"$title_mal\":" >> $animes_titles
@@ -325,8 +318,8 @@ do
                 lineprevious=$((line - 1))
                 previoustitle=$(sed -n "${lineprevious}p" $SCRIPT_FOLDER/tmp/animes-title-metadata.txt)
                 lineprevioustitle=$(grep -n "${previoustitle}" $animes_titles | cut -d : -f 1)
-                linedelstart=$((lineprevioustitle + 5))
-                linedelend=$((lineprevioustitle + 11))
+                linedelstart=$((lineprevioustitle + 6))
+                linedelend=$((lineprevioustitle + 13))
                 sed -i "${linedelstart},${linedelend}d" $animes_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
                 echo "$(date +%Y.%m.%d" - "%H:%M:%S) - removed from metadata :\n\t$title"  >> $DELETED_LOG
