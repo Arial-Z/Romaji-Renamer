@@ -166,22 +166,23 @@ do
 			sed -i "${tagsline}i\    genre.sync: Anime,${mal_tags}" $movies_titles
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
 		fi
-		topmoviesline=$((sorttitleline+3))
-		if sed -n "${topmoviesline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
+		labelline=$((sorttitleline+3))
+		if sed -n "${labelline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
 		then
-			sed -i "${topmoviesline}d" $movies_titles
+			sed -i "${labelline}d" $movies_titles
 			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/movies/top-movies.tsv | grep "\"$title_mal\":"
 			then
-				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
+				sed -i "${labelline}i\    label: AM-100" $movies_titles
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100\n" >> $LOG
 			else
-				sed -i "${topmoviesline}i\    label.remove: AM-100" $movies_titles
+				sed -i "${labelline}i\    label.remove: AM-100" $movies_titles
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 			fi
 		fi
 		studiosline=$((sorttitleline+4))
 		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
 		then
+			sed -i "${studiosline}d" $movies_titles
 			mal_studios=$(get-mal-studios)
 			sed -i "${studiosline}i\    studio: ${mal_studios}" $movies_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG

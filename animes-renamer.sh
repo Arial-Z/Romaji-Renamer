@@ -257,6 +257,7 @@ do
 		studiosline=$((sorttitleline+4))
 		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
 		then
+			sed -i "${studiosline}d" $animes_titles
 			mal_studios=$(get-mal-studios)
 			sed -i "${studiosline}i\    studio: ${mal_studios}" $animes_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
