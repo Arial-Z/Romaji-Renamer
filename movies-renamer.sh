@@ -39,7 +39,7 @@ function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
 function get-mal-studios() {
-jq '.data.studios[].name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+jq '.data.studios[] | [.name] | @tsv' -r data/animes/$mal_id.json | awk -F"\t" '{print $1", "}' | xargs | sed 's/.$//'
 }
 
 # download pmm animes mapping and check if files and folder exist
