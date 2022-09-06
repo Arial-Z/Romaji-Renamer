@@ -38,6 +38,9 @@ fi
 function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json  && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
+function get-mal-studios() {
+jq '.data.studios[].name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+}
 
 # download pmm animes mapping and check if files and folder exist
 if [ ! -f $movies_titles ]
@@ -47,8 +50,9 @@ fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
         mkdir $SCRIPT_FOLDER/data
-elif [ ! -d $SCRIPT_FOLDER/data/movies ]
-then	
+fi
+if [ ! -d $SCRIPT_FOLDER/data/movies ]	
+then
 	mkdir $SCRIPT_FOLDER/data/movies
 else
 	find $SCRIPT_FOLDER/data/movies/* -mtime +2 -exec rm {} \;						#delete json data if older than 2 days
@@ -77,7 +81,8 @@ fi
 if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
-elif [ ! -d $LOG_FOLDER/movies ]
+fi
+if [ ! -d $LOG_FOLDER/movies ]
 then
 	mkdir $LOG_FOLDER/movies
 fi
@@ -161,18 +166,26 @@ do
 			sed -i "${tagsline}i\    genre.sync: Anime,${mal_tags}" $movies_titles
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
 		fi
-		topmoviesline=$((sorttitleline+3))
-		if sed -n "${topmoviesline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
+		labelline=$((sorttitleline+3))
+		if sed -n "${labelline}p" $movies_titles | grep "label"			# replace the Movies-top-100 label
 		then
-			sed -i "${topmoviesline}d" $movies_titles
+			sed -i "${labelline}d" $movies_titles
 			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/movies/top-movies.tsv | grep "\"$title_mal\":"
 			then
-				sed -i "${topmoviesline}i\    label: AM-100" $movies_titles
+				sed -i "${labelline}i\    label: AM-100" $movies_titles
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tadded to AM-100\n" >> $LOG
 			else
-				sed -i "${topmoviesline}i\    label.remove: AM-100" $movies_titles
+				sed -i "${labelline}i\    label.remove: AM-100" $movies_titles
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 			fi
+		fi
+		studiosline=$((sorttitleline+4))
+		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
+		then
+			sed -i "${studiosline}d" $movies_titles
+			mal_studios=$(get-mal-studios)
+			sed -i "${studiosline}i\    studio: ${mal_studios}" $movies_titles
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
 		fi
 	else
 		get-mal-infos
@@ -185,8 +198,7 @@ do
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags updated : $mal_tags\n" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
 		if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/movies/top-movies.tsv | grep "\"$title_mal\":"
 		then
 			echo "    label: AM-100" >> $movies_titles
@@ -195,6 +207,9 @@ do
 			echo "    label.remove: AM-100" >> $movies_titles
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tremoved from AM-100\n" >> $LOG
 		fi
+		mal_studios=$(get-mal-studios)
+		echo "    studio: ${mal_studios}"  >> $movies_titles
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios" >> $LOG
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG

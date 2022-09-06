@@ -40,6 +40,9 @@ function get-mal-tags () {
 function get-tvdb-id () {
 jq ".[] | select( .mal_id == ${mal_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq '.tvdb_id' | sort -n | head -1
 }
+function get-mal-studios() {
+jq '.data.studios[].name' -r $SCRIPT_FOLDER/data/animes/$mal_id.json
+}
 
 # download pmm animes mapping and check if files and folder exist
 if [ ! -f $animes_titles ]											#check if metadata files exist and echo first line
@@ -49,11 +52,12 @@ fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
         mkdir $SCRIPT_FOLDER/data
-elif [ ! -d $SCRIPT_FOLDER/data/animes ]	
+fi
+if [ ! -d $SCRIPT_FOLDER/data/animes ]	
 then
 	mkdir $SCRIPT_FOLDER/data/animes
 else
-	find $SCRIPT_FOLDER/data/animes/* -mtime +2 -exec rm {} \;						#delete json data if older than 2 days
+	find $SCRIPT_FOLDER/data/animes/* -mtime +1 -exec rm {} \;						#delete json data if older than 1 days
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]										#check if exist and create folder for posters
 then
@@ -79,7 +83,8 @@ fi
 if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
-elif [ ! -d $LOG_FOLDER/animes ]
+fi
+if [ ! -d $LOG_FOLDER/animes ]
 then
 	mkdir $LOG_FOLDER/animes
 fi
@@ -249,6 +254,14 @@ do
 				fi
 			fi
 		fi
+		studiosline=$((sorttitleline+4))
+		if sed -n "${studiosline}p" $movies_titles | grep "studio:"
+		then
+			sed -i "${studiosline}d" $animes_titles
+			mal_studios=$(get-mal-studios)
+			sed -i "${studiosline}i\    studio: ${mal_studios}" $animes_titles
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal studio : $mal-studios" >> $LOG
+		fi
 	else												# New anime need to write all metadata
 		get-mal-infos
 		echo "  \"$title_mal\":" >> $animes_titles
@@ -286,6 +299,9 @@ do
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
 		fi
+		mal_studios=$(get-mal-studios)
+		echo "    studio: ${mal_studios}"  >> $animes_titles
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios" >> $LOG
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
 		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
