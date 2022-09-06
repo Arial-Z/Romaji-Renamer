@@ -26,7 +26,7 @@ to install and use Plex-Meta-Manager see : https://github.com/meisnate12/Plex-Me
 you also need to install jq which is a json parser see : https://stedolan.github.io/jq/
 
 ### Step 2 - Download and extract the script
-Git clone the release branch or download zip her : https://github.com/Arial-Z/Plex-Romaji-Renamer/archive/refs/heads/release.zip
+Git clone the **release** branch or get lastest release : https://github.com/Arial-Z/Plex-Romaji-Renamer/releases/latest
 
 ### Step 3 - Configure the script
 Go to the script folder<br/>
