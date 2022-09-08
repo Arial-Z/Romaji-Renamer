@@ -20,10 +20,11 @@ what is imported :
   - Create and update a PMM metadata file to import everything in plex when PMM run
 
 
-### Step 1 - Plex, Plex-Meta-Manager and JQ
-First you need plex, Plex-Meta-Manager and JQ<br/>
+### Step 1 - Bash, Plex, Plex-Meta-Manager and JQ
+First you need a GNU/Linux OS tu run bash script<br/>
+Then plex, Plex-Meta-Manager and JQ<br/>
 to install and use Plex-Meta-Manager see : https://github.com/meisnate12/Plex-Meta-Manager<br/>
-you also need to install jq which is a json parser see : https://stedolan.github.io/jq/
+to install jq which is a json parser see : https://stedolan.github.io/jq/
 
 ### Step 2 - Download and extract the script
 Git clone the **release** branch or get lastest release : https://github.com/Arial-Z/Plex-Romaji-Renamer/releases/latest
@@ -52,6 +53,7 @@ settings:
 ...
 ```
 You only need plex and tmdb to be configured<br/>
+If you also want to run the movies animes script you need to create another PMM config exactly like the anime one but with your Animes Movies library name<br/>
 <br/>
 Then you need to add the metadata file to your Animes Library in the PMM config file should look like this with the default path and filename :
 ```
