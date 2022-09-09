@@ -41,7 +41,7 @@ function get-tvdb-id () {
 jq ".[] | select( .mal_id == ${mal_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq '.tvdb_id' | sort -n | head -1
 }
 function get-mal-studios() {
-jq '.data.studios[0] | [.name]| @tsv' -r data/animes/$mal_id.json
+jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json | sed "s/Brain's Base/Brains Base/"
 }
 
 # download pmm animes mapping and check if files and folder exist
@@ -161,14 +161,21 @@ then
 				continue
 			else    												# get the mal ID again but main anime and create ongoing list
 				mal_id=$(get-mal-id)
-				if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep "\<$tvdb_id\>"
 				then
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id Origin : $mal_id / $title_mal" >> $LOG
+					line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
+					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
+					title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
+					printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+				elif [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+				then
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id" >> $LOG
 					continue
+				else
+					get-mal-infos
+					title_mal=$(get-mal-title)
+					printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 				fi
-				get-mal-infos
-				title_mal=$(get-mal-title)
-				printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 			fi
 		fi
         done < $SCRIPT_FOLDER/tmp/ongoing.tsv
