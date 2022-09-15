@@ -69,7 +69,6 @@ then
 	touch $SCRIPT_FOLDER/ID/movies.tsv
 elif [ ! -f $SCRIPT_FOLDER/ID/movies.tsv ]
 then
-	rm $SCRIPT_FOLDER/ID/movies.tsv
 	touch $SCRIPT_FOLDER/ID/movies.tsv	
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]
@@ -101,6 +100,21 @@ line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/tmp/meta
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-movies.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
 
+# Cleanup ID/movies.tsv
+printf "\nCleaning ID/animes.tsv\n"  >> $LOG 
+line=1
+while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
+do
+        if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-animes.tsv | grep -w $tvdb_id
+        then
+                sed -i "${line}d" $SCRIPT_FOLDER/ID/movies.tsv
+                echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from ID/movies.tsv"  >> $DELETED_LOG
+        else
+                ((line++))
+        fi
+done < $SCRIPT_FOLDER/ID/movies.tsv
+printf "ID/movies.tsv cleanup finished\n"  >> $LOG
+
 # create ID/movies.tsv ( imdb_id | mal_id | title_mal | title_plex )
 while IFS=$'\t' read -r imdb_id mal_id title_mal
 do
@@ -120,6 +134,7 @@ do
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $imdb_id / $title_plex" >> $MATCH_LOG
+			continue
 		fi
 		get-mal-infos
 		title_mal=$(get-mal-title)

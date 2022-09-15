@@ -71,7 +71,6 @@ then
 	touch $SCRIPT_FOLDER/ID/animes.tsv
 elif [ ! -f $SCRIPT_FOLDER/ID/animes.tsv ]
 then
-	rm $SCRIPT_FOLDER/ID/animes.tsv
 	touch $SCRIPT_FOLDER/ID/animes.tsv
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]											#check if exist and create temp folder cleaned at the start of every run
@@ -103,12 +102,27 @@ line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/tmp/meta.log |
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
 
+# Cleanup ID/animes.tsv
+printf "\nCleaning ID/animes.tsv\n"  >> $LOG 
+line=1
+while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
+do
+        if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-animes.tsv | grep -w $tvdb_id
+        then
+                sed -i "${line}d" $SCRIPT_FOLDER/ID/animes.tsv
+                echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from ID/animes.tsv"  >> $DELETED_LOG
+        else
+                ((line++))
+        fi
+done < $SCRIPT_FOLDER/ID/animes.tsv
+printf "ID/animes.tsv cleanup finished\n"  >> $LOG
+
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_mal	title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_mal								# First add the override animes to the ID file
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 	then
-		line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
+		line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-animes.tsv | awk -F"\t" '{print $2}')
 		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
@@ -116,12 +130,13 @@ do
 done < $SCRIPT_FOLDER/override-ID-animes.tsv
 while IFS=$'\t' read -r tvdb_id title_plex									# then get the other ID from the ID mapping and download json data
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep "\<$tvdb_id\>"
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 	then
 		mal_id=$(get-mal-id)
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]	# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
+			continue
 		fi
 		get-mal-infos
 		title_mal=$(get-mal-title)
@@ -147,9 +162,9 @@ then
         done
         while read -r mal_id
         do
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep "\<$mal_id\>"
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $mal_id
 		then
-			line=$(grep -n "\<$mal_id\>" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
+			line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 			tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $1}')
 			title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
 			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
@@ -161,9 +176,9 @@ then
 				continue
 			else    												# get the mal ID again but main anime and create ongoing list
 				mal_id=$(get-mal-id)
-				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep "\<$tvdb_id\>"
+				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $tvdb_id
 				then
-					line=$(grep -n "\<$tvdb_id\>" $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
+					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
 					title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
 					printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
@@ -270,13 +285,13 @@ do
                 echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
 		mal_tags=$(get-mal-tags)
 		echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
-		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep "\"$title_mal\":"		# Ongoing label according to MAL airing list
+		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"		# Ongoing label according to MAL airing list
 		then
-			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
 			then
 				echo "    label: Ongoing, A-100" >> $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
-			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep "\"$title_mal\":"
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
 			then
 				echo "    label: Ongoing, A-250" >> $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
@@ -285,11 +300,11 @@ do
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
 			fi
 		else
-			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep "\"$title_mal\":"
+			if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
 			then
 				echo "    label: A-100" >> $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-100" >> $LOG
-			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep "\"$title_mal\":"
+			elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
 			then
 				echo "    label: A-250" >> $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-250" >> $LOG
