@@ -69,7 +69,6 @@ then
 	touch $SCRIPT_FOLDER/ID/movies.tsv
 elif [ ! -f $SCRIPT_FOLDER/ID/movies.tsv ]
 then
-	rm $SCRIPT_FOLDER/ID/movies.tsv
 	touch $SCRIPT_FOLDER/ID/movies.tsv	
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]
