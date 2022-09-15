@@ -119,6 +119,7 @@ do
 		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $imdb_id / $title_plex" >> $MATCH_LOG
+			continue
 		fi
 		get-mal-infos
 		title_mal=$(get-mal-title)
