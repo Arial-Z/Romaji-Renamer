@@ -233,7 +233,7 @@ do
 			sed -i "${ratingline}d" $animes_titles
 			mal_score=$(get-mal-rating)
 			sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
-			echo "$(date +%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
 		fi
 		tagsline=$((sorttitleline+2))
 		if sed -n "${tagsline}p" $animes_titles | grep "genre.sync:"		# Replace tags (genres, themes and demographics from MAL)
@@ -318,7 +318,7 @@ do
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios" >> $LOG
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
-		echo "$(date +%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
 
