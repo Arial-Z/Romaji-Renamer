@@ -123,7 +123,7 @@ do
 		line=$(grep -n "\<$imdb_id\>" $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-movies.tsv | awk -F"\t" '{print $2}')
 		printf "$imdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
-		echo "$(date +%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/override-ID-movies.tsv
 while IFS=$'\t' read -r imdb_id title_plex
@@ -139,7 +139,7 @@ do
 		get-mal-infos
 		title_mal=$(get-mal-title)
 		printf "$imdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
-		echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to ID/movies.tsv" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID/movies.tsv" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 
@@ -165,7 +165,7 @@ do
 		get-mal-poster
 		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $movies_titles | cut -d : -f 1)
 		ratingline=$((sorttitleline+1))
-		echo "$(date +%H:%M:%S) - $title_mal metadata updated :" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal metadata updated :" >> $LOG
 		if sed -n "${ratingline}p" $movies_titles | grep "audience_rating:"
 		then
 			sed -i "${ratingline}d" $movies_titles
@@ -199,7 +199,7 @@ do
 		echo "  \"$title_mal\":" >> $movies_titles
                 echo "    alt_title: \"$title_plex\"" >> $movies_titles
                 echo "    sort_title: \"$title_mal\"" >> $movies_titles
-		echo "$(date +%H:%M:%S) - $title_mal / $title_plex added to metadata :" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to metadata :" >> $LOG
 		score_mal=$(get-mal-rating)
                 echo "    audience_rating: $score_mal" >> $movies_titles
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
@@ -220,7 +220,7 @@ do
 		get-mal-poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
-		echo "$(date +%H:%M:%S) - added to metadata :\n\t$title_mal / $title_plex" >> $ADDED_LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata :\n\t$title_mal / $title_plex" >> $ADDED_LOG
 	fi
 done < $SCRIPT_FOLDER/ID/movies.tsv
 
@@ -239,7 +239,7 @@ do
                 linedelend=$((lineprevioustitle + 13))
                 sed -i "${linedelstart},${linedelend}d" $movies_titles
                 title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
-                echo "$(date +%H:%M:%S) - removed from metadata :\n\t$title"  >> $DELETED_LOG
+                echo "$(date +%Y.%m.%d" - "%H:%M:%S) - removed from metadata :\n\t$title"  >> $DELETED_LOG
         fi
         ((line++))
 done < $SCRIPT_FOLDER/tmp/movies-title-metadata.txt
