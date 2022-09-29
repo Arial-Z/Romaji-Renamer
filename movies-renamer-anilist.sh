@@ -8,25 +8,25 @@ ADDED_LOG=$LOG_FOLDER/movies/added.log
 DELETED_LOG=$LOG_FOLDER/movies/deleted.log
 
 # function
-function get-mal-id () {
+function get-anilist-id () {
 imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
 jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .anilist_id | sort -n | head -1
 }
-function get-mal-infos () {
-if [ ! -f $SCRIPT_FOLDER/data/movies/$anilist_id.json ]
+function get-infos () {
+if [ ! -f $SCRIPT_FOLDER/data/anilist/movies/$anilist_id.json ]
 then
 	sleep 0.2
 	curl 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
-	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } status averageScore studios { nodes { name isAnimationStudio } } genres tags { name } } }" }' > $anilist_id.json  $SCRIPT_FOLDER/data/movies/$anilist_id.json 
+	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } status averageScore studios { edges { isMain node { isAnimationStudio name } } } genres tags { name } } }" }' > $SCRIPT_FOLDER/data/anilist/movies/$anilist_id.json 
 	sleep 0.3
 fi
 }
-function get-mal-title () {
+function get-title () {
 jq .data.title -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 }
-function get-mal-rating () {
+function get-MAL-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 }
 function get-mal-poster () {
