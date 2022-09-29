@@ -103,9 +103,9 @@ awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($
 # Cleanup ID/movies.tsv
 printf "\nCleaning ID/animes.tsv\n"  >> $LOG 
 line=1
-while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
+while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
 do
-        if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-animes.tsv | grep -w $tvdb_id
+        if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-movies.tsv | grep -w $tvdb_id
         then
                 sed -i "${line}d" $SCRIPT_FOLDER/ID/movies.tsv
                 echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from ID/movies.tsv"  >> $DELETED_LOG
