@@ -57,7 +57,7 @@ if [ ! -d $SCRIPT_FOLDER/data/animes ]
 then
 	mkdir $SCRIPT_FOLDER/data/animes
 else
-	find $SCRIPT_FOLDER/data/animes/* -mtime +1 -exec rm {} \;						#delete json data if older than 1 days
+	find $SCRIPT_FOLDER/data/animes/* -mmin +720 -exec rm {} \;						#delete json data if older than 1 days
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]										#check if exist and create folder for posters
 then
