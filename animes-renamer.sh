@@ -197,27 +197,27 @@ then
 fi
 
 #Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/animes/
-if [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
-then
-	rm $SCRIPT_FOLDER/data/animes/top-animes*
-	topanimespage=1
-	while [ $topanimespage -lt 11 ];
-	do
-		curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
-		sleep 2
-		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
-		curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
-		sleep 2
-		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
-		curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
-		sleep 2
-		jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
-		((topanimespage++))
-	done
-	sort -t "$(printf "\t")" -nrk3 $SCRIPT_FOLDER/tmp/top-animes.tsv > $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv
-	head -n 100 $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
-	head -n 250 $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv | tail -n 150 | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
-fi
+# if [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
+# then
+	# rm $SCRIPT_FOLDER/data/animes/top-animes*
+	# topanimespage=1
+	# while [ $topanimespage -lt 11 ];
+	# do
+		# curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
+		# sleep 2
+		# jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
+		# curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
+		# sleep 2
+		# jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
+		# curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
+		# sleep 2
+		# jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
+		# ((topanimespage++))
+	# done
+	# sort -t "$(printf "\t")" -nrk3 $SCRIPT_FOLDER/tmp/top-animes.tsv > $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv
+	# head -n 100 $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
+	# head -n 250 $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv | tail -n 150 | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
+# fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
 while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
@@ -249,31 +249,11 @@ do
 			sed -i "${labelline}d" $animes_titles
 			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"
 			then
-				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
-				then
-					sed -i "${labelline}i\    label.sync: Ongoing, A-100" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-100" >> $LOG
-				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
-				then
-					sed -i "${labelline}i\    label.sync: Ongoing, A-250" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing, A-250" >> $LOG
-				else
-					sed -i "${labelline}i\    label.sync: Ongoing" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
-				fi
+				sed -i "${labelline}i\    label: Ongoing" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
 			else
-				if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-100.tsv | grep -w "\"$title_mal\":"
-				then
-					sed -i "${labelline}i\    label.sync: A-100" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-100" >> $LOG
-				elif awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/top-animes-250.tsv | grep -w "\"$title_mal\":"
-				then
-					sed -i "${labelline}i\    label.sync: A-250" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to A-250" >> $LOG
-				else
-					sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
-				fi
+				sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
 		fi
 	else												# New anime need to write all metadata
