@@ -252,7 +252,7 @@ do
 				sed -i "${labelline}i\    label: Ongoing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
 			else
-				sed -i "${labelline}i\    label.remove: Ongoing, A-100, A-250" $animes_titles
+				sed -i "${labelline}i\    label.remove: Ongoing" $animes_titles
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 			fi
 		fi
@@ -270,15 +270,15 @@ do
 			echo "    label: Ongoing" >> $animes_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
 		else
-			echo "    label.remove: Ongoing, A-100, A-250" >> $animes_titles
+			echo "    label.remove: Ongoing" >> $animes_titles
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 		fi
 		mal_studios=$(get-mal-studios)
 		echo "    studio: ${mal_studios}"  >> $animes_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t$title_mal\tstudio : $mal_studios\n" >> $LOG
 		get-mal-poster										# check / download poster
 		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / $title_plex / score : $score_mal / tags / poster" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / score : $score_mal / tags / poster" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
 
