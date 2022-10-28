@@ -75,6 +75,9 @@ then
 elif [ ! -f $SCRIPT_FOLDER/ID/animes.tsv ]
 then
 	touch $SCRIPT_FOLDER/ID/animes.tsv
+else 
+	rm $SCRIPT_FOLDER/ID/animes.tsv
+	touch $SCRIPT_FOLDER/ID/animes.tsv
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]											#check if exist and create temp folder cleaned at the start of every run
 then
@@ -104,21 +107,6 @@ line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/tmp/meta.log | cut 
 line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
-
-# Cleanup ID/animes.tsv
-printf "\nCleaning ID/animes.tsv\n"  >> $LOG 
-line=1
-while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
-do
-        if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-animes.tsv | grep -w $tvdb_id
-        then
-                sed -i "${line}d" $SCRIPT_FOLDER/ID/animes.tsv
-                echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed from ID/animes.tsv"  >> $DELETED_LOG
-        else
-                ((line++))
-        fi
-done < $SCRIPT_FOLDER/ID/animes.tsv
-printf "ID/animes.tsv cleanup finished\n"  >> $LOG
 
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_mal	title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_mal								# First add the override animes to the ID file
