@@ -98,7 +98,6 @@ fi
 curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json		#download local copy of ID mapping
 
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
-rm $PMM_FOLDER/config/temp-animes.cache
 $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
 
@@ -190,62 +189,26 @@ fi
 # write PMM metadata file from ID/animes.tsv and jikan API
 while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
 do
-	if grep "\"$title_mal\":" $animes_titles				# test if anime already in the metadata file and then replace some metadata
+	get-mal-infos
+	echo "  \"$title_mal\":" >> $animes_titles
+	echo "    alt_title: \"$title_plex\"" >> $animes_titles		
+	echo "    sort_title: \"$title_mal\"" >> $animes_titles
+	score_mal=$(get-mal-rating)
+	echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
+	mal_tags=$(get-mal-tags)
+	echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
+	if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"		# Ongoing label according to MAL airing list
 	then
-		get-mal-infos						# check / download json data
-		get-mal-poster						# check / download poster
-		sorttitleline=$(grep -n "sort_title: \"$title_mal\"" $animes_titles | cut -d : -f 1)
-		ratingline=$((sorttitleline+1))
-		if sed -n "${ratingline}p" $animes_titles | grep "audience_rating:"	# Replace rating (audience)
-		then
-			sed -i "${ratingline}d" $animes_titles
-			mal_score=$(get-mal-rating)
-			sed -i "${ratingline}i\    audience_rating: ${mal_score}" $animes_titles
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated score : $mal_score" >> $LOG
-		fi
-		tagsline=$((sorttitleline+2))
-		if sed -n "${tagsline}p" $animes_titles | grep "genre.sync:"		# Replace tags (genres, themes and demographics from MAL)
-		then
-			sed -i "${tagsline}d" $animes_titles
-			mal_tags=$(get-mal-tags)
-			sed -i "${tagsline}i\    genre.sync: Anime,${mal_tags}" $animes_titles
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal updated tags : $mal_tags" >> $LOG
-		fi
-		labelline=$((sorttitleline+3))
-		if sed -n "${labelline}p" $animes_titles | grep "label"			# replace the Ongoing and TOP label
-		then
-			sed -i "${labelline}d" $animes_titles
-			if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"
-			then
-				sed -i "${labelline}i\    label: Ongoing" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
-			else
-				sed -i "${labelline}i\    label.remove: Ongoing" $animes_titles
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
-			fi
-		fi
-	else												# New anime need to write all metadata
-		get-mal-infos
-		echo "  \"$title_mal\":" >> $animes_titles
-                echo "    alt_title: \"$title_plex\"" >> $animes_titles		
-                echo "    sort_title: \"$title_mal\"" >> $animes_titles
-		score_mal=$(get-mal-rating)
-                echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
-		mal_tags=$(get-mal-tags)
-		echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
-		if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"		# Ongoing label according to MAL airing list
-		then
-			echo "    label: Ongoing" >> $animes_titles
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
-		else
-			echo "    label.remove: Ongoing" >> $animes_titles
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
-		fi
-		mal_studios=$(get-mal-studios)
-		echo "    studio: ${mal_studios}"  >> $animes_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t$title_mal\tstudio : $mal_studios\n" >> $LOG
-		get-mal-poster										# check / download poster
-		echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / score : $score_mal / tags / poster" >> $LOG
+		echo "    label: Ongoing" >> $animes_titles
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
+	else
+		echo "    label.remove: Ongoing" >> $animes_titles
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
 	fi
+	mal_studios=$(get-mal-studios)
+	echo "    studio: ${mal_studios}"  >> $animes_titles
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t$title_mal\tstudio : $mal_studios\n" >> $LOG
+	get-mal-poster										# check / download poster
+	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
+	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / score : $score_mal / tags / poster" >> $LOG
 done < $SCRIPT_FOLDER/ID/animes.tsv
