@@ -48,6 +48,9 @@ jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json
 if [ ! -f $animes_titles ]											#check if metadata files exist and echo first line
 then
         echo "metadata:" > $animes_titles
+else
+	rm $animes_titles
+	echo "metadata:" > $animes_titles
 fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
@@ -196,29 +199,6 @@ then
         done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 fi
 
-#Create an TOP 100 & TOP 250 list at $SCRIPT_FOLDER/data/animes/
-# if [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-100.tsv ] || [ ! -f $SCRIPT_FOLDER/data/animes/top-animes-250.tsv ]	#check if already exist data folder is stored for 2 days 
-# then
-	# rm $SCRIPT_FOLDER/data/animes/top-animes*
-	# topanimespage=1
-	# while [ $topanimespage -lt 11 ];
-	# do
-		# curl "https://api.jikan.moe/v4/top/anime?type=tv&page=$topanimespage" > $SCRIPT_FOLDER/tmp/tv-250-tmp.json
-		# sleep 2
-		# jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/tv-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
-		# curl "https://api.jikan.moe/v4/top/anime?type=ova&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ova-250-tmp.json
-		# sleep 2
-		# jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ova-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
-		# curl "https://api.jikan.moe/v4/top/anime?type=ona&page=$topanimespage" > $SCRIPT_FOLDER/tmp/ona-250-tmp.json
-		# sleep 2
-		# jq '.data[] | [.mal_id, .title, .score] | @tsv' -r $SCRIPT_FOLDER/tmp/ona-250-tmp.json >> $SCRIPT_FOLDER/tmp/top-animes.tsv
-		# ((topanimespage++))
-	# done
-	# sort -t "$(printf "\t")" -nrk3 $SCRIPT_FOLDER/tmp/top-animes.tsv > $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv
-	# head -n 100 $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-100.tsv
-	# head -n 250 $SCRIPT_FOLDER/tmp/top-animes-sorted.tsv | tail -n 150 | awk -F"\t" '{ OFS = "\t" } ; {print $1,$2}' > $SCRIPT_FOLDER/data/animes/top-animes-250.tsv
-# fi
-
 # write PMM metadata file from ID/animes.tsv and jikan API
 while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
 do
@@ -281,24 +261,3 @@ do
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / score : $score_mal / tags / poster" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
-
-# Remove from metadata deleted animes
-printf "\nRunning metadata cleanup\n"  >> $LOG 
-sed '/sort_title:/!d'  $animes_titles > $SCRIPT_FOLDER/tmp/animes-title-metadata.txt
-line=1
-while read -r title_metadata
-do
-        if ! awk -F"\t" '{print "sort_title: \""$3"\""}' $SCRIPT_FOLDER/ID/animes.tsv | grep "${title_metadata}"
-        then
-                lineprevious=$((line - 1))
-                previoustitle=$(sed -n "${lineprevious}p" $SCRIPT_FOLDER/tmp/animes-title-metadata.txt)
-                lineprevioustitle=$(grep -n "${previoustitle}" $animes_titles | cut -d : -f 1)
-                linedelstart=$((lineprevioustitle + 6))
-                linedelend=$((lineprevioustitle + 13))
-                sed -i "${linedelstart},${linedelend}d" $animes_titles
-                title=$(echo $title_metadata | cut -c 14- | sed 's/.$//')
-                echo "$(date +%Y.%m.%d" - "%H:%M:%S) - removed from metadata :\n\t$title"  >> $DELETED_LOG
-        fi
-        ((line++))
-done < $SCRIPT_FOLDER/tmp/animes-title-metadata.txt
-printf "metadata cleanup finished\n"  >> $LOG
