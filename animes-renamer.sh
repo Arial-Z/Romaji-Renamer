@@ -4,8 +4,6 @@ SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
 LOG=$LOG_FOLDER/animes/$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/animes/missing-ID-link.log
-ADDED_LOG=$LOG_FOLDER/animes/added.log
-DELETED_LOG=$LOG_FOLDER/animes/deleted.log
 
 # function
 function get-mal-id () {

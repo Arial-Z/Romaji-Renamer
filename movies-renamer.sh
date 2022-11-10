@@ -4,8 +4,6 @@ SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
 LOG=$LOG_FOLDER/movies/$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/movies/missing-ID-link.log
-ADDED_LOG=$LOG_FOLDER/movies/added.log
-DELETED_LOG=$LOG_FOLDER/movies/deleted.log
 
 # function
 function get-mal-id () {
@@ -154,5 +152,5 @@ do
 	get-mal-poster
 	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
-	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata :\n\t$title_mal / $title_plex" >> $ADDED_LOG
+	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata :\n\t$title_mal / $title_plex" >> $LOG
 done < $SCRIPT_FOLDER/ID/movies.tsv
