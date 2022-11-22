@@ -225,12 +225,11 @@ do
 	if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_anime\":"		# Ongoing label according to MAL airing list
 	then
 		echo "    label: Ongoing" >> $animes_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\Label add Ongoing\n" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel add Ongoing\n" >> $LOG
 	else
 		echo "    label.remove: Ongoing" >> $animes_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\Label remove Ongoing\n" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
 	fi
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
 	mal_studios=$(get-mal-studios)
 	echo "    studio: ${mal_studios}"  >> $animes_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
