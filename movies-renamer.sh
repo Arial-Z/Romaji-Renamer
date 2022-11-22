@@ -18,8 +18,19 @@ then
 	sleep 1.5
 fi
 }
-function get-mal-title () {
-jq .data.title -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+function get-anilist-title () {
+if [ ! -f $SCRIPT_FOLDER/data/movies/title-$mal_id.json ]
+then
+	sleep 0.3
+	curl 'https://graphql.anilist.co/' \
+	-X POST \
+	-H 'content-type: application/json' \
+	--data '{ "query": "{ Media(idMal: '"$mal_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/movies/title-$mal_id.json 
+	sleep 0.3
+	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/movies/title-$mal_id.json
+else
+	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/movies/title-$mal_id.json
+fi
 }
 function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/movies/$mal_id.json
@@ -27,10 +38,10 @@ jq .data.score -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 function get-mal-poster () {
 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]
 then
-sleep 0.5
+	sleep 0.5
 	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
 	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
-sleep 1.5
+	sleep 1.5
 fi
 }
 function get-mal-tags () {
@@ -52,7 +63,7 @@ if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for 
 then
         mkdir $SCRIPT_FOLDER/data
 fi
-if [ ! -d $SCRIPT_FOLDER/data/movies ]	
+if [ ! -d $SCRIPT_FOLDER/data/movies ]
 then
 	mkdir $SCRIPT_FOLDER/data/movies
 else
@@ -73,7 +84,7 @@ then
 	touch $SCRIPT_FOLDER/ID/movies.tsv
 else
 	rm $SCRIPT_FOLDER/ID/movies.tsv
-	touch $SCRIPT_FOLDER/ID/movies.tsv	
+	touch $SCRIPT_FOLDER/ID/movies.tsv
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]
 then
@@ -126,7 +137,7 @@ do
 			continue
 		fi
 		get-mal-infos
-		title_mal=$(get-mal-title)
+		title_mal=$(get-anilist-title)
 		printf "$imdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID/movies.tsv" >> $LOG
 	fi
