@@ -123,7 +123,6 @@ awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_anime								# First add the override animes to the ID file
 do
-	echo "$tvdb_id"
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 	then
 		line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
