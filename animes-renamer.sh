@@ -10,8 +10,7 @@ function get-mal-id () {
 jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id | sort -n | head -1
 }
 function get-anilist-id () {
-imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
-jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .anilist_id | sort -n | head -1
+jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .anilist_id | sort -n | head -1
 }
 function get-mal-infos () {
 if [ ! -f $SCRIPT_FOLDER/data/animes/$mal_id.json ] 										#check if exist
@@ -22,15 +21,14 @@ then
 fi
 }
 function get-anilist-title () {
-anilist_id=$(get-mal-id)
 if [ ! -f $SCRIPT_FOLDER/data/animes/title-$mal_id.json ]
 then
-	sleep 0.3
+	sleep 0.5
 	curl 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
 	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/animes/title-$mal_id.json 
-	sleep 0.3
+	sleep 1
 	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/animes/title-$mal_id.json
 else
 	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/animes/title-$mal_id.json
@@ -138,13 +136,19 @@ do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 	then
 		mal_id=$(get-mal-id)
-		if [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]	# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]	# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 			continue
 		fi
-		get-mal-infos
+		anilist_id=$(get-anilist-id)
+		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]	# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+		then
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid Anilist ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
+			continue
+		fi		
 		title_anime=$(get-anilist-title)
+		get-mal-infos
 		printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/animes.tsv" >> $LOG
 	fi
@@ -181,6 +185,7 @@ then
 				continue
 			else    												# get the mal ID again but main anime and create ongoing list
 				mal_id=$(get-mal-id)
+				anilist_id=$(get-anilist-id)
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $tvdb_id
 				then
 					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
