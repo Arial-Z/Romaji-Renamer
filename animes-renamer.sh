@@ -115,9 +115,7 @@ $PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $P
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
 
 # create clean list-animes.tsv (tvdb_id	title_plex) from meta.log
-echo "1"
 line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-echo "2"
 line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
@@ -125,10 +123,9 @@ awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_anime								# First add the override animes to the ID file
 do
-	echo "3"
+	echo "$tvdb_id"
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 	then
-		echo "4"
 		line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-animes.tsv | awk -F"\t" '{print $2}')
 		printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
@@ -137,7 +134,6 @@ do
 done < $SCRIPT_FOLDER/override-ID-animes.tsv
 while IFS=$'\t' read -r tvdb_id title_plex									# then get the other ID from the ID mapping and download json data
 do
-	echo "5"
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 	then
 		mal_id=$(get-mal-id)
@@ -168,8 +164,7 @@ then
                 curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
                 sleep 2
                 jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv            # store the mal ID of the ongoing show
-                echo "6"
-		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json                  #stop if page is empty
+                if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json                  #stop if page is empty
                 then
                         break
                 fi
@@ -177,10 +172,8 @@ then
         done
         while read -r mal_id
         do
-		echo "7"
 		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $mal_id
 		then
-			echo "8"
 			line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 			tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $1}')
 			title_anime=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
@@ -194,10 +187,8 @@ then
 			else    												# get the mal ID again but main anime and create ongoing list
 				mal_id=$(get-mal-id)
 				anilist_id=$(get-anilist-id)
-				echo "9"
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $tvdb_id
 				then
-					echo "10"
 					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
 					title_anime=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
@@ -227,7 +218,6 @@ do
 	echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
-	echo "11"
 	if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_anime\":"		# Ongoing label according to MAL airing list
 	then
 		echo "    label: Ongoing" >> $animes_titles
