@@ -115,15 +115,15 @@ line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/tmp/meta
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-movies.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
 
-# create ID/movies.tsv ( imdb_id | mal_id | title_mal | title_plex )
-while IFS=$'\t' read -r imdb_id mal_id title_mal
+# create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
+while IFS=$'\t' read -r imdb_id mal_id title_anime
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep "\<$imdb_id\>"
 	then
 		line=$(grep -n "\<$imdb_id\>" $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-movies.tsv | awk -F"\t" '{print $2}')
-		printf "$imdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
+		printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/override-ID-movies.tsv
 while IFS=$'\t' read -r imdb_id title_plex
@@ -137,20 +137,20 @@ do
 			continue
 		fi
 		get-mal-infos
-		title_mal=$(get-anilist-title)
-		printf "$imdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID/movies.tsv" >> $LOG
+		title_anime=$(get-anilist-title)
+		printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/movies.tsv" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 
 # write PMM metadata file from ID/movies.tsv and jikan API
-while IFS=$'\t' read -r imdb_id mal_id title_mal title_plex
+while IFS=$'\t' read -r imdb_id mal_id title_anime title_plex
 do
 	get-mal-infos
-	echo "  \"$title_mal\":" >> $movies_titles
+	echo "  \"$title_anime\":" >> $movies_titles
 	echo "    alt_title: \"$title_plex\"" >> $movies_titles
-	echo "    sort_title: \"$title_mal\"" >> $movies_titles
-	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to metadata :" >> $LOG
+	echo "    sort_title: \"$title_anime\"" >> $movies_titles
+	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to metadata :" >> $LOG
 	score_mal=$(get-mal-rating)
 	echo "    audience_rating: $score_mal" >> $movies_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
@@ -163,5 +163,5 @@ do
 	get-mal-poster
 	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
-	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata :\n\t$title_mal / $title_plex" >> $LOG
+	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata :\n\t$title_anime / $title_plex" >> $LOG
 done < $SCRIPT_FOLDER/ID/movies.tsv

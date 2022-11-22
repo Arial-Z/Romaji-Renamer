@@ -17,8 +17,19 @@ then
 	sleep 1.5
 fi
 }
-function get-mal-title () {
-jq .data.title -r $SCRIPT_FOLDER/data/animes/$mal_id.json
+function get-anilist-title () {
+if [ ! -f $SCRIPT_FOLDER/data/animes/title-$mal_id.json ]
+then
+	sleep 0.3
+	curl 'https://graphql.anilist.co/' \
+	-X POST \
+	-H 'content-type: application/json' \
+	--data '{ "query": "{ Media(idMal: '"$mal_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/animes/title-$mal_id.json 
+	sleep 0.3
+	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/animes/title-$mal_id.json
+else
+	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/animes/title-$mal_id.json
+fi
 }
 function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/animes/$mal_id.json
@@ -106,15 +117,15 @@ line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/tmp/meta.log |
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
 
-# create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_mal	title_plex )
-while IFS=$'\t' read -r tvdb_id mal_id title_mal								# First add the override animes to the ID file
+# create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
+while IFS=$'\t' read -r tvdb_id mal_id title_anime								# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 	then
 		line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
 		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-animes.tsv | awk -F"\t" '{print $2}')
-		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_mal / $title_plex" >> $LOG
+		printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/override-ID-animes.tsv
 while IFS=$'\t' read -r tvdb_id title_plex									# then get the other ID from the ID mapping and download json data
@@ -128,9 +139,9 @@ do
 			continue
 		fi
 		get-mal-infos
-		title_mal=$(get-mal-title)
-		printf "$tvdb_id\t$mal_id\t$title_mal\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal / $title_plex added to ID/animes.tsv" >> $LOG
+		title_anime=$(get-anilist-title)
+		printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/animes.tsv" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/tmp/list-animes.tsv
 
@@ -155,8 +166,8 @@ then
 		then
 			line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 			tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $1}')
-			title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
-			printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+			title_anime=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
+			printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 		else
 			tvdb_id=$(get-tvdb-id)                                                                                  # convert the mal id to tvdb id (to get the main anime)
 			if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]                                             # Ignore anime with no mal to tvdb id conversion
@@ -169,16 +180,16 @@ then
 				then
 					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
-					title_mal=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
-					printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+					title_anime=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
+					printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 				elif [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 				then
 					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id" >> $LOG
 					continue
 				else
 					get-mal-infos
-					title_mal=$(get-mal-title)
-					printf "$tvdb_id\t$mal_id\t$title_mal\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+					title_anime=$(get-anilist-title)
+					printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 				fi
 			fi
 		fi
@@ -186,28 +197,28 @@ then
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
-while IFS=$'\t' read -r tvdb_id mal_id title_mal title_plex
+while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex
 do
 	get-mal-infos
-	echo "  \"$title_mal\":" >> $animes_titles
+	echo "  \"$title_anime\":" >> $animes_titles
 	echo "    alt_title: \"$title_plex\"" >> $animes_titles		
-	echo "    sort_title: \"$title_mal\"" >> $animes_titles
+	echo "    sort_title: \"$title_anime\"" >> $animes_titles
 	score_mal=$(get-mal-rating)
 	echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
-	if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_mal\":"		# Ongoing label according to MAL airing list
+	if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_anime\":"		# Ongoing label according to MAL airing list
 	then
 		echo "    label: Ongoing" >> $animes_titles
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal added to Ongoing" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime added to Ongoing" >> $LOG
 	else
 		echo "    label.remove: Ongoing" >> $animes_titles
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_mal removed to Ongoing" >> $LOG
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime removed to Ongoing" >> $LOG
 	fi
 	mal_studios=$(get-mal-studios)
 	echo "    studio: ${mal_studios}"  >> $animes_titles
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t$title_mal\tstudio : $mal_studios\n" >> $LOG
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t$title_anime\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster										# check / download poster
 	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
-	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_mal / score : $score_mal / tags / poster" >> $LOG
+	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_anime / score : $score_mal / tags / poster" >> $LOG
 done < $SCRIPT_FOLDER/ID/animes.tsv
