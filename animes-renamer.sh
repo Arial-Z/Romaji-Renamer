@@ -16,7 +16,7 @@ function get-mal-infos () {
 if [ ! -f $SCRIPT_FOLDER/data/animes/$mal_id.json ] 										#check if exist
 then
 	sleep 0.5
-	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/animes/$mal_id.json 
+	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/animes/$mal_id.json
 	sleep 1.5
 fi
 }
@@ -27,7 +27,7 @@ then
 	curl 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
-	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/animes/title-$mal_id.json 
+	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/animes/title-$mal_id.json
 	sleep 1.5
 fi
 }
@@ -68,7 +68,7 @@ if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for 
 then
         mkdir $SCRIPT_FOLDER/data
 fi
-if [ ! -d $SCRIPT_FOLDER/data/animes ]	
+if [ ! -d $SCRIPT_FOLDER/data/animes ]
 then
 	mkdir $SCRIPT_FOLDER/data/animes
 else
@@ -146,7 +146,7 @@ do
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid Anilist ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 			continue
-		fi		
+		fi
 		get-mal-infos
 		get-anilist-infos
 		title_anime=$(get-anilist-title)
@@ -213,7 +213,7 @@ while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex
 do
 	get-mal-infos
 	echo "  \"$title_anime\":" >> $animes_titles
-	echo "    alt_title: \"$title_plex\"" >> $animes_titles		
+	echo "    alt_title: \"$title_plex\"" >> $animes_titles
 	echo "    sort_title: \"$title_anime\"" >> $animes_titles
 	score_mal=$(get-mal-rating)
 	echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
@@ -231,6 +231,6 @@ do
 	echo "    studio: ${mal_studios}"  >> $animes_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t$title_anime\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster										# check / download poster
-	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster 
+	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster
 	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_anime / score : $score_mal / tags / poster" >> $LOG
 done < $SCRIPT_FOLDER/ID/animes.tsv

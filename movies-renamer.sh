@@ -18,7 +18,7 @@ function get-mal-infos () {
 if [ ! -f $SCRIPT_FOLDER/data/movies/$mal_id.json ]
 then
 	sleep 0.5
-	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/movies/$mal_id.json 
+	curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/movies/$mal_id.json
 	sleep 1.5
 fi
 }
@@ -29,7 +29,7 @@ then
 	curl 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
-	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/movies/title-$mal_id.json 
+	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/movies/title-$mal_id.json
 	sleep 1.5
 fi
 }
