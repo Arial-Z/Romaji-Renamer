@@ -176,7 +176,8 @@ then
 		then
 			line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 			tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $1}')
-			printf "$tvdb_id\t$mal_idn" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+			title_anime=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
+			printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 		else
 			tvdb_id=$(get-tvdb-id)                                                                                  # convert the mal id to tvdb id (to get the main anime)
 			if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]                                             # Ignore anime with no mal to tvdb id conversion
@@ -185,18 +186,22 @@ then
 				continue
 			else    												# get the mal ID again but main anime and create ongoing list
 				mal_id=$(get-mal-id)
+				anilist_id=$(get-anilist-id)
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $tvdb_id
 				then
 					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
-					printf "$tvdb_id\t$mal_id\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
-				elif [[ "$mal_title" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+					title_anime=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
+					printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+				elif [[ "$title_anime" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 				then
 					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id" >> $LOG
 					continue
 				else
 					get-mal-infos
-					printf "$tvdb_id\t$mal_id\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+					get-anilist-infos
+					title_anime=$(get-anilist-title)
+					printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 				fi
 			fi
 		fi

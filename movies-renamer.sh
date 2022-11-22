@@ -22,20 +22,19 @@ then
 	sleep 1.5
 fi
 }
-function get-anilist-title () {
-anilist_id=$(get-mal-id)
-if [ ! -f $SCRIPT_FOLDER/data/movies/title-$mal_id.json ]
+function get-anilist-infos () {
+if [ ! -f $SCRIPT_FOLDER/data/animes/title-$mal_id.json ]
 then
-	sleep 0.3
+	sleep 0.5
 	curl 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
 	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/movies/title-$mal_id.json 
-	sleep 0.3
-	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/movies/title-$mal_id.json
-else
-	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/movies/title-$mal_id.json
+	sleep 1.5
 fi
+}
+function get-anilist-title () {
+jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/movies/title-$mal_id.json
 }
 function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/movies/$mal_id.json
@@ -142,6 +141,7 @@ do
 			continue
 		fi
 		get-mal-infos
+		get-anilist-infos
 		title_anime=$(get-anilist-title)
 		printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/movies.tsv" >> $LOG
@@ -152,6 +152,7 @@ done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 while IFS=$'\t' read -r imdb_id mal_id title_anime title_plex
 do
 	get-mal-infos
+	get-anilist-infos
 	echo "  \"$title_anime\":" >> $movies_titles
 	echo "    alt_title: \"$title_plex\"" >> $movies_titles
 	echo "    sort_title: \"$title_anime\"" >> $movies_titles
