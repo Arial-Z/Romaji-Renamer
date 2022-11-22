@@ -193,13 +193,13 @@ then
 					printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 					mal_id=$(get-mal-id)
 					anilist_id=$(get-anilist-id)
+					get-anilist-infos
+					title_anime=$(get-anilist-title)					
 					elif [[ "$title_anime" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 					then
 						echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id" >> $LOG
 						continue
 					else
-						get-anilist-infos
-						title_anime=$(get-anilist-title)
 						printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 					fi
 			fi
