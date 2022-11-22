@@ -190,17 +190,14 @@ then
 					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
 					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
 					title_anime=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $3}')
-					printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+					printf "$mal_id\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 					mal_id=$(get-mal-id)
-					anilist_id=$(get-anilist-id)
-					get-anilist-infos
-					title_anime=$(get-anilist-title)					
-					elif [[ "$title_anime" == 'null' ]] || [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+					elif [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 					then
 						echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id" >> $LOG
 						continue
 					else
-						printf "$tvdb_id\t$mal_id\t$title_anime\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
+						printf "$mal_id\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
 					fi
 			fi
 		fi
@@ -221,7 +218,7 @@ do
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
-	if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_anime\":"		# Ongoing label according to MAL airing list
+	if awk -F"\t" '{print "\""$2"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$mal_id\":"		# Ongoing label according to MAL airing list
 	then
 		echo "    label: Ongoing" >> $animes_titles
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel add Ongoing\n" >> $LOG
