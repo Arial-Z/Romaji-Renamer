@@ -9,6 +9,10 @@ MATCH_LOG=$LOG_FOLDER/animes/missing-ID-link.log
 function get-mal-id () {
 jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id | sort -n | head -1
 }
+function get-anilist-id () {
+imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
+jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .anilist_id | sort -n | head -1
+}
 function get-mal-infos () {
 if [ ! -f $SCRIPT_FOLDER/data/animes/$mal_id.json ] 										#check if exist
 then
@@ -18,13 +22,14 @@ then
 fi
 }
 function get-anilist-title () {
+anilist_id=$(get-mal-id)
 if [ ! -f $SCRIPT_FOLDER/data/animes/title-$mal_id.json ]
 then
 	sleep 0.3
 	curl 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
-	--data '{ "query": "{ Media(idMal: '"$mal_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/animes/title-$mal_id.json 
+	--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/animes/title-$mal_id.json 
 	sleep 0.3
 	jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/animes/title-$mal_id.json
 else
