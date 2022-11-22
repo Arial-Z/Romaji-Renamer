@@ -215,22 +215,25 @@ do
 	echo "  \"$title_anime\":" >> $animes_titles
 	echo "    alt_title: \"$title_plex\"" >> $animes_titles
 	echo "    sort_title: \"$title_anime\"" >> $animes_titles
+	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:" >> $LOG
 	score_mal=$(get-mal-rating)
 	echo "    audience_rating: $score_mal" >> $animes_titles				# rating (audience)
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles				# tags (genres, themes and demographics from MAL)
 	if awk -F"\t" '{print "\""$3"\":"}' $SCRIPT_FOLDER/data/animes/ongoing.tsv | grep -w "\"$title_anime\":"		# Ongoing label according to MAL airing list
 	then
 		echo "    label: Ongoing" >> $animes_titles
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime added to Ongoing" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\Label add Ongoing" >> $LOG
 	else
 		echo "    label.remove: Ongoing" >> $animes_titles
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime removed to Ongoing" >> $LOG
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\Label remove Ongoing" >> $LOG
 	fi
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
 	mal_studios=$(get-mal-studios)
 	echo "    studio: ${mal_studios}"  >> $animes_titles
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t$title_anime\tstudio : $mal_studios\n" >> $LOG
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios" >> $LOG
 	get-mal-poster										# check / download poster
 	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles		# add poster
-	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata : $title_anime / score : $score_mal / tags / poster" >> $LOG
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
 done < $SCRIPT_FOLDER/ID/animes.tsv

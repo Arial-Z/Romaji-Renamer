@@ -162,7 +162,7 @@ do
 	echo "  \"$title_anime\":" >> $movies_titles
 	echo "    alt_title: \"$title_plex\"" >> $movies_titles
 	echo "    sort_title: \"$title_anime\"" >> $movies_titles
-	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to metadata :" >> $LOG
+	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:" >> $LOG
 	score_mal=$(get-mal-rating)
 	echo "    audience_rating: $score_mal" >> $movies_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
@@ -175,5 +175,4 @@ do
 	get-mal-poster
 	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
-	echo "$(date +%Y.%m.%d" - "%H:%M:%S) - added to metadata :\n\t$title_anime / $title_plex" >> $LOG
 done < $SCRIPT_FOLDER/ID/movies.tsv
