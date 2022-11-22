@@ -182,13 +182,11 @@ then
 				echo "Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
 				continue
 			else    												# get the mal ID again but main anime and create ongoing list
+				mal_id=$(get-mal-id)
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $tvdb_id
 				then
-					mal_id=$(get-mal-id)
 					printf "$mal_id\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
-				else
-					mal_id=$(get-mal-id)
-					if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+					elif [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]       # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 					then
 						echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for Ongoing : tvdb : $tvdb_id" >> $LOG
 						continue
