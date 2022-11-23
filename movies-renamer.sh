@@ -58,14 +58,14 @@ jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 # download pmm animes mapping and check if files and folder exist
 if [ ! -f $movies_titles ]
 then
-        echo "metadata:" > $movies_titles
+	echo "metadata:" > $movies_titles
 else
 	rm $movies_titles
 	echo "metadata:" > $movies_titles
 fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
-        mkdir $SCRIPT_FOLDER/data
+	mkdir $SCRIPT_FOLDER/data
 fi
 if [ ! -d $SCRIPT_FOLDER/data/movies ]
 then
@@ -75,7 +75,7 @@ else
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
-        mkdir $SCRIPT_FOLDER/posters
+	mkdir $SCRIPT_FOLDER/posters
 else
 	find $SCRIPT_FOLDER/posters/* -mtime +30 -exec rm {} \;
 fi
@@ -92,7 +92,7 @@ else
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]
 then
-        mkdir $SCRIPT_FOLDER/tmp
+	mkdir $SCRIPT_FOLDER/tmp
 else
 	rm $SCRIPT_FOLDER/tmp/*
 fi

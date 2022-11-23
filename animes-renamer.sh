@@ -40,10 +40,10 @@ jq .data.score -r $SCRIPT_FOLDER/data/animes/$mal_id.json
 function get-mal-poster () {
 if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]										#check if exist
 then
-sleep 0.5
+	sleep 0.5
 	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
 	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
-sleep 1.5
+	sleep 1.5
 fi
 }
 function get-mal-tags () {
@@ -59,14 +59,14 @@ jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json
 # download pmm animes mapping and check if files and folder exist
 if [ ! -f $animes_titles ]											#check if metadata files exist and echo first line
 then
-        echo "metadata:" > $animes_titles
+	echo "metadata:" > $animes_titles
 else
 	rm $animes_titles
 	echo "metadata:" > $animes_titles
 fi
 if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
 then
-        mkdir $SCRIPT_FOLDER/data
+	mkdir $SCRIPT_FOLDER/data
 fi
 if [ ! -d $SCRIPT_FOLDER/data/animes ]
 then
@@ -76,7 +76,7 @@ else
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]										#check if exist and create folder for posters
 then
-        mkdir $SCRIPT_FOLDER/posters
+	mkdir $SCRIPT_FOLDER/posters
 else
 	find $SCRIPT_FOLDER/posters/* -mtime +30 -exec rm {} \;							#delete posters if older than 30 days
 fi
@@ -93,7 +93,7 @@ else
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]											#check if exist and create temp folder cleaned at the start of every run
 then
-        mkdir $SCRIPT_FOLDER/tmp
+	mkdir $SCRIPT_FOLDER/tmp
 else
 	rm $SCRIPT_FOLDER/tmp/*
 fi
@@ -158,20 +158,20 @@ done < $SCRIPT_FOLDER/tmp/list-animes.tsv
 #Create an ongoing list at $SCRIPT_FOLDER/data/animes/ongoing.csv
 if [ ! -f $SCRIPT_FOLDER/data/animes/ongoing.tsv ]              #check if already exist data folder is stored for 2 days
 then
-        ongoingpage=1
-        while [ $ongoingpage -lt 10 ];                  #get the airing list from jikan API max 9 pages (225 animes)
-        do
-                curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
-                sleep 2
-                jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv            # store the mal ID of the ongoing show
-                if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json                  #stop if page is empty
-                then
-                        break
-                fi
-                ((ongoingpage++))
-        done
-        while read -r mal_id
-        do
+	ongoingpage=1
+	while [ $ongoingpage -lt 10 ];                  #get the airing list from jikan API max 9 pages (225 animes)
+	do
+		curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
+		sleep 2
+		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv            # store the mal ID of the ongoing show
+		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json                  #stop if page is empty
+		then
+			break
+		fi
+		((ongoingpage++))
+	done
+	while read -r mal_id
+	do
 		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $mal_id
 		then
 			printf "$mal_id\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv
@@ -195,7 +195,7 @@ then
 				fi
 			fi
 		fi
-        done < $SCRIPT_FOLDER/tmp/ongoing.tsv
+	done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
