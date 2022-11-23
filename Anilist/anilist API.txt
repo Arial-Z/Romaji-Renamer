@@ -1,0 +1,30 @@
+     {
+       Media(id: 6702) {
+        title {
+          romaji
+        }
+        status
+        averageScore
+        studios {
+          edges {
+            isMain
+            node {
+              isAnimationStudio
+              name
+            }
+          }
+        }
+        genres
+        tags {
+         name
+        }
+       }
+     }
+     
+{ Media(id: '"$anilist_id"') { title { romaji } status averageScore studios { edges { isMain node { isAnimationStudio name } } } genres tags { name } } }  
+
+  
+curl 'https://graphql.anilist.co/' \
+-X POST \
+-H 'content-type: application/json' \
+--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } status averageScore studios { nodes { name isAnimationStudio } } genres tags { name } } }" }' > $anilist_id.json 
