@@ -2,12 +2,10 @@
 
 Bash script to import MAL metadata to plex with a PMM metadata file<br/>
 what is imported :
-  - Romaji title
+  - Romaji title (from Anilist)
   - Mal Score
   - Mal tags
   - Airing status (As Label)
-  - Top 100 & Top 250 animes (TV, OVA & ONA) (as Label)
-  - Top 100 movies (As Label)
   - Studios
   - Mal Poster
   
