@@ -110,7 +110,7 @@ curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/m
 
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-movies.cache
-$PMM_FOLDER/pmm-venv/bin/python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
+python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
 
 # create clean list-movies.tsv (imdb_id | title_plex) from meta.log
