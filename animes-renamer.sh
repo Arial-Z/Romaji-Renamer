@@ -4,7 +4,6 @@ SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
 LOG=$LOG_FOLDER/animes/$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/animes/missing-ID-link.log
-Ongoing_LOG=$LOG_FOLDER/animes/Ongoing-$(date +%Y.%m.%d).log
 
 # function
 function get-mal-id () {
@@ -74,7 +73,7 @@ then
 	mkdir $SCRIPT_FOLDER/data/animes
 else
 	find $SCRIPT_FOLDER/data/animes/* -mmin +2880 -exec rm {} \;			#delete json data if older than 2 days
-	find $SCRIPT_FOLDER/data/animes/ongoing.tsv -mmin +1440 -exec rm {} \;	#delete ongoing if older than 1 days
+	find $SCRIPT_FOLDER/data/animes/ongoing.tsv -mmin +720 -exec rm {} \;		#delete ongoing if older than 12h
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]										#check if exist and create folder for posters
 then
@@ -181,7 +180,7 @@ then
 			tvdb_id=$(get-tvdb-id)																	# convert the mal id to tvdb id (to get the main anime)
 			if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]										# Ignore anime with no mal to tvdb id conversion
 			then
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for : MAL : $mal_id" >> $Ongoing_LOG
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
 				continue
 			else    												
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $tvdb_id
@@ -193,7 +192,7 @@ then
 					mal_id=$(get-mal-id)
 					if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 					then
-						echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid MAL ID for : TVDB : $tvdb_id" >> $Ongoing_LOG
+						echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid MAL ID for : TVDB : $tvdb_id" >> $LOG
 						continue
 					else
 						printf "$mal_id\n" >> $SCRIPT_FOLDER/data/animes/ongoing.tsv

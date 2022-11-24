@@ -71,7 +71,7 @@ if [ ! -d $SCRIPT_FOLDER/data/movies ]
 then
 	mkdir $SCRIPT_FOLDER/data/movies
 else
-	find $SCRIPT_FOLDER/data/movies/* -mtime +2 -exec rm {} \;						#delete json data if older than 2 days
+	find $SCRIPT_FOLDER/data/movies/* -mmin +2880 -exec rm {} \;				#delete json data if older than 2 days
 fi
 if [ ! -d $SCRIPT_FOLDER/posters ]
 then
