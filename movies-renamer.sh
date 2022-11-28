@@ -23,7 +23,7 @@ then
 fi
 }
 function get-anilist-infos () {
-if [ ! -f $SCRIPT_FOLDER/data/animes/title-$mal_id.json ]
+if [ ! -f $SCRIPT_FOLDER/data/movies/title-$mal_id.json ]
 then
 	sleep 0.5
 	curl 'https://graphql.anilist.co/' \
