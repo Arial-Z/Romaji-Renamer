@@ -152,7 +152,7 @@ do
 		printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/movies.tsv" >> $LOG
 	fi
-done < $SCRIPT_FOLDER/tmp/list-animes.tsv
+done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_anime title_plex
