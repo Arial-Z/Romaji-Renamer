@@ -112,7 +112,8 @@ curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/m
 
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
 rm $PMM_FOLDER/config/temp-animes.cache
-python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
+#python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
+$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
 
 # create clean list-animes.tsv (tvdb_id	title_plex) from meta.log
@@ -182,7 +183,7 @@ then
 			then
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
 				continue
-			else    												
+			else
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $tvdb_id
 				then
 					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
@@ -212,7 +213,7 @@ do
 	echo "    sort_title: \"$title_anime\"" >> $animes_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	score_mal=$(get-mal-rating)
-	echo "    audience_rating: $score_mal" >> $animes_titles									# rating (audience)
+	echo "    critic_rating: $score_mal" >> $animes_titles									# rating (critic)
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles									# tags (genres, themes and demographics from MAL)

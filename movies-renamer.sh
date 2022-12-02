@@ -110,7 +110,7 @@ curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/m
 
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-movies.cache
-python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
+$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
 mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
 
 # create clean list-movies.tsv (imdb_id | title_plex) from meta.log
@@ -163,7 +163,7 @@ do
 	echo "    sort_title: \"$title_anime\"" >> $movies_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	score_mal=$(get-mal-rating)
-	echo "    audience_rating: $score_mal" >> $movies_titles									# rating (audience)
+	echo "    critic_rating: $score_mal" >> $movies_titles									# rating (critic)
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles									# tags (genres, themes and demographics from MAL)
