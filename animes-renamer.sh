@@ -88,7 +88,7 @@ then
 elif [ ! -f $SCRIPT_FOLDER/ID/animes.tsv ]
 then
 	touch $SCRIPT_FOLDER/ID/animes.tsv
-else 
+else
 	rm $SCRIPT_FOLDER/ID/animes.tsv
 	touch $SCRIPT_FOLDER/ID/animes.tsv
 fi
