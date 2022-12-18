@@ -124,10 +124,13 @@ while IFS=$'\t' read -r imdb_id mal_id title_anime									# First add the overr
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 	then
-		line=$(grep -w -n $imdb_id $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
-		title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-movies.tsv | awk -F"\t" '{print $2}')
-		printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-movies.tsv | grep -w  $imdb_id
+		then
+			line=$(grep -w -n $imdb_id $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
+			title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-movies.tsv | awk -F"\t" '{print $2}')
+			printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
+		fi
 	fi
 done < $SCRIPT_FOLDER/override-ID-movies.tsv
 while IFS=$'\t' read -r imdb_id title_plex											# then get the other ID from the ID mapping and download json data
