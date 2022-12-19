@@ -44,6 +44,16 @@ then
 	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
 	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
 	sleep 1.5
+else
+	postersize=$(du -b $SCRIPT_FOLDER/posters/$mal_id.jpg | awk '{ print $1 }')
+	if [[ $postersize -lt 10000 ]]
+	then
+		rm $SCRIPT_FOLDER/posters/$mal_id.jpg
+		sleep 0.5
+		mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
+		curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
+		sleep 1.5
+	fi
 fi
 }
 function get-mal-tags () {
