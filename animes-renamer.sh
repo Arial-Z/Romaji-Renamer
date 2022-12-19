@@ -63,7 +63,11 @@ function get-tvdb-id () {
 jq ".[] | select( .mal_id == ${mal_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq '.tvdb_id' | sort -n | head -1
 }
 function get-mal-studios() {
-jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json
+if [[ $mal_id == 6702 ]
+then
+	echo "A1-Pictures"
+else
+	jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json
 }
 
 # download pmm animes mapping and check if files and folder exist
