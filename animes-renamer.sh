@@ -65,7 +65,7 @@ jq ".[] | select( .mal_id == ${mal_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.js
 function get-mal-studios() {
 if [[ $mal_id == 6702 ]]
 then
-	echo "A1-Pictures"
+	echo "A-1 Pictures"
 else
 	jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json
 fi
