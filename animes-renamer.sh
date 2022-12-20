@@ -71,7 +71,7 @@ then
         then
                 mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
         else
-                mal_studios=$("$studio")
+                mal_studios=$(echo "$studio")
         fi
 fi
 }
