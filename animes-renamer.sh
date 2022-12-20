@@ -66,12 +66,12 @@ function get-mal-studios() {
 if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $mal_id
 then
         line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
-        studios=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $4}')
+        studio=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $4}')
         if [[ -z "$studios" ]]
         then
                 mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
         else
-                mal_studios=$("$studios")
+                mal_studios=$("$studio")
         fi
 fi
 }
