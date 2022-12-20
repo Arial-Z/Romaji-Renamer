@@ -69,9 +69,9 @@ then
         studios=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $4}')
         if [[ -z "$studios" ]]
         then
-                jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json
+                mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
         else
-                echo "$studios"
+                mal_studios=$("$studios")
         fi
 fi
 }
@@ -249,7 +249,7 @@ do
 		echo "    label.remove: Ongoing" >> $animes_titles
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
 	fi
-	mal_studios=$(get-mal-studios)
+	get-mal-studios
 	echo "    studio: ${mal_studios}"  >> $animes_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster																		# check / download poster
