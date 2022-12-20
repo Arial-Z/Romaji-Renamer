@@ -67,7 +67,7 @@ if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $mal
 then
         line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
         studio=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $4}')
-        if [[ -z "$studios" ]]
+        if [[ -z "$studio" ]]
         then
                 mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
         else
