@@ -65,12 +65,12 @@ function get-mal-studios() {
 if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-movies.tsv | grep -w  $mal_id
 then
         line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-movies.tsv | cut -d : -f 1)
-        studios=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"\t" '{print $4}')
-        if [[ -z "$studios" ]]
+        studio=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"\t" '{print $4}')
+        if [[ -z "$studio" ]]
         then
-                jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+                mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
         else
-                echo "$studios"
+                mal_studios=$(echo "$studio")
         fi
 fi
 }
@@ -140,7 +140,7 @@ head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_st
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
 
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
-while IFS=$'\t' read -r imdb_id mal_id title_anime									# First add the override animes to the ID file
+while IFS=$'\t' read -r imdb_id mal_id title_anime studio									# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 	then
@@ -191,7 +191,7 @@ do
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles									# tags (genres, themes and demographics from MAL)
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
-	mal_studios=$(get-mal-studios)
+	get-mal-studios
 	echo "    studio: ${mal_studios}"  >> $movies_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster																		# check / download poster
