@@ -72,6 +72,8 @@ then
         else
                 mal_studios=$(echo "$studio")
         fi
+else
+	mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
 fi
 }
 
