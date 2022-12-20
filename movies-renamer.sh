@@ -62,7 +62,17 @@ function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/movies/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
 function get-mal-studios() {
-jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-movies.tsv | grep -w  $mal_id
+then
+        line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-movies.tsv | cut -d : -f 1)
+        studios=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"\t" '{print $4}')
+        if [[ -z "$studios" ]]
+        then
+                jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json
+        else
+                echo "$studios"
+        fi
+fi
 }
 
 # download pmm animes mapping and check if files and folder exist
