@@ -3,7 +3,7 @@
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
 LOG=$LOG_FOLDER/movies/$(date +%Y.%m.%d).log
-MATCH_LOG=$LOG_FOLDER/missing-ID-link.log
+MATCH_LOG=$LOG_FOLDER/missing-id.log
 
 # function
 function get-mal-id () {
