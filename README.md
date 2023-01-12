@@ -57,7 +57,6 @@ Then you need to add the metadata file to your Animes Library in the PMM config 
 ```
   Animes:
     metadata_path:
-    - repo: /metadata/animes-airing
     - file: config/animes/animes-mal.yml
 ```
 ### and you're done
@@ -72,23 +71,25 @@ You can also add it to cron and make it run before PMM (be carreful it take a li
 some animes won't be matched and the metadata will be missing, you can see them error in the log, in PMM metadata files or plex directly<br/>
 Cause are missing MAL ID for the TVDB ID / IMDB ID or the first corresponding MAL ID is not the "main" anime<br/>
 #### Animes
-to fix animes you need to edit this file : override-ID-animes.tsv<br/>
-it look like this, be carreful to use **tab** as separator
+to fix animes ID you can create a request here or at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-animes.tsv<br/>
+it look like this, be carreful to use **tab** as separator (studio is optional)
 ```
-TVDB-ID	MAL-ID	MAL-TITLE
-219771	9513	Beelzebub
-331753	34572	Black Clover
-305074	31964	Boku no Hero Academia
-413555	37914	Chikyuugai Shounen Shoujo
-79525	1575	Code Geass: Hangyaku no Lelouch
-79895	918	Gintama
+tvdb-id	mal-id	Name	Studio
+281249	22319	Tokyo Ghoul	
+313435	33255	Saiki Kusuo no Ψ-nan	
+76013	627	Major	
+304316	28735	Shouwa Genroku Rakugo Shinjuu	
+413515	50590	Koukyuu no Karasu	
+418364	49828	Kidou Senshi Gundam: Suisei no Majo	
+423787	52865	Romantic Killer	
+114801	6702	Fairy Tail	A-1 Pictures
 ```
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
-to fix movies you need to edit this file : override-ID-movies.tsv<br/>
-it look like this, be carreful to use **tab** as separator
+to fix movies ID you can create a request here or at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-movies.tsv<br/>
+it look like this, be carreful to use **tab** as separator (studio is optional)
 ```
-IMDB-ID	MAL-ID	MAL-TITLE
+imdb-id	mal-id	Name	Studio
 tt16360006	50549	Bubble
 tt9598270	34439	Code Geass: Hangyaku no Lelouch II - Handou
 tt9844256	34440	Code Geass: Hangyaku no Lelouch III - Oudou
