@@ -7,10 +7,10 @@ MATCH_LOG=$LOG_FOLDER/missing-id.log
 
 # function
 function get-mal-id () {
-jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id | sort -n | head -1
+jq ".[] | select( .tvdb_id == ${tvdb_id} ) | select( .tvdb_season == 1 ) | select( .tvdb_epoffset == 0 ) | .mal_id" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id
 }
 function get-anilist-id () {
-jq ".[] | select( .tvdb_id == ${tvdb_id} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .anilist_id | sort -n | head -1
+jq ".[] | select( .mal_id == ${mal_id} ) | .anilist_id" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
 }
 function get-mal-infos () {
 if [ ! -f $SCRIPT_FOLDER/data/animes/$mal_id.json ] 										#check if exist
@@ -130,7 +130,7 @@ then
 fi
 
 # Download anime mapping json data
-curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
+curl "https://raw.githubusercontent.com/Arial-Z/Plex-Meta-Manager-Anime-IDs/main/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
 
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
 rm $PMM_FOLDER/config/temp-animes.cache
