@@ -7,7 +7,7 @@ MATCH_LOG=$LOG_FOLDER/missing-id.log
 
 # function
 function get-mal-id () {
-jq ".[] | select( .tvdb_id == ${tvdb_id} ) | select( .tvdb_season == 1 ) | select( .tvdb_epoffset == 0 ) | .mal_id" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id
+jq ".[] | select( .tvdb_id == ${tvdb_id} ) | select( .tvdb_season == 1 ) | select( .tvdb_epoffset == 0 ) | .mal_id" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
 }
 function get-anilist-id () {
 jq ".[] | select( .mal_id == ${mal_id} ) | .anilist_id" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
