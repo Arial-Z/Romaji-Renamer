@@ -64,14 +64,14 @@ function get-mal-tags () {
 function get-mal-studios() {
 if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-movies.tsv | grep -w  $mal_id
 then
-        line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-movies.tsv | cut -d : -f 1)
-        studio=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"\t" '{print $4}')
-        if [[ -z "$studio" ]]
-        then
-                mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
-        else
-                mal_studios=$(echo "$studio")
-        fi
+     line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-movies.tsv | cut -d : -f 1)
+     studio=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-movies.tsv | awk -F"\t" '{print $4}')
+     if [[ -z "$studio" ]]
+     then
+          mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
+     else
+          mal_studios=$(echo "$studio")
+     fi
 else
 	mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
 fi
@@ -128,7 +128,7 @@ then
 fi
 
 # Download anime mapping json data
-curl "https://raw.githubusercontent.com/meisnate12/Plex-Meta-Manager-Anime-IDs/master/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
+curl "https://raw.githubusercontent.com/Arial-Z/Plex-Meta-Manager-Anime-IDs/main/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
 
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-movies.cache
