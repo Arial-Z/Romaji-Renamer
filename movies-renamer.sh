@@ -8,11 +8,11 @@ MATCH_LOG=$LOG_FOLDER/missing-id.log
 # function
 function get-mal-id () {
 imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
-jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .mal_id | sort -n | head -1
+jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/list-animes-id.json | jq .mal_id | sort -n | head -1
 }
 function get-anilist-id () {
 imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
-jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/pmm_anime_ids.json | jq .anilist_id | sort -n | head -1
+jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/list-animes-id.json | jq .anilist_id | sort -n | head -1
 }
 function get-mal-infos () {
 if [ ! -f $SCRIPT_FOLDER/data/movies/$mal_id.json ]
@@ -128,7 +128,7 @@ then
 fi
 
 # Download anime mapping json data
-curl "https://raw.githubusercontent.com/Arial-Z/Plex-Meta-Manager-Anime-IDs/main/pmm_anime_ids.json" > $SCRIPT_FOLDER/tmp/pmm_anime_ids.json
+curl "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > $SCRIPT_FOLDER/tmp/list-animes-id.json
 
 # create pmm meta.log
 rm $PMM_FOLDER/config/temp-movies.cache
