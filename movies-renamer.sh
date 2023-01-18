@@ -36,6 +36,9 @@ fi
 function get-anilist-title () {
 jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/movies/title-$mal_id.json
 }
+function get-mal-eng-title () {
+jq .data.title_english -r $SCRIPT_FOLDER/data/animes/$mal_id.json
+}
 function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 }
@@ -186,6 +189,13 @@ do
 	echo "  \"$title_anime\":" >> $movies_titles
 	echo "    alt_title: \"$title_plex\"" >> $movies_titles
 	echo "    sort_title: \"$title_anime\"" >> $movies_titles
+	title_eng=$(get-mal-eng-title)
+	if [ "$title_eng" == "null" ]
+	then
+		echo "    original_title: \"$title_anime\"" >> $animes_titles
+	else 
+		echo "    original_title: \"$title_eng\"" >> $animes_titles
+	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	score_mal=$(get-mal-rating)
 	echo "    critic_rating: $score_mal" >> $movies_titles									# rating (critic)
