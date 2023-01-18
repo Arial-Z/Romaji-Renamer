@@ -37,7 +37,7 @@ function get-anilist-title () {
 jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/movies/title-$mal_id.json
 }
 function get-mal-eng-title () {
-jq .data.title_english -r $SCRIPT_FOLDER/data/animes/$mal_id.json
+jq .data.title_english -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 }
 function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/movies/$mal_id.json
