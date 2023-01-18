@@ -192,9 +192,9 @@ do
 	title_eng=$(get-mal-eng-title)
 	if [ "$title_eng" == "null" ]
 	then
-		echo "    original_title: \"$title_anime\"" >> $animes_titles
+		echo "    original_title: \"$title_anime\"" >> $movies_titles
 	else 
-		echo "    original_title: \"$title_eng\"" >> $animes_titles
+		echo "    original_title: \"$title_eng\"" >> $movies_titles
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	score_mal=$(get-mal-rating)
