@@ -240,7 +240,12 @@ do
 	echo "    alt_title: \"$title_plex\"" >> $animes_titles
 	echo "    sort_title: \"$title_anime\"" >> $animes_titles
 	title_eng=$(get-mal-eng-title)
-	echo "    original_title: \"$title_eng\"" >> $animes_titles
+	if [ "$title_eng" == "null" ]
+	then
+		echo "    original_title: \"$title_anime\"" >> $animes_titles
+	else 
+		echo "    original_title: \"$title_eng\"" >> $animes_titles
+	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	score_mal=$(get-mal-rating)
 	echo "    critic_rating: $score_mal" >> $animes_titles									# rating (critic)
