@@ -141,8 +141,10 @@ if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
 then
 	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_config/temp-animes.yml
 elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
+then
 	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-animes.yml
 elif [ "$PMM_INSTALL_TYPE"  == "python" ]
+then
 	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_config/temp-animes.yml
 fi
 mv $PMM_FOLDER_config/logs/meta.log $SCRIPT_FOLDER/tmp
