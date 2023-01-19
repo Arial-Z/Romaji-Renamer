@@ -136,10 +136,19 @@ fi
 curl "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > $SCRIPT_FOLDER/tmp/list-animes-id.json
 
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
-rm $PMM_FOLDER/config/temp-animes.cache
-#python3 $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
-$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
-mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
+rm $PMM_FOLDER_CONFIG/temp-animes.cache
+if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
+then
+	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-animes.yml
+elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
+then
+	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-animes.yml
+elif [ "$PMM_INSTALL_TYPE"  == "python" ]
+then
+	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-animes.yml
+fi
+mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+
 
 # create clean list-animes.tsv (tvdb_id	title_plex) from meta.log
 line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
