@@ -133,10 +133,17 @@ fi
 # Download anime mapping json data
 curl "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > $SCRIPT_FOLDER/tmp/list-animes-id.json
 
-# create pmm meta.log
+# Dummy run of PMM and move meta.log for creating imdb_id and title_plex
 rm $PMM_FOLDER/config/temp-movies.cache
-$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-movies.yml
-mv $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
+if [ $PMM_INSTALL_TYPE  == "python_venv" ]
+then
+	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_config/temp-movies.yml
+elif [ $PMM_INSTALL_TYPE  == "docker" ]
+	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-movies.yml
+elif [ $PMM_INSTALL_TYPE  == "python" ]
+	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_config/temp-movies.yml
+fi
+mv $PMM_FOLDER_config/logs/meta.log $SCRIPT_FOLDER/tmp
 
 # create clean list-movies.tsv (imdb_id | title_plex) from meta.log
 line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
