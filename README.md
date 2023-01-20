@@ -33,12 +33,19 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
 extract script somewhere<br/>
 Go to the script folder<br/>
 and rename config.delfaut to config.conf<br/>
-edit config.conf to add your path folder and file<br/>
+edit config.conf to add your config and path<br/>
 ```
+# PMM_INSTALL_TYPE either "python_venv", "docker" or"python"
+PMM_INSTALL_TYPE=
+# DOCKER_CONTAINER_NAME Only for docker
+DOCKER_CONTAINER_NAME=
+# PMM_FOLDER PMM base folder for Python install skip if docker install
 PMM_FOLDER=/path/to/plexmetamanager
-LOG_PATH=$SCRIPT_FOLDER/log/ # Default log in the script folder (you can change it)
-animes_titles=$PMM_FOLDER/config/animes/animes-titles.yml # Default path to the animes metadata files for PMM (you can change it)
-movies_titles=$PMM_FOLDER/config/animes/movies-titles.yml # Default path to the movies metadata files for PMM (you can change it)
+# PMM_FOLDER_CONFIG for all install type
+PMM_FOLDER_CONFIG=/path/to/plexmetamanager-config-folder
+LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
+animes_titles=$PMM_FOLDER/config/animes/animes-mal.yml
+movies_titles=$PMM_FOLDER/config/animes/movies-mal.yml
 ```
 
 ### Step 4 - Configure PMM
