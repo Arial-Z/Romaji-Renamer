@@ -138,16 +138,19 @@ curl "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.js
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
 if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
 then
+	rm $PMM_FOLDER_CONFIG/temp-animes.cache
 	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-animes.yml
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
 then
+	rm $PMM_FOLDER_CONFIG/temp-animes.cache
 	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-animes.yml
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "python" ]
 then
+	rm $PMM_FOLDER_CONFIG/temp-animes.cache
 	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-animes.yml
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 else
 	echo "Set Plex Meta Manager install type in conf"
 fi
