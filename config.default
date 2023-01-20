@@ -2,9 +2,8 @@
 PMM_INSTALL_TYPE=
 # DOCKER_CONTAINER_NAME Only for docker
 DOCKER_CONTAINER_NAME=
-# PMM_FOLDER Only for python_venv & python
+# PMM_FOLDER config folder for docker install or PMM base folder for Python install
 PMM_FOLDER=/path/to/plexmetamanager
-PMM_FOLDER_CONFIG=/path/to/plexmetamanager/config
 LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/animes-mal.yml
 movies_titles=$PMM_FOLDER/config/animes/movies-mal.yml
