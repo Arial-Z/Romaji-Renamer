@@ -145,7 +145,7 @@ elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
 then
 	rm $PMM_FOLDER_CONFIG/temp-animes.cache
 	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-animes.yml
-	rm $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "python" ]
 then
 	rm $PMM_FOLDER_CONFIG/temp-animes.cache
