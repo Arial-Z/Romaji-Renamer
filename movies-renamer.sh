@@ -138,17 +138,17 @@ if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
 then
 	rm $PMM_FOLDER_CONFIG/temp-movies.cache
 	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-movies.yml
-	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
 then
-	rm $PMM_FOLDER_CONFIG/temp-movies.cache
+	docker exec -it $DOCKER_CONTAINER_NAME rm config/temp-movies.cache
 	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-movies.yml
-	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "python" ]
 then
 	rm $PMM_FOLDER_CONFIG/temp-movies.cache
 	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-movies.yml
-	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 else
 	echo "Set Plex Meta Manager install type in conf"
 fi
