@@ -161,7 +161,8 @@ fi
 line_start=$(grep -n "Mapping "$ANIME_LIBRARY_NAME" Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 line_end=$(grep -n -m1 "$ANIME_LIBRARY_NAME Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
-awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
+awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes-dirty.tsv
+sed 's/^[ \t]*//;s/[ \t]*$//' < $SCRIPT_FOLDER/tmp/list-animes-dirty.tsv > $SCRIPT_FOLDER/tmp/list-animes.tsv
 
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_anime studio									# First add the override animes to the ID file
@@ -284,7 +285,8 @@ do
 	if [ "$PMM_INSTALL_TYPE"  == "docker" ]
 	then
 		echo "    file_poster: $POSTERS_PMM_FOLDER/${mal_id}.jpg" >> $animes_titles
-
-	echo "    file_poster: $POSTERS_FOLDER/${mal_id}.jpg" >> $animes_titles
+	else
+		echo "    file_poster: $POSTERS_FOLDER/${mal_id}.jpg" >> $animes_titles
+	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
 done < $SCRIPT_FOLDER/ID/animes.tsv
