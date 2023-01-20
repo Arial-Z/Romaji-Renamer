@@ -36,9 +36,9 @@ and rename config.delfaut to config.conf<br/>
 edit config.conf to add your config and path<br/>
 ```
 # PMM_INSTALL_TYPE either "python_venv", "docker" or"python"
-PMM_INSTALL_TYPE=
+PMM_INSTALL_TYPE=docker
 # DOCKER_CONTAINER_NAME Only for docker
-DOCKER_CONTAINER_NAME=
+DOCKER_CONTAINER_NAME=plex-meta-manager
 # PMM_FOLDER PMM base folder for Python install skip if docker install
 PMM_FOLDER=/path/to/plexmetamanager
 # PMM_FOLDER_CONFIG for all install type
