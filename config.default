@@ -12,6 +12,8 @@ ANIME_LIBRARY_NAME="Animes"
 MOVIE_LIBRARY_NAME="Animes Movies"
 # Folder where the poster are stored if you are running docker it should be in the PMM config folder
 POSTERS_FOLDER=$PMM_FOLDER_CONFIG/posters
+# Folder where PMM need to look to find the poster
+POSTERS_PMM_FOLDER=/config/posters
 LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/animes-mal.yml
 movies_titles=$PMM_FOLDER/config/animes/movies-mal.yml
