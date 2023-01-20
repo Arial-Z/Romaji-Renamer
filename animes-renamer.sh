@@ -44,20 +44,20 @@ function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/animes/$mal_id.json
 }
 function get-mal-poster () {
-if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]										#check if exist
+if [ ! -f $POSTERS_FOLDER/$mal_id.jpg ]										#check if exist
 then
 	sleep 0.5
 	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
-	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
+	curl "$mal_poster_url" > $POSTERS_FOLDER/$mal_id.jpg
 	sleep 1.5
 else
-	postersize=$(du -b $SCRIPT_FOLDER/posters/$mal_id.jpg | awk '{ print $1 }')
+	postersize=$(du -b $POSTERS_FOLDER/$mal_id.jpg | awk '{ print $1 }')
 	if [[ $postersize -lt 10000 ]]
 	then
-		rm $SCRIPT_FOLDER/posters/$mal_id.jpg
+		rm $POSTERS_FOLDER/$mal_id.jpg
 		sleep 0.5
 		mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
-		curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
+		curl "$mal_poster_url" > $POSTERS_FOLDER/$mal_id.jpg
 		sleep 1.5
 	fi
 fi
@@ -100,11 +100,11 @@ else
 	find $SCRIPT_FOLDER/data/animes/* -mmin +2880 -exec rm {} \;			#delete json data if older than 2 days
 	find $SCRIPT_FOLDER/data/animes/ongoing.tsv -mmin +720 -exec rm {} \;		#delete ongoing if older than 12h
 fi
-if [ ! -d $SCRIPT_FOLDER/posters ]										#check if exist and create folder for posters
+if [ ! -d $POSTERS_FOLDER ]										#check if exist and create folder for posters
 then
-	mkdir $SCRIPT_FOLDER/posters
+	mkdir $POSTERS_FOLDER
 else
-	find $SCRIPT_FOLDER/posters/* -mtime +30 -exec rm {} \;				#delete posters if older than 30 days
+	find $POSTERS_FOLDER/* -mtime +30 -exec rm {} \;				#delete posters if older than 30 days
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
 then
@@ -158,7 +158,7 @@ else
 fi
 
 # create clean list-animes.tsv (tvdb_id	title_plex) from meta.log
-line_start=$(grep -n "Mapping $ANIME_LIBRARY_NAME Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
+line_start=$(grep -n "Mapping "$ANIME_LIBRARY_NAME" Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 line_end=$(grep -n -m1 "$ANIME_LIBRARY_NAME Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
@@ -281,6 +281,6 @@ do
 	echo "    studio: ${mal_studios}"  >> $animes_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster																		# check / download poster
-	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $animes_titles					# add poster
+	echo "    file_poster: $POSTERS_FOLDER/${mal_id}.jpg" >> $animes_titles					# add poster
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
 done < $SCRIPT_FOLDER/ID/animes.tsv

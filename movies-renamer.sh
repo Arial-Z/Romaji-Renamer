@@ -43,20 +43,20 @@ function get-mal-rating () {
 jq .data.score -r $SCRIPT_FOLDER/data/movies/$mal_id.json
 }
 function get-mal-poster () {
-if [ ! -f $SCRIPT_FOLDER/posters/$mal_id.jpg ]
+if [ ! -f $POSTERS_FOLDER/$mal_id.jpg ]
 then
 	sleep 0.5
 	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
-	curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
+	curl "$mal_poster_url" > $POSTERS_FOLDER/$mal_id.jpg
 	sleep 1.5
 else
-	postersize=$(du -b $SCRIPT_FOLDER/posters/$mal_id.jpg | awk '{ print $1 }')
+	postersize=$(du -b $POSTERS_FOLDER/$mal_id.jpg | awk '{ print $1 }')
 	if [[ $postersize -lt 10000 ]]
 	then
-		rm $SCRIPT_FOLDER/posters/$mal_id.jpg
+		rm $POSTERS_FOLDER/$mal_id.jpg
 		sleep 0.5
 		mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/movies/$mal_id.json)
-		curl "$mal_poster_url" > $SCRIPT_FOLDER/posters/$mal_id.jpg
+		curl "$mal_poster_url" > $POSTERS_FOLDER/$mal_id.jpg
 		sleep 1.5
 	fi
 fi
@@ -98,11 +98,11 @@ then
 else
 	find $SCRIPT_FOLDER/data/movies/* -mmin +2880 -exec rm {} \;				#delete json data if older than 2 days
 fi
-if [ ! -d $SCRIPT_FOLDER/posters ]
+if [ ! -d $POSTERS_FOLDER ]
 then
-	mkdir $SCRIPT_FOLDER/posters
+	mkdir $POSTERS_FOLDER
 else
-	find $SCRIPT_FOLDER/posters/* -mtime +30 -exec rm {} \;
+	find $POSTERS_FOLDER/* -mtime +30 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
@@ -224,6 +224,6 @@ do
 	echo "    studio: ${mal_studios}"  >> $movies_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster																		# check / download poster
-	echo "    file_poster: $SCRIPT_FOLDER/posters/${mal_id}.jpg" >> $movies_titles					# add poster
+	echo "    file_poster: $POSTERS_FOLDER/${mal_id}.jpg" >> $movies_titles					# add poster
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
 done < $SCRIPT_FOLDER/ID/movies.tsv
