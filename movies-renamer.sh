@@ -134,18 +134,24 @@ fi
 curl "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > $SCRIPT_FOLDER/tmp/list-animes-id.json
 
 # Dummy run of PMM and move meta.log for creating imdb_id and title_plex
-rm $PMM_FOLDER_CONFIG/temp-movies.cache
 if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
 then
-	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-movies.yml
+	rm $PMM_FOLDER_CONFIG/temp-movies.cache
+	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-movies.cache
+	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
 then
-	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-movies.yml
+	rm $PMM_FOLDER_CONFIG/temp-movies.cache
+	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-movies.cache
+	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "python" ]
 then
-	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-movies.yml
+	rm $PMM_FOLDER_CONFIG/temp-movies.cache
+	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-movies.cache
+	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+else
+	echo "Set Plex Meta Manager install type in conf"
 fi
-mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 
 # create clean list-movies.tsv (imdb_id | title_plex) from meta.log
 line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
