@@ -6,6 +6,10 @@ DOCKER_CONTAINER_NAME=
 PMM_FOLDER=/path/to/plexmetamanager
 # PMM_FOLDER_CONFIG for all install type
 PMM_FOLDER_CONFIG=/path/to/plexmetamanager-config-folder
+# Plex animes library name
+$ANIME_LIBRARY_NAME=
+# Plex movies animes library name
+$MOVIE_LIBRARY_NAME=
 LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
 animes_titles=$PMM_FOLDER/config/animes/animes-mal.yml
 movies_titles=$PMM_FOLDER/config/animes/movies-mal.yml

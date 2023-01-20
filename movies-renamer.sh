@@ -144,7 +144,7 @@ then
 	docker exec -it $DOCKER_CONTAINER_NAME chmod 777 config/temp-movies.cache
 	docker exec -it $DOCKER_CONTAINER_NAME rm config/temp-movies.cache
 	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-movies.yml
-	docker exec -it $DOCKER_CONTAINER_NAME chmod 777 config/logs/meta.log
+	docker exec -it $DOCKER_CONTAINER_NAME chmod -R 777 config/logs/meta.log
 	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "python" ]
 then
@@ -156,8 +156,8 @@ else
 fi
 
 # create clean list-movies.tsv (imdb_id | title_plex) from meta.log
-line_start=$(grep -n "Mapping Animes Films Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-line_end=$(grep -n -m1 "Animes Films Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
+line_start=$(grep -n "Mapping $MOVIE_LIBRARY_NAME Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
+line_end=$(grep -n -m1 "$MOVIE_LIBRARY_NAME Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-movies.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
 

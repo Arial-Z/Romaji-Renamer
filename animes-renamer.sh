@@ -158,8 +158,8 @@ else
 fi
 
 # create clean list-animes.tsv (tvdb_id	title_plex) from meta.log
-line_start=$(grep -n "Mapping Animes Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-line_end=$(grep -n -m1 "Animes Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
+line_start=$(grep -n "Mapping $ANIME_LIBRARY_NAME Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
+line_end=$(grep -n -m1 "$ANIME_LIBRARY_NAME Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
 head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes.tsv
 
