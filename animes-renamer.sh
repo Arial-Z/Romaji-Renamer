@@ -52,7 +52,7 @@ then
 	sleep 1.5
 else
 	postersize=$(du -b $POSTERS_FOLDER/$mal_id.jpg | awk '{ print $1 }')
-	if [[ $postersize -lt 10000 ]]
+	if [[ $postersize -lt 2000 ]]
 	then
 		rm $POSTERS_FOLDER/$mal_id.jpg
 		sleep 0.5
