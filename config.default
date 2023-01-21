@@ -1,19 +1,36 @@
-# PMM_INSTALL_TYPE either "python_venv", "docker" or"python"
+# PMM_INSTALL_TYPE either "python_venv", "docker" or "python".
 PMM_INSTALL_TYPE=
-# DOCKER_CONTAINER_NAME Only for docker
+
+# DOCKER_CONTAINER_NAME Only for docker.
+# If not used, comment out.
 DOCKER_CONTAINER_NAME=plex-meta-manager
-# PMM_FOLDER PMM base folder for Python install skip in docker install type
+
+# PMM_FOLDER PMM base folder for Python.
+# Comment out when making use of docker install type!
 PMM_FOLDER=/path/to/plexmetamanager
+
 # PMM_FOLDER_CONFIG for all install type
 PMM_FOLDER_CONFIG=/path/to/plexmetamanager-config-folder
+
 # Plex animes library name need to be in a double quote
+# If not used, comment out.
 ANIME_LIBRARY_NAME="Animes"
+
 # Plex movies animes library name need to be in a double quote
+# If not used, comment out.
 MOVIE_LIBRARY_NAME="Animes Movies"
+
 # Folder where the poster are stored if you are running docker it should be in the PMM config folder
 POSTERS_FOLDER=$PMM_FOLDER_CONFIG/posters
-#IF YOUR ARE USING DOCKER folder where docker PMM need to look to find the poster
+
+#IF YOU ARE USING DOCKER folder where docker PMM need to look to find the poster.
 POSTERS_PMM_FOLDER=/config/posters
+
+# Folder where the logs of script are kept.
 LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
+
+# Folder of where animes-mal.yml and movies-mal.yml are saved.
+# Change $PMM_FOLDER to PMM_FOLDER_CONFIG when making use of DOCKER!
 animes_titles=$PMM_FOLDER/config/animes/animes-mal.yml
 movies_titles=$PMM_FOLDER/config/animes/movies-mal.yml
+
