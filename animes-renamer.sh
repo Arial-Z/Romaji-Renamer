@@ -143,10 +143,10 @@ then
 	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
 then
-	docker exec -it $DOCKER_CONTAINER_NAME chmod 777 config/temp-animes.cache
+	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/temp-animes.cache
 	rm $PMM_FOLDER_CONFIG/temp-animes.cache
-	docker exec -it $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-animes.yml
-	docker exec -it $DOCKER_CONTAINER_NAME chmod -R 777 config/logs/meta.log
+	docker exec -i $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-animes.yml
+	docker exec -i $DOCKER_CONTAINER_NAME chmod -R 777 config/logs/meta.log
 	mv $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
 elif [ "$PMM_INSTALL_TYPE"  == "python" ]
 then
