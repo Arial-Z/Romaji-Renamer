@@ -48,7 +48,7 @@ if [ ! -f $POSTERS_FOLDER/$mal_id.jpg ]										#check if exist
 then
 	sleep 0.5
 	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
-	curl "$mal_poster_url" > $POSTERS_FOLDER/$mal_id.jpg
+	wget -O $POSTERS_FOLDER/$mal_id.jpg "$mal_poster_url"
 	sleep 1.5
 else
 	postersize=$(du -b $POSTERS_FOLDER/$mal_id.jpg | awk '{ print $1 }')
@@ -57,7 +57,7 @@ else
 		rm $POSTERS_FOLDER/$mal_id.jpg
 		sleep 0.5
 		mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/animes/$mal_id.json)
-		curl "$mal_poster_url" > $POSTERS_FOLDER/$mal_id.jpg
+		wget -O $POSTERS_FOLDER/$mal_id.jpg "$mal_poster_url"
 		sleep 1.5
 	fi
 fi
