@@ -72,7 +72,7 @@ movies_titles=$PMM_FOLDER/config/animes/movies-mal.yml
 ```
 
 ### Step 4 - Configure PMM 
-  - Create a file in the PMM directory called: temp-animes.yml. This will be called by the bash script (animes-renamer.sh) to export the different Anime nd the corrosponding TVDB-ds<br/>
+  - Create a file in the PMM directory called: temp-animes.yml. This will be called by the bash script (animes-renamer.sh) to export the different Anime id the corrosponding TVDB-ids<br/>
   - Copy the contents of config.yml to temp-animes.yml (Same directory as config.yml)<br/>
   - Replace the contents of temp-animes.yml with the following:
 ```
