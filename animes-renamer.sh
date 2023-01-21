@@ -282,6 +282,12 @@ do
 	echo "    studio: ${mal_studios}"  >> $animes_titles
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster																# check / download poster
-	echo "    file_poster: $POSTERS_PMM_FOLDER/${mal_id}.jpg" >> $animes_titles
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
+	if [ "$PMM_INSTALL_TYPE"  == "docker" ]
+	then
+		echo "    file_poster: $POSTERS_PMM_FOLDER/${mal_id}.jpg" >> $animes_titles
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
+	else
+		echo "    file_poster: $POSTERS_FOLDER/${mal_id}.jpg" >> $animes_titles
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
+	fi
 done < $SCRIPT_FOLDER/ID/animes.tsv
