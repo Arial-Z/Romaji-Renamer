@@ -2,7 +2,7 @@
 
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 source $SCRIPT_FOLDER/config.conf
-source $SCRIPT_FOLDER/function.sh
+source $SCRIPT_FOLDER/functions.sh
 LOG=$LOG_FOLDER/animes_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/missing-id.log
 
