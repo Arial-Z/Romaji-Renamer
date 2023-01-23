@@ -6,48 +6,8 @@ source $SCRIPT_FOLDER/functions.sh
 LOG=$LOG_FOLDER/movies_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/missing-id.log
 
-check if files and folder exist
-if [ ! -f $movies_titles ]
-then
-	echo "metadata:" > $movies_titles
-else
-	rm $movies_titles
-	echo "metadata:" > $movies_titles
-fi
-if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
-then
-	mkdir $SCRIPT_FOLDER/data
-fi
-if [ ! -d $SCRIPT_FOLDER/data/movies ]
-then
-	mkdir $SCRIPT_FOLDER/data/movies
-else
-	find $SCRIPT_FOLDER/data/* -mmin +2880 -exec rm {} \;				#delete json data if older than 2 days
-fi
-if [ ! -d $POSTERS_FOLDER ]
-then
-	mkdir $POSTERS_FOLDER
-else
-	find $POSTERS_FOLDER/* -mtime +30 -exec rm {} \;
-fi
-if [ ! -d $SCRIPT_FOLDER/ID ]
-then
-	mkdir $SCRIPT_FOLDER/ID
-	touch $SCRIPT_FOLDER/ID/movies.tsv
-elif [ ! -f $SCRIPT_FOLDER/ID/movies.tsv ]
-then
-	touch $SCRIPT_FOLDER/ID/movies.tsv
-else
-	rm $SCRIPT_FOLDER/ID/movies.tsv
-	touch $SCRIPT_FOLDER/ID/movies.tsv
-fi
-if [ ! -d $LOG_FOLDER ]
-then
-	mkdir $LOG_FOLDER
-fi
-
-# Dummy run of PMM and move meta.log for creating imdb_id and title_plex
-if [ ! -d $SCRIPT_FOLDER/tmp ]
+# Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
+if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if temp folder exist and create or clean it at the start of every run
 then
 	mkdir $SCRIPT_FOLDER/tmp
 else
@@ -73,6 +33,42 @@ then
 else
 	echo "Set Plex Meta Manager install type in conf"
 	exit 1
+fi
+
+# check if files and folder exist
+if [ ! -f $movies_titles ]
+then
+	echo "metadata:" > $movies_titles
+else
+	rm $movies_titles
+	echo "metadata:" > $movies_titles
+fi
+if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
+then
+	mkdir $SCRIPT_FOLDER/data
+else
+	find $SCRIPT_FOLDER/data/* -mmin +2880 -exec rm {} \;				#delete json data if older than 2 days
+fi
+if [ ! -d $POSTERS_FOLDER ]
+then
+	mkdir $POSTERS_FOLDER
+else
+	find $POSTERS_FOLDER/* -mtime +30 -exec rm {} \;
+fi
+if [ ! -d $SCRIPT_FOLDER/ID ]
+then
+	mkdir $SCRIPT_FOLDER/ID
+	touch $SCRIPT_FOLDER/ID/movies.tsv
+elif [ ! -f $SCRIPT_FOLDER/ID/movies.tsv ]
+then
+	touch $SCRIPT_FOLDER/ID/movies.tsv
+else
+	rm $SCRIPT_FOLDER/ID/movies.tsv
+	touch $SCRIPT_FOLDER/ID/movies.tsv
+fi
+if [ ! -d $LOG_FOLDER ]
+then
+	mkdir $LOG_FOLDER
 fi
 
 # Download anime mapping json data

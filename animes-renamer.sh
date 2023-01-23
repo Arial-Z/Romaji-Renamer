@@ -7,7 +7,7 @@ LOG=$LOG_FOLDER/animes_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/missing-id.log
 
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
-if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if exist and create temp folder cleaned at the start of every run
+if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if temp folder exist and create or clean it at the start of every run
 then
 	mkdir $SCRIPT_FOLDER/tmp
 else
@@ -35,7 +35,7 @@ else
 	exit 1
 fi
 
-# download pmm animes mapping and check if files and folder exist
+# check if files and folder exist
 if [ ! -f $animes_titles ]											#check if metadata files exist and echo first line
 then
 	echo "metadata:" > $animes_titles
@@ -46,10 +46,6 @@ fi
 if [ ! -d $SCRIPT_FOLDER/data ]										#check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/data
-fi
-if [ ! -d $SCRIPT_FOLDER/data/animes ]
-then
-	mkdir $SCRIPT_FOLDER/data/animes
 else
 	find $SCRIPT_FOLDER/data/* -mmin +2880 -exec rm {} \;			#delete json data if older than 2 days
 	find $SCRIPT_FOLDER/data/ongoing.tsv -mmin +720 -exec rm {} \;		#delete ongoing if older than 12h
@@ -141,7 +137,7 @@ then
 	done
 	while read -r mal_id
 	do
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $mal_id
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
 		then
 			printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 		else
@@ -151,10 +147,10 @@ then
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
 				continue
 			else
-				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $tvdb_id
+				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 				then
-					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
-					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $2}')
+					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
+					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
 					printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 				else
 					mal_id=$(get-mal-id-from-tvdb-id)
