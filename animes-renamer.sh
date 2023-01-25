@@ -73,7 +73,7 @@ then
 fi
 
 # Download anime mapping json data
-curl "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > $SCRIPT_FOLDER/tmp/list-animes-id.json
+downlaod-anime-id-mapping
 
 # create clean list-animes.tsv (tvdb_id	title_plex) from meta.log
 line_start=$(grep -n "Mapping "$ANIME_LIBRARY_NAME" Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)

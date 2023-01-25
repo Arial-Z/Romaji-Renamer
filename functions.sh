@@ -79,3 +79,22 @@ else
 	mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
 fi
 }
+function downlaod-anime-id-mapping () {
+if [ -d $SCRIPT_FOLDER/tmp/list-animes-id.json ]
+then
+	rm $SCRIPT_FOLDER/tmp/list-animes-id.json
+fi
+wait_time=0
+while [ $wait_time -lt 4 ];
+do
+	wget -O $SCRIPT_FOLDER/tmp/list-animes-id.json "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json"
+	size=$(du -b $SCRIPT_FOLDER/tmp/list-animes-id.json | awk '{ print $1 }')
+	if [[ $size -lt 1000 ]]
+	then
+		sleep 30
+	else
+		break
+	fi
+	((wait_time++))
+done
+}
