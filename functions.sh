@@ -85,7 +85,7 @@ then
 	rm $SCRIPT_FOLDER/tmp/list-animes-id.json
 fi
 wait_time=0
-while [ $wait_time -lt 4 ];
+while [ $wait_time -le 4 ];
 do
 	wget -O $SCRIPT_FOLDER/tmp/list-animes-id.json "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json"
 	size=$(du -b $SCRIPT_FOLDER/tmp/list-animes-id.json | awk '{ print $1 }')
@@ -97,6 +97,9 @@ do
 	fi
 	((wait_time++))
 done
-echo "can't download anime ID mapping file"
-exit 0
+if [[ $wait_time = 4 ]]
+then
+	echo "can't download anime ID mapping file"
+	exit 1
+fi
 }
