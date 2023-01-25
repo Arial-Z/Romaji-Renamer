@@ -97,4 +97,6 @@ do
 	fi
 	((wait_time++))
 done
+echo "can't download anime ID mapping file"
+exit 0
 }
