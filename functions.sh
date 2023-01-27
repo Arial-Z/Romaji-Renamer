@@ -1,6 +1,39 @@
 #!/bin/bash
 
+#General variables
+LOG=$LOG_FOLDER/$TYOE_$(date +%Y.%m.%d).log
+MATCH_LOG=$LOG_FOLDER/missing-id.log
+
 # functions
+function pmm-id-run () {
+if [ ! -d $SCRIPT_FOLDER/tmp ]
+then
+	mkdir $SCRIPT_FOLDER/tmp
+else
+	rm $SCRIPT_FOLDER/tmp/*
+fi
+if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
+then
+	rm $PMM_FOLDER_CONFIG/temp-$media_type.cache
+	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-$media_type.yml
+	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
+then
+	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/temp-$media_type.cache
+	docker exec -i $DOCKER_CONTAINER_NAME rm config/temp-$media_type.cache
+	docker exec -i $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-$media_type.yml
+	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/logs/meta.log
+	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+elif [ "$PMM_INSTALL_TYPE"  == "python" ]
+then
+	rm $PMM_FOLDER_CONFIG/temp-$media_type.cache
+	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-$media_type.yml
+	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
+else
+	echo "Set Plex Meta Manager install type in conf"
+	exit 1
+fi
+}
 function get-mal-id-from-tvdb-id () {
 jq ".[] | select( .tvdb_id == ${tvdb_id} ) | select( .tvdb_season == 1 ) | select( .tvdb_epoffset == 0 ) | .mal_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
@@ -79,7 +112,7 @@ else
 	mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
 fi
 }
-function downlaod-anime-id-mapping () {
+function download-anime-id-mapping () {
 wait_time=0
 while [ $wait_time -lt 4 ];
 do
@@ -121,7 +154,7 @@ printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 mal_tags=$(get-mal-tags)
 echo "    genre.sync: Anime,${mal_tags}"  >> $METADATA									# tags (genres, themes and demographics from MAL)
 printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
-if [[ $OVERRIDE == override-ID-animes.tsv ]]
+if [[ $media_type= == "animes" ]]
 then
 	if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "$mal_id"		# Ongoing label according to MAL airing list
 	then

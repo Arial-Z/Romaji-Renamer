@@ -1,40 +1,14 @@
 #!/bin/bash
 
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
+media_type=animes
 source $SCRIPT_FOLDER/config.conf
 source $SCRIPT_FOLDER/functions.sh
-LOG=$LOG_FOLDER/animes_$(date +%Y.%m.%d).log
-MATCH_LOG=$LOG_FOLDER/missing-id.log
 METADATA=$METADATA_ANIMES
-OVERRIDE=override-ID-animes.tsv
+OVERRIDE=override-ID-$media_type.tsv
 
-if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if temp folder exist and create or clean it at the start of every run
-then
-	mkdir $SCRIPT_FOLDER/tmp
-else
-	rm $SCRIPT_FOLDER/tmp/*
-fi
-if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
-then
-	rm $PMM_FOLDER_CONFIG/temp-animes.cache
-	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
-	cp $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
-elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
-then
-	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/temp-animes.cache
-	docker exec -i $DOCKER_CONTAINER_NAME rm config/temp-animes.cache
-	docker exec -i $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-animes.yml
-	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/logs/meta.log
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
-elif [ "$PMM_INSTALL_TYPE"  == "python" ]
-then
-	rm $PMM_FOLDER_CONFIG/temp-animes.cache
-	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER/config/temp-animes.yml
-	cp $PMM_FOLDER/config/logs/meta.log $SCRIPT_FOLDER/tmp
-else
-	echo "Set Plex Meta Manager install type in conf"
-	exit 1
-fi
+#check temp folder + run of pmm for ID
+pmm-id-run
 
 # check if files and folder exist
 echo "metadata:" > $METADATA
@@ -42,14 +16,14 @@ if [ ! -d $SCRIPT_FOLDER/data ]										#check if exist and create folder for j
 then
 	mkdir $SCRIPT_FOLDER/data
 else
-	find $SCRIPT_FOLDER/data/* -mmin +2880 -exec rm {} \;			#delete json data if older than 2 days
-	find $SCRIPT_FOLDER/data/ongoing.tsv -mmin +720 -exec rm {} \;		#delete ongoing if older than 12h
+	find $SCRIPT_FOLDER/data/* -mmin +2880 -exec rm {} \;					#delete json data if older than 2 days
+	find $SCRIPT_FOLDER/data/ongoing.tsv -mmin +720 -exec rm {} \;			#delete ongoing if older than 12h
 fi
-if [ ! -d $POSTERS_FOLDER ]										#check if exist and create folder for posters
+if [ ! -d $POSTERS_FOLDER ]											#check if exist and create folder for posters
 then
 	mkdir $POSTERS_FOLDER
 else
-	find $POSTERS_FOLDER/* -mtime +30 -exec rm {} \;				#delete posters if older than 30 days
+	find $POSTERS_FOLDER/* -mtime +30 -exec rm {} \;						#delete posters if older than 30 days
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
 then
@@ -68,7 +42,7 @@ then
 fi
 
 # Download anime mapping json data
-downlaod-anime-id-mapping
+download-anime-id-mapping
 
 # create clean list-animes.tsv (tvdb_id	title_plex) from meta.log
 line_start=$(grep -n "Mapping "$ANIME_LIBRARY_NAME" Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
@@ -96,13 +70,13 @@ do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 	then
 		mal_id=$(get-mal-id-from-tvdb-id)
-		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no mal id
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 			continue
 		fi
 		anilist_id=$(get-anilist-id)
-		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid Anilist ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 			continue
@@ -116,10 +90,10 @@ do
 done < $SCRIPT_FOLDER/tmp/list-animes.tsv
 
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
-if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]              												# check if already exist
+if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]              								# check if already exist
 then
-	ongoingpage=1
-	while [ $ongoingpage -lt 10 ];																	# get the airing list from jikan API max 9 pages (225 animes)
+	ongoingpage=0
+	while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 	do
 		curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
 		sleep 2
@@ -149,8 +123,7 @@ then
 					printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 				else
 					mal_id=$(get-mal-id-from-tvdb-id)
-					if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
-					then
+					if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id
 						echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid MAL ID for : TVDB : $tvdb_id" >> $LOG
 						continue
 					else

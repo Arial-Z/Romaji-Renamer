@@ -1,40 +1,14 @@
 #!/bin/bash
 
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
+media_type=movies
 source $SCRIPT_FOLDER/config.conf
 source $SCRIPT_FOLDER/functions.sh
-LOG=$LOG_FOLDER/movies_$(date +%Y.%m.%d).log
-MATCH_LOG=$LOG_FOLDER/missing-id.log
 METADATA=$METADATA_MOVIES
-OVERRIDE=override-ID-movies.tsv
+OVERRIDE=override-ID-$media_type.tsv
 
-if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if temp folder exist and create or clean it at the start of every run
-then
-	mkdir $SCRIPT_FOLDER/tmp
-else
-	rm $SCRIPT_FOLDER/tmp/*
-fi
-if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
-then
-	rm $PMM_FOLDER_CONFIG/temp-movies.cache
-	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-movies.yml
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
-elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
-then
-	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/temp-movies.cache
-	docker exec -i $DOCKER_CONTAINER_NAME rm config/temp-movies.cache
-	docker exec -i $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-movies.yml
-	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/logs/meta.log
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
-elif [ "$PMM_INSTALL_TYPE"  == "python" ]
-then
-	rm $PMM_FOLDER_CONFIG/temp-movies.cache
-	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-movies.yml
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
-else
-	echo "Set Plex Meta Manager install type in conf"
-	exit 1
-fi
+#check temp folder + run of pmm for ID
+pmm-id-run
 
 # check if files and folder exist
 echo "metadata:" > $METADATA
@@ -67,7 +41,7 @@ then
 fi
 
 # Download anime mapping json data
-downlaod-anime-id-mapping
+download-anime-id-mapping
 
 
 # create clean list-movies.tsv (imdb_id | title_plex) from meta.log
