@@ -154,7 +154,7 @@ printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 mal_tags=$(get-mal-tags)
 echo "    genre.sync: Anime,${mal_tags}"  >> $METADATA									# tags (genres, themes and demographics from MAL)
 printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
-if [[ $media_type= == "animes" ]]
+if [[ $media_type == "animes" ]]
 then
 	if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "$mal_id"		# Ongoing label according to MAL airing list
 	then
