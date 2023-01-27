@@ -5,6 +5,8 @@ source $SCRIPT_FOLDER/config.conf
 source $SCRIPT_FOLDER/functions.sh
 LOG=$LOG_FOLDER/movies_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/missing-id.log
+METADATA=$METADATA_MOVIES
+OVERRIDE=override-ID-movies.tsv
 
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
 if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if temp folder exist and create or clean it at the start of every run
@@ -122,35 +124,6 @@ done < $SCRIPT_FOLDER/tmp/list-movies.tsv
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_anime title_plex
 do
-	get-mal-infos
-	echo "  \"$title_anime\":" >> $movies_titles
-	echo "    alt_title: \"$title_plex\"" >> $movies_titles
-	echo "    sort_title: \"$title_anime\"" >> $movies_titles
-	title_eng=$(get-mal-eng-title)
-	if [ "$title_eng" == "null" ]
-	then
-		echo "    original_title: \"$title_anime\"" >> $movies_titles
-	else 
-		echo "    original_title: \"$title_eng\"" >> $movies_titles
-	fi
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
-	score_mal=$(get-mal-rating)
-	echo "    critic_rating: $score_mal" >> $movies_titles									# rating (critic)
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
-	mal_tags=$(get-mal-tags)
-	echo "    genre.sync: Anime,${mal_tags}"  >> $movies_titles									# tags (genres, themes and demographics from MAL)
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
-	get-mal-studios
-	echo "    studio: ${mal_studios}"  >> $movies_titles
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
-	get-mal-poster																		# check / download poster
-	if [ "$PMM_INSTALL_TYPE"  == "docker" ]
-	then
-		echo "    file_poster: $POSTERS_PMM_FOLDER/${mal_id}.jpg" >> $movies_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
-	else
-		echo "    file_poster: $POSTERS_FOLDER/${mal_id}.jpg" >> $movies_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
-	fi
+	write-metadata
 done < $SCRIPT_FOLDER/ID/movies.tsv
 exit 0

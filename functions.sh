@@ -65,10 +65,10 @@ function get-mal-tags () {
 (jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 }
 function get-mal-studios() {
-if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/override-ID-animes.tsv | grep -w  $mal_id
+if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
 then
-     line=$(grep -w -n $mal_id $SCRIPT_FOLDER/override-ID-animes.tsv | cut -d : -f 1)
-	studio=$(sed -n "${line}p" $SCRIPT_FOLDER/override-ID-animes.tsv | awk -F"\t" '{print $4}')
+     line=$(grep -w -n $mal_id $SCRIPT_FOLDER/$OVERRIDE | cut -d : -f 1)
+	studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
      if [[ -z "$studio" ]]
 	then
           mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
@@ -102,4 +102,50 @@ do
 	fi
 	sleep 30
 done
+}
+function write-metadata () {
+get-mal-infos
+echo "  \"$title_anime\":" >> $METADATA
+if [[ $title_anime != $title_plex ]]
+then
+	echo "    alt_title: \"$title_plex\"" >> $METADATA
+fi
+echo "    sort_title: \"$title_anime\"" >> $METADATA
+title_eng=$(get-mal-eng-title)
+if [ "$title_eng" == "null" ]
+then
+	echo "    original_title: \"$title_anime\"" >> $METADATA
+else 
+	echo "    original_title: \"$title_eng\"" >> $METADATA
+fi
+printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
+score_mal=$(get-mal-rating)
+echo "    critic_rating: $score_mal" >> $METADATA									# rating (critic)
+printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
+mal_tags=$(get-mal-tags)
+echo "    genre.sync: Anime,${mal_tags}"  >> $METADATA									# tags (genres, themes and demographics from MAL)
+printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
+if [[ $OVERRIDE == override-ID-animes.tsv ]]
+then
+	if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "$mal_id"		# Ongoing label according to MAL airing list
+	then
+		echo "    label: Ongoing" >> $METADATA
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel add Ongoing\n" >> $LOG
+	else
+		echo "    label.remove: Ongoing" >> $METADATA
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
+	fi
+fi
+get-mal-studios
+echo "    studio: ${mal_studios}"  >> $METADATA
+printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
+get-mal-poster																# check / download poster
+if [ "$PMM_INSTALL_TYPE"  == "docker" ]
+then
+	echo "    file_poster: $POSTERS_PMM_FOLDER/${mal_id}.jpg" >> $METADATA
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
+else
+	echo "    file_poster: $POSTERS_FOLDER/${mal_id}.jpg" >> $METADATA
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
+fi
 }

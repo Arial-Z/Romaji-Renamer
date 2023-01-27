@@ -5,6 +5,8 @@ source $SCRIPT_FOLDER/config.conf
 source $SCRIPT_FOLDER/functions.sh
 LOG=$LOG_FOLDER/animes_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/missing-id.log
+METADATA=$METADATA_ANIMES
+OVERRIDE=override-ID-animes.tsv
 
 # Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
 if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if temp folder exist and create or clean it at the start of every run
@@ -170,43 +172,6 @@ fi
 # write PMM metadata file from ID/animes.tsv and jikan API
 while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex
 do
-	get-mal-infos
-	echo "  \"$title_anime\":" >> $animes_titles
-	echo "    alt_title: \"$title_plex\"" >> $animes_titles
-	echo "    sort_title: \"$title_anime\"" >> $animes_titles
-	title_eng=$(get-mal-eng-title)
-	if [ "$title_eng" == "null" ]
-	then
-		echo "    original_title: \"$title_anime\"" >> $animes_titles
-	else 
-		echo "    original_title: \"$title_eng\"" >> $animes_titles
-	fi
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
-	score_mal=$(get-mal-rating)
-	echo "    critic_rating: $score_mal" >> $animes_titles									# rating (critic)
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
-	mal_tags=$(get-mal-tags)
-	echo "    genre.sync: Anime,${mal_tags}"  >> $animes_titles									# tags (genres, themes and demographics from MAL)
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
-	if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "$mal_id"		# Ongoing label according to MAL airing list
-	then
-		echo "    label: Ongoing" >> $animes_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel add Ongoing\n" >> $LOG
-	else
-		echo "    label.remove: Ongoing" >> $animes_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
-	fi
-	get-mal-studios
-	echo "    studio: ${mal_studios}"  >> $animes_titles
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
-	get-mal-poster																# check / download poster
-	if [ "$PMM_INSTALL_TYPE"  == "docker" ]
-	then
-		echo "    file_poster: $POSTERS_PMM_FOLDER/${mal_id}.jpg" >> $animes_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
-	else
-		echo "    file_poster: $POSTERS_FOLDER/${mal_id}.jpg" >> $animes_titles
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tPoster added\n" >> $LOG
-	fi
+	write-metadata
 done < $SCRIPT_FOLDER/ID/animes.tsv
 exit 0

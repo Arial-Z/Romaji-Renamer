@@ -30,8 +30,8 @@ POSTERS_FOLDER=$PMM_FOLDER_CONFIG/posters
 #MOVIE_LIBRARY_NAME="Animes Movies"
 
 # Folder of where animes-mal.yml and movies-mal.yml are saved.
-animes_titles=$PMM_FOLDER/config/animes/animes-mal.yml
-movies_titles=$PMM_FOLDER/config/animes/movies-mal.yml
+METADATA_ANIMES=$PMM_FOLDER/config/animes/animes-mal.yml
+METADATA_MOVIES=$PMM_FOLDER/config/animes/movies-mal.yml
 
 # Folder where the logs of script are kept.
 LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
