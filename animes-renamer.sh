@@ -8,7 +8,6 @@ MATCH_LOG=$LOG_FOLDER/missing-id.log
 METADATA=$METADATA_ANIMES
 OVERRIDE=override-ID-animes.tsv
 
-# Dummy run of PMM and move meta.log for creating tvdb_id and title_plex
 if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if temp folder exist and create or clean it at the start of every run
 then
 	mkdir $SCRIPT_FOLDER/tmp
