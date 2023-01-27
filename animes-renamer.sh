@@ -38,13 +38,7 @@ else
 fi
 
 # check if files and folder exist
-if [ ! -f $animes_titles ]											#check if metadata files exist and echo first line
-then
-	echo "metadata:" > $animes_titles
-else
-	rm $animes_titles
-	echo "metadata:" > $animes_titles
-fi
+echo "metadata:" > $METADATA
 if [ ! -d $SCRIPT_FOLDER/data ]										#check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/data
