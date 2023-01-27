@@ -124,6 +124,7 @@ then
 				else
 					mal_id=$(get-mal-id-from-tvdb-id)
 					if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id
+					then
 						echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid MAL ID for : TVDB : $tvdb_id" >> $LOG
 						continue
 					else
