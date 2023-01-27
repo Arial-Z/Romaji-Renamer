@@ -80,10 +80,6 @@ else
 fi
 }
 function downlaod-anime-id-mapping () {
-if [ -d $SCRIPT_FOLDER/tmp/list-animes-id.json ]
-then
-	rm $SCRIPT_FOLDER/tmp/list-animes-id.json
-fi
 wait_time=0
 while [ $wait_time -lt 4 ];
 do
