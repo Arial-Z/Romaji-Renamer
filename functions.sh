@@ -134,11 +134,13 @@ done
 }
 function write-metadata () {
 get-mal-infos
-echo "  \"$title_anime\":" >> $METADATA
-if [[ $title_anime != $title_plex ]]
+if [[ $media_type == "animes" ]]
 then
-	echo "    alt_title: \"$title_plex\"" >> $METADATA
+	echo "  $tvdb_id:" >> $METADATA
+else
+	echo "  $imdb_id:" >> $METADATA
 fi
+echo "    title: \"$title_anime\"" >> $METADATA	
 echo "    sort_title: \"$title_anime\"" >> $METADATA
 title_eng=$(get-mal-eng-title)
 if [ "$title_eng" == "null" ]
