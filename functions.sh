@@ -35,7 +35,7 @@ else
 fi
 }
 function get-mal-id-from-tvdb-id () {
-jq ".[] | select( .tvdb_id == ${tvdb_id} ) | select( .tvdb_season == 1 ) | select( .tvdb_epoffset == 0 ) | .mal_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
+jq ".[] | select( .tvdb_id == ${tvdb_id} ) | select( .tvdb_season == 1  or .tvdb_season == -1 ) | select( .tvdb_epoffset == 0 ) | .mal_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
 function get-mal-id-from-imdb-id () {
 imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
