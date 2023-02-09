@@ -39,10 +39,15 @@ jq ".[] | select( .tvdb_id == ${tvdb_id} ) | select( .tvdb_season == 1  or .tvdb
 }
 function get-mal-id-from-imdb-id () {
 imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
-jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/list-animes-id.json | jq .mal_id | sort -n | head -1
+jq ".[] | select( .imdb_id == ${imdb_jq} )" -r $SCRIPT_FOLDER/tmp/list-movies-id.json | jq .mal_id | sort -n | head -1
 }
 function get-anilist-id () {
-jq ".[] | select( .mal_id == ${mal_id} ) | .anilist_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
+if [[ $media_type == "animes" ]]
+then
+	jq ".[] | select( .mal_id == ${mal_id} ) | .anilist_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
+else
+	jq ".[] | select( .mal_id == ${mal_id} ) | .anilist_id" -r $SCRIPT_FOLDER/tmp/list-movies-id.json
+fi
 }
 function get-tvdb-id () {
 jq ".[] | select( .mal_id == ${mal_id} ) | .tvdb_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
