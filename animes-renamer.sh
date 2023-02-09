@@ -54,9 +54,9 @@ sed 's/^[ \t]*//;s/[ \t]*$//' < $SCRIPT_FOLDER/tmp/list-animes-dirty.tsv > $SCRI
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_anime studio									# First add the override animes to the ID file
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-animes.tsv | grep -w  $tvdb_id
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-animes.tsv | grep -w $tvdb_id
 		then
 			line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
 			title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-animes.tsv | awk -F"\t" '{print $2}')
@@ -67,7 +67,7 @@ do
 done < $SCRIPT_FOLDER/override-ID-animes.tsv
 while IFS=$'\t' read -r tvdb_id title_plex											# then get the other ID from the ID mapping and download json data
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 	then
 		mal_id=$(get-mal-id-from-tvdb-id)
 		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no mal id
