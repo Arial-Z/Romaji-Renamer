@@ -1,7 +1,7 @@
 #!/bin/bash
 
 #General variables
-LOG=$LOG_FOLDER/$TYOE_$(date +%Y.%m.%d).log
+LOG=$LOG_FOLDER/$media_type_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/missing-id.log
 
 # functions
