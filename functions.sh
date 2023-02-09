@@ -38,8 +38,7 @@ function get-mal-id-from-tvdb-id () {
 jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
 function get-mal-id-from-imdb-id () {
-imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
-jq --arg imdb_jq "$imdb_jq" '.[] | select( .imdb_id == $imdb_jq )' -r $SCRIPT_FOLDER/tmp/list-movies-id.json | jq .mal_id | sort -n | head -1
+jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_jq )' -r $SCRIPT_FOLDER/tmp/list-movies-id.json | jq .mal_id | sort -n | head -1
 }
 function get-anilist-id () {
 if [[ $media_type == "animes" ]]
