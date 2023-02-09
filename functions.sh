@@ -35,22 +35,22 @@ else
 fi
 }
 function get-mal-id-from-tvdb-id () {
-jq ".[] | select( .tvdb_id == "${tvdb_id}" ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .mal_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
+jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
 function get-mal-id-from-imdb-id () {
 imdb_jq=$(echo $imdb_id | awk '{print "\""$1"\""}' )
-jq ".[] | select( .imdb_id == "${imdb_jq}" )" -r $SCRIPT_FOLDER/tmp/list-movies-id.json | jq .mal_id | sort -n | head -1
+jq --arg imdb_jq "$imdb_jq" '.[] | select( .imdb_id == $imdb_jq )' -r $SCRIPT_FOLDER/tmp/list-movies-id.json | jq .mal_id | sort -n | head -1
 }
 function get-anilist-id () {
 if [[ $media_type == "animes" ]]
 then
-	jq ".[] | select( .mal_id == "${mal_id}" ) | .anilist_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
+	jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 else
-	jq ".[] | select( .mal_id == "${mal_id}" ) | .anilist_id" -r $SCRIPT_FOLDER/tmp/list-movies-id.json
+	jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-movies-id.json
 fi
 }
 function get-tvdb-id () {
-jq ".[] | select( .mal_id == "${mal_id}" ) | .tvdb_id" -r $SCRIPT_FOLDER/tmp/list-animes-id.json
+jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
 function get-mal-infos () {
 if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ] 										#check if exist
@@ -72,19 +72,19 @@ then
 fi
 }
 function get-anilist-title () {
-jq .data.Media.title.romaji -r $SCRIPT_FOLDER/data/title-$mal_id.json
+jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
 }
 function get-mal-eng-title () {
-jq .data.title_english -r $SCRIPT_FOLDER/data/$mal_id.json
+jq '.data.title_english' -r $SCRIPT_FOLDER/data/$mal_id.json
 }
 function get-mal-rating () {
-jq .data.score -r $SCRIPT_FOLDER/data/$mal_id.json
+jq '.data.score' -r $SCRIPT_FOLDER/data/$mal_id.json
 }
 function get-mal-poster () {
 if [ ! -f $POSTERS_FOLDER/$mal_id.jpg ]										#check if exist
 then
 	sleep 0.5
-	mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
+	mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 	wget --no-use-server-timestamps -O $POSTERS_FOLDER/$mal_id.jpg "$mal_poster_url"
 	sleep 1.5
 else
@@ -93,7 +93,7 @@ else
 	then
 		rm $POSTERS_FOLDER/$mal_id.jpg
 		sleep 0.5
-		mal_poster_url=$(jq .data.images.jpg.large_image_url -r $SCRIPT_FOLDER/data/$mal_id.json)
+		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 		wget --no-use-server-timestamps -O $POSTERS_FOLDER/$mal_id.jpg "$mal_poster_url"
 		sleep 1.5
 	fi
