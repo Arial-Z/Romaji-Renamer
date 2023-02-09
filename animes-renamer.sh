@@ -98,6 +98,7 @@ then
 		curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
 		sleep 2
 		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing.tsv				# store the mal ID of the ongoing show
+		echo "1"
 		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json								# stop if page is empty
 		then
 			break
@@ -106,6 +107,7 @@ then
 	done
 	while read -r mal_id
 	do
+		echo "2"
 		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
 		then
 			printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
@@ -116,8 +118,10 @@ then
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
 				continue
 			else
+				echo "3"
 				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id
 				then
+					echo "4"
 					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
 					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
 					printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
