@@ -55,7 +55,7 @@ if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]										#check if exist
 then
 	sleep 0.5
 	mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-	mkdir "$ASSET_FOLDER/$asset_name/poster.jpg"
+	mkdir "$ASSET_FOLDER/$asset_name"
 	wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
 	sleep 1.5
 else
@@ -64,7 +64,7 @@ else
 	then
 		rm "$ASSET_FOLDER/$asset_name/poster.jpg"
 		sleep 0.5
-		mkdir "$ASSET_FOLDER/$asset_name/poster.jpg"
+		mkdir "$ASSET_FOLDER/$asset_name"
 		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 		wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
 		sleep 1.5
