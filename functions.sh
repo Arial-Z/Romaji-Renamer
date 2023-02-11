@@ -55,8 +55,10 @@ if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]										#check if exist
 then
 	sleep 0.5
 	mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-	wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
-	sleep 1.5
+	wget --no-use-server-timestamps -O $SCRIPT_FOLDER/tmp/$mal_id.jpg "$mal_poster_url"
+	sleep 0.5
+	mv "$SCRIPT_FOLDER/tmp/$mal_id.jpg" "$ASSET_FOLDER/$asset_name/poster.jpg"
+	sleep 1
 else
 	postersize=$(du -b "$ASSET_FOLDER/$asset_name/poster.jpg" | awk '{ print $1 }')
 	if [[ $postersize -lt 10000 ]]
@@ -64,8 +66,10 @@ else
 		rm "$ASSET_FOLDER/$asset_name/poster.jpg"
 		sleep 0.5
 		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-		wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
-		sleep 1.5
+		wget --no-use-server-timestamps -O $SCRIPT_FOLDER/tmp/$mal_id.jpg "$mal_poster_url"
+		sleep 0.5
+		mv "$SCRIPT_FOLDER/tmp/$mal_id.jpg" "$ASSET_FOLDER/$asset_name/poster.jpg"
+		sleep 1
 	fi
 fi
 }
