@@ -39,24 +39,19 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
 ### Step 3 - Configure the script
   - Extract the script on a desired location.<br/>
   - Navigate to its location.<br/>
-  - Rename config.default to config.conf<br/>
-  - Edit config.conf and fill out the necessary variables.<br/>
+  - Rename default.env to .env<br/>
+  - Edit config.conf and fill out the variables.<br/>
 ```
-#Plex url
+#Plex url (Needed)
 plex_url=http://127.0.0.1:32400
-#Plex token
+#Plex token 
 plex_token=zadazdzadazdazdazdazdazd
 
-# PMM_FOLDER_CONFIG for docker install type
-# uncomment when making use of docker install type!
-#PMM_FOLDER_CONFIG=/path/to/plexmetamanager-config-folder
+# PMM_FOLDER_CONFIG need to filled 
+PMM_FOLDER_CONFIG=
 
-# Folder where the poster are stored if you are running docker it should be in the PMM config folder
-POSTERS_FOLDER=$PMM_FOLDER_CONFIG/posters
-
-#IF YOU ARE USING DOCKER folder where docker PMM need to look to find the poster.
-# uncomment when making use of docker install type!
-#POSTERS_PMM_FOLDER=/config/posters
+# PMM Asset Folder to import posters
+ASSET_FOLDER=$PMM_FOLDER_CONFIG/assets
 
 # Plex animes library name need to be in a double quote
 # If used, uncomment
