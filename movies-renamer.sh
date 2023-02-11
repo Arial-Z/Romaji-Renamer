@@ -51,7 +51,7 @@ head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_st
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
 
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
-while IFS=$'\t' read -r imdb_id mal_id title_anime studio									# First add the override animes to the ID file
+while IFS=$'\t' read -r imdb_id mal_id title_anime studio
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 	then
