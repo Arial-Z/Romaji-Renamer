@@ -19,7 +19,7 @@ if [ ! -d $POSTERS_FOLDER ]
 then
 	mkdir $POSTERS_FOLDER
 else
-	find $POSTERS_FOLDER/* -mtime +30 -exec rm {} \;
+	find $ASSET_FOLDER/$asset_name/* -mtime +30 -exec rm {} \;
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
