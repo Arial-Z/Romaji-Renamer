@@ -13,17 +13,25 @@ The following are imported in your PMS:
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is untested</b>
   
  ## How it works:
-  - Plex-Romaji-Renamer will export Anime and TVDBids from your PMS library to Plex-Meta-Manager (PMM);
-  - Then it will then retrieve the MAL IDs from a modified PMM file: https://github.com/meisnate12/Plex-Meta-Manager-Anime-IDs;
+  - Plex-Romaji-Renamer will export Anime and TVDBids from python plexapi
+  - Then it will then retrieve the tvdb / imdb / MAL / Anilist IDs from my json list
   - Use the Jikan API to get metadata from MAL;
   - Use the anilist API to get the Romaji title;
   - Create and update a PMM metadata file to import everything in to your PMS when PMM runs.
 
 ### Step 1 - Prerequisites
-First you need a GNU/Linux OS to run bash script OR Docker<br/>
-  Requirements: PMS, PMM and JQ<br/>
-  - Install and configure Plex-Meta-Manager: https://github.com/meisnate12/Plex-Meta-Manager<br/> 
+First you need a GNU/Linux OS to run bash script<br/>
+  Requirements: PMS, PMM, Python and JQ<br/>
+  - Install and configure Plex-Meta-Manager: https://github.com/meisnate12/Plex-Meta-Manager<br/>
   - Install JQ which is a json parser see: https://stedolan.github.io/jq/ (Present by default on unRAID 6.10.0 and later.)<br/>
+  - install python plexapi
+  ```
+  pip install python plexapi
+  ```
+  - install python-dotenv
+  ```
+  pip install python-dotenv
+  ```
 
 ### Step 2 - Download and extract the script
 Git clone the **main** branch or get lastest release : https://github.com/Arial-Z/Plex-Romaji-Renamer/releases/latest
@@ -34,60 +42,39 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
   - Rename config.default to config.conf<br/>
   - Edit config.conf and fill out the necessary variables.<br/>
 ```
-# PMM_INSTALL_TYPE either "python_venv", "docker" or "python".
-PMM_INSTALL_TYPE=
+#Plex url
+plex_url=http://127.0.0.1:32400
+#Plex token
+plex_token=zadazdzadazdazdazdazdazd
 
-# DOCKER_CONTAINER_NAME Only for docker.
-# If not used, comment out.
-DOCKER_CONTAINER_NAME=plex-meta-manager
-
-# PMM_FOLDER PMM base folder for Python.
-# Comment out when making use of docker install type!
-PMM_FOLDER=/path/to/plexmetamanager
-
-# PMM_FOLDER_CONFIG for all install type
-PMM_FOLDER_CONFIG=/path/to/plexmetamanager-config-folder
-
-# Plex animes library name need to be in a double quote
-# If not used, comment out.
-ANIME_LIBRARY_NAME="Animes"
-
-# Plex movies animes library name need to be in a double quote
-# If not used, comment out.
-MOVIE_LIBRARY_NAME="Animes Movies"
+# PMM_FOLDER_CONFIG for docker install type
+# uncomment when making use of docker install type!
+#PMM_FOLDER_CONFIG=/path/to/plexmetamanager-config-folder
 
 # Folder where the poster are stored if you are running docker it should be in the PMM config folder
 POSTERS_FOLDER=$PMM_FOLDER_CONFIG/posters
 
 #IF YOU ARE USING DOCKER folder where docker PMM need to look to find the poster.
-POSTERS_PMM_FOLDER=/config/posters
+# uncomment when making use of docker install type!
+#POSTERS_PMM_FOLDER=/config/posters
+
+# Plex animes library name need to be in a double quote
+# If used, uncomment
+#ANIME_LIBRARY_NAME="Animes"
+
+# Plex movies animes library name need to be in a double quote
+# If used, uncomment
+#MOVIE_LIBRARY_NAME="Animes Movies"
+
+# Folder of where animes-mal.yml and movies-mal.yml are saved.
+METADATA_ANIMES=$PMM_FOLDER/config/animes/animes-mal.yml
+METADATA_MOVIES=$PMM_FOLDER/config/animes/movies-mal.yml
 
 # Folder where the logs of script are kept.
 LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
-
-# Folder of where animes-mal.yml and movies-mal.yml are saved.
-# Change $PMM_FOLDER to PMM_FOLDER_CONFIG when making use of DOCKER!
-animes_titles=$PMM_FOLDER/config/animes/animes-mal.yml
-movies_titles=$PMM_FOLDER/config/animes/movies-mal.yml
 ```
 
 ### Step 4 - Configure PMM 
-  - Create a file in the PMM directory called: temp-animes.yml. This will be called by the bash script (animes-renamer.sh) to export the different Anime id the corrosponding TVDB-ids<br/>
-  - Copy the contents of config.yml to temp-animes.yml (Same directory as config.yml)<br/>
-  - Replace the contents of temp-animes.yml with the following:
-```
-libraries:
-  Animes: # Rename according to your library
-
-settings: # Settings that you have defined.
-```
-  - DO NOT add anything else within the libraries section!
-  - Prerequisites to make this work:
-    - Configure PMS in temp-animes.yml (should be set up already if config.yml is correctly setup.)<br/>
-    - TMDB configured within temp-animes.yml<br/>
-
-NOTE: If you also want to run the movies animes script you need to create another PMM config exactly like the anime one but with your Animes Movies library name. temp-movies.yml will need to be stored in the same directory as temp-animes.yml<br/>
-<br/>
   - Within your (PMM) config.yml add the following metadata_path, it should look like this and use the default filepath:
 ```
   Animes:
@@ -137,6 +124,7 @@ create a new line and manually enter the IMDB-ID and MAL-ID, MAL-TITLE
 ### Thanks
   - To Plex for Plex
   - To meisnate12 for Plex-Meta-Manager and Plex-Meta-Manager-Anime-IDs.
+  - To plexapi
   - To https://jikan.moe/ for their MAL API.
   - To MAL for being here.
   - To Anilist for being here too.
