@@ -2,7 +2,7 @@
 
 SCRIPT_FOLDER=$(dirname $(readlink -f $0))
 media_type=animes
-source $SCRIPT_FOLDER/config.conf
+source $SCRIPT_FOLDER/.env
 source $SCRIPT_FOLDER/functions.sh
 METADATA=$METADATA_ANIMES
 OVERRIDE=override-ID-$media_type.tsv
