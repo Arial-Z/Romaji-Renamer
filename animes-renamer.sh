@@ -131,7 +131,7 @@ then
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
-while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name
+while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name season
 do
 	write-metadata
 done < $SCRIPT_FOLDER/ID/animes.tsv
