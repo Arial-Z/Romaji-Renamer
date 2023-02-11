@@ -12,11 +12,11 @@ pmm-id-run
 
 # check if files and folder exist
 echo "metadata:" > $METADATA
-if [ ! -d $SCRIPT_FOLDER/data ]											#check if exist and create folder for json data
+if [ ! -d $SCRIPT_FOLDER/data ]                                                                                 #check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/data
 else
-	find $SCRIPT_FOLDER/data/* -mmin +2880 -exec rm {} \;				#delete json data if older than 2 days
+	find $SCRIPT_FOLDER/data/* -mmin +2880 -exec rm {} \;                           #delete json data if older than 2 days
 fi
 if [ ! -d $POSTERS_FOLDER ]
 then
@@ -51,7 +51,7 @@ head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_st
 awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
 
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
-while IFS=$'\t' read -r imdb_id mal_id title_anime studio
+while IFS=$'\t' read -r imdb_id mal_id title_anime studio                                                                       # First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 	then
@@ -63,19 +63,19 @@ do
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 		fi
 	fi
-done < $SCRIPT_FOLDER/override-ID-movies.tsv
-while IFS=$'\t' read -r imdb_id title_plex											# then get the other ID from the ID mapping and download json data
+done < $SCRIPT_FOLDER/override-ID-movies.tsv=$
+while IFS=$'\t' read -r imdb_id title_plex                                                                                      # then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 	then
 		mal_id=$(get-mal-id-from-imdb-id)
-		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]                                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : imdb : $imdb_id / $title_plex" >> $MATCH_LOG
 			continue
 		fi
 		anilist_id=$(get-anilist-id)
-		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid Anilist ID for : imdb : $imdb_id / $title_plex" >> $MATCH_LOG
 			continue
