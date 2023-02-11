@@ -45,20 +45,24 @@ download-anime-id-mapping
 python $SCRIPT_FOLDER/plex_animes_export.py
 
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
-while IFS=$'\t' read -r tvdb_id mal_id title_anime studio									# First add the override animes to the ID file
-do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
-	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -w $tvdb_id
+override_line=$(wc -l < $SCRIPT_FOLDER/override-ID-animes.tsv)
+if [[ override_line -gt 1 ]]
+then
+	while IFS=$'\t' read -r tvdb_id mal_id title_anime studio									# First add the override animes to the ID file
+	do
+		if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 		then
-			line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | cut -d : -f 1)
-			title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $2}')
-			asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $3}')
-			printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/animes.tsv
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
+			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -w $tvdb_id
+			then
+				line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | cut -d : -f 1)
+				title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $2}')
+				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $3}')
+				printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
+			fi
 		fi
-	fi
-done < $SCRIPT_FOLDER/override-ID-animes.tsv
+	done < $SCRIPT_FOLDER/override-ID-animes.tsv
+fi
 while IFS=$'\t' read -r tvdb_id title_plex asset_name  season										# then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
