@@ -44,24 +44,24 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
 ```
 #Plex url (Needed)
 plex_url=http://127.0.0.1:32400
-#Plex token 
+#Plex token (Needed)
 plex_token=zadazdzadazdazdazdazdazd
 
-# PMM_FOLDER_CONFIG need to filled 
+# PMM_FOLDER_CONFIG (Needed)
 PMM_FOLDER_CONFIG=
 
-# PMM Asset Folder to import posters
+# PMM Asset Folder to import posters (Needed)
 ASSET_FOLDER=$PMM_FOLDER_CONFIG/assets
 
-# Plex animes library name need to be in a double quote
+# Plex animes library name need to be in a double quote (Needed for the animes script)
 # If used, uncomment
 #ANIME_LIBRARY_NAME="Animes"
 
-# Plex movies animes library name need to be in a double quote
+# Plex movies animes library name need to be in a double quote (Needed for the movies script)
 # If used, uncomment
 #MOVIE_LIBRARY_NAME="Animes Movies"
 
-# Folder of where animes-mal.yml and movies-mal.yml are saved.
+# Folder of where animes-mal.yml and movies-mal.yml are saved. (Needed)
 METADATA_ANIMES=$PMM_FOLDER/config/animes/animes-mal.yml
 METADATA_MOVIES=$PMM_FOLDER/config/animes/movies-mal.yml
 
@@ -70,7 +70,7 @@ LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
 ```
 
 ### Step 4 - Configure PMM 
-  - Within your (PMM) config.yml add the following metadata_path, it should look like this and use the default filepath:
+  - Within your (PMM) config.yml add the following metadata_path, it should look like this with the default filepath:
 ```
   Animes:
     metadata_path:
