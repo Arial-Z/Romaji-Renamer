@@ -5,35 +5,6 @@ LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/missing-id.log
 
 # functions
-function pmm-id-run () {
-if [ ! -d $SCRIPT_FOLDER/tmp ]
-then
-	mkdir $SCRIPT_FOLDER/tmp
-else
-	rm $SCRIPT_FOLDER/tmp/*
-fi
-if [ "$PMM_INSTALL_TYPE"  == "python_venv" ]
-then
-	rm $PMM_FOLDER_CONFIG/temp-$media_type.cache
-	$PMM_FOLDER/pmm-venv/bin/python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-$media_type.yml
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
-elif [ "$PMM_INSTALL_TYPE"  == "docker" ]
-then
-	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/temp-$media_type.cache
-	docker exec -i $DOCKER_CONTAINER_NAME rm config/temp-$media_type.cache
-	docker exec -i $DOCKER_CONTAINER_NAME python plex_meta_manager.py -r --config config/temp-$media_type.yml
-	docker exec -i $DOCKER_CONTAINER_NAME chmod 777 config/logs/meta.log
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
-elif [ "$PMM_INSTALL_TYPE"  == "python" ]
-then
-	rm $PMM_FOLDER_CONFIG/temp-$media_type.cache
-	python $PMM_FOLDER/plex_meta_manager.py -r --config $PMM_FOLDER_CONFIG/temp-$media_type.yml
-	cp $PMM_FOLDER_CONFIG/logs/meta.log $SCRIPT_FOLDER/tmp
-else
-	echo "Set Plex Meta Manager install type in conf"
-	exit 1
-fi
-}
 function get-mal-id-from-tvdb-id () {
 jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
