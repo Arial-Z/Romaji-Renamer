@@ -84,7 +84,7 @@ do
 done < $SCRIPT_FOLDER/tmp/plex_movies_export.tsv
 
 # write PMM metadata file from ID/movies.tsv and jikan API
-while IFS=$'\t' read -r imdb_id mal_id title_anime title_plex
+while IFS=$'\t' read -r imdb_id mal_id title_anime title_plex asset_name
 do
 	write-metadata
 done < $SCRIPT_FOLDER/ID/movies.tsv
