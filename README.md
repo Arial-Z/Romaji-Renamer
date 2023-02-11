@@ -90,7 +90,7 @@ You can also add it to CRON and make sure to run it before PMM (be careful it ta
 Some animes won't be matched and the metadata will be missing, you can see them error in the log, in PMM metadata files or plex directly<br/>
 Cause are missing MAL ID for the TVDB ID / IMDB ID or the first corresponding MAL ID is not the "main" anime<br/>
 #### Animes
-to fix animes ID you can create at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-animes.tsv<br/>
+to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-animes.tsv<br/>
 it look like this, be carreful to use **tab** as separator (studio is optional)
 ```
 tvdb-id	mal-id	Name	Studio
@@ -99,7 +99,7 @@ tvdb-id	mal-id	Name	Studio
 ```
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
-to fix movies ID you can create at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-movies.tsv<br/>
+to fix movies ID you can create a request at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-movies.tsv<br/>
 it look like this, be carreful to use **tab** as separator (studio is optional)
 ```
 imdb-id	mal-id	Name	Studio
