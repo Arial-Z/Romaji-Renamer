@@ -45,20 +45,23 @@ download-anime-id-mapping
 python $SCRIPT_FOLDER/plex_movies_export.py
 
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
-while IFS=$'\t' read -r imdb_id mal_id title_anime studio                                                                       # First add the override animes to the ID file
-do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
-	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | grep -w  $imdb_id
+if [[ wc -l $SCRIPT_FOLDER/override-ID-movies.tsv -gt 1]]
+then
+	while IFS=$'\t' read -r imdb_id mal_id title_anime studio                                                                       # First add the override animes to the ID file
+	do
+		if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 		then
-			line=$(grep -w -n $imdb_id $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | cut -d : -f 1)
-			title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $2}')
-			asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $3}')
-			printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
+			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | grep -w  $imdb_id
+			then
+				line=$(grep -w -n $imdb_id $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | cut -d : -f 1)
+				title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $2}')
+				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $3}')
+				printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
+			fi
 		fi
-	fi
-done < $SCRIPT_FOLDER/override-ID-movies.tsv
+	done < $SCRIPT_FOLDER/override-ID-movies.tsv
+fi
 while IFS=$'\t' read -r imdb_id title_plex asset_name                                                                                      # then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
