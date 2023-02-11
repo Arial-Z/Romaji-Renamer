@@ -44,22 +44,18 @@ fi
 # Download anime mapping json data
 download-anime-id-mapping
 
-# create clean list-animes.tsv (tvdb_id	title_plex) from meta.log
-line_start=$(grep -n "Mapping "$ANIME_LIBRARY_NAME" Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-line_end=$(grep -n -m1 "$ANIME_LIBRARY_NAME Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-animes.txt
-awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$5) } ; { print substr($5,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-animes.txt > $SCRIPT_FOLDER/tmp/list-animes-dirty.tsv
-sed 's/^[ \t]*//;s/[ \t]*$//' < $SCRIPT_FOLDER/tmp/list-animes-dirty.tsv > $SCRIPT_FOLDER/tmp/list-animes.tsv
+# export animes list from plex
+python $SCRIPT_FOLDER/plex_animes_export.py
 
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
 while IFS=$'\t' read -r tvdb_id mal_id title_anime studio									# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-animes.tsv | grep -w $tvdb_id
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -w $tvdb_id
 		then
-			line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/list-animes.tsv | cut -d : -f 1)
-			title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-animes.tsv | awk -F"\t" '{print $2}')
+			line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | cut -d : -f 1)
+			title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $2}')
 			printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 		fi
@@ -87,7 +83,7 @@ do
 		printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/animes.tsv" >> $LOG
 	fi
-done < $SCRIPT_FOLDER/tmp/list-animes.tsv
+done < $SCRIPT_FOLDER/tmp/plex_animes_export.tsv
 
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
 if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]              								# check if already exist

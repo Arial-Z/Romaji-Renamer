@@ -44,21 +44,18 @@ fi
 download-anime-id-mapping
 
 
-# create clean list-movies.tsv (imdb_id | title_plex) from meta.log
-line_start=$(grep -n "Mapping $MOVIE_LIBRARY_NAME Library" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-line_end=$(grep -n -m1 "$MOVIE_LIBRARY_NAME Library Operations" $SCRIPT_FOLDER/tmp/meta.log | cut -d : -f 1)
-head -n $line_end $SCRIPT_FOLDER/tmp/meta.log | tail -n $(( $line_end - $line_start - 1 )) | head -n -5 > $SCRIPT_FOLDER/tmp/cleanlog-movies.txt
-awk -F"|" '{ OFS = "\t" } ; { gsub(/ /,"",$6) } ; { print  substr($6,8),substr($7,2,length($7)-2) }' $SCRIPT_FOLDER/tmp/cleanlog-movies.txt > $SCRIPT_FOLDER/tmp/list-movies.tsv
+# export movies list from plex
+python $SCRIPT_FOLDER/plex_movies_export.py
 
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
 while IFS=$'\t' read -r imdb_id mal_id title_anime studio                                                                       # First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 	then
-		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/list-movies.tsv | grep -w  $imdb_id
+		if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | grep -w  $imdb_id
 		then
-			line=$(grep -w -n $imdb_id $SCRIPT_FOLDER/tmp/list-movies.tsv | cut -d : -f 1)
-			title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/list-movies.tsv | awk -F"\t" '{print $2}')
+			line=$(grep -w -n $imdb_id $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | cut -d : -f 1)
+			title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $2}')
 			printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 		fi
@@ -86,7 +83,7 @@ do
 		printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/movies.tsv" >> $LOG
 	fi
-done < $SCRIPT_FOLDER/tmp/list-movies.tsv
+done < $SCRIPT_FOLDER/tmp/plex_movies_export.tsv
 
 # write PMM metadata file from ID/movies.tsv and jikan API
 while IFS=$'\t' read -r imdb_id mal_id title_anime title_plex
