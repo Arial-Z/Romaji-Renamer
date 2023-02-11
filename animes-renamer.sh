@@ -59,7 +59,7 @@ do
 		fi
 	fi
 done < $SCRIPT_FOLDER/override-ID-animes.tsv
-while IFS=$'\t' read -r tvdb_id title_plex asset_name											# then get the other ID from the ID mapping and download json data
+while IFS=$'\t' read -r tvdb_id title_plex asset_name  season										# then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 	then
@@ -131,7 +131,7 @@ then
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
-while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name season
+while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name
 do
 	write-metadata
 done < $SCRIPT_FOLDER/ID/animes.tsv
