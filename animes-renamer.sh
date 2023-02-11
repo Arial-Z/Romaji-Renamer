@@ -20,7 +20,7 @@ if [ ! -d $POSTERS_FOLDER ]											#check if exist and create folder for post
 then
 	mkdir $POSTERS_FOLDER
 else
-	find $POSTERS_FOLDER/* -mtime +30 -exec rm {} \;						#delete posters if older than 30 days
+	find $ASSET_FOLDER/$asset_name/* -mtime +30 -exec rm {} \;						#delete posters if older than 30 days
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
 then
