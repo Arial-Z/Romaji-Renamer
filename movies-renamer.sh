@@ -46,7 +46,7 @@ python $SCRIPT_FOLDER/plex_movies_export.py
 
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
 override_line=$(wc -l < $SCRIPT_FOLDER/override-ID-movies.tsv)
-if [[ override_line -gt 1 ]]
+if [[ $override_line -gt 1 ]]
 then
 	while IFS=$'\t' read -r imdb_id mal_id title_anime studio                                                                       # First add the override animes to the ID file
 	do
