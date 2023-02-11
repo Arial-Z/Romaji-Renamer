@@ -7,9 +7,6 @@ source $SCRIPT_FOLDER/functions.sh
 METADATA=$METADATA_ANIMES
 OVERRIDE=override-ID-$media_type.tsv
 
-#check temp folder + run of pmm for ID
-pmm-id-run
-
 # check if files and folder exist
 echo "metadata:" > $METADATA
 if [ ! -d $SCRIPT_FOLDER/data ]										#check if exist and create folder for json data
