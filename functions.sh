@@ -85,27 +85,26 @@ function get-mal-season-poster () {
 		fi
 		sleep 1.5
 	else
-			if [[$season_number -lt 10 ]]
+		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+		if [[$season_number -lt 10 ]]
+		then
+			postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" | awk '{ print $1 }')
+			if [[ $postersize -lt 10000 ]]
 			then
-				postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" | awk '{ print $1 }')
-				if [[ $postersize -lt 10000 ]]
-				then
-					rm "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg"
-					sleep 0.5
-					mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-					wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
-				fi
-			else
-				postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" | awk '{ print $1 }')
-				if [[ $postersize -lt 10000 ]]
-				then
-					rm "$ASSET_FOLDER/$asset_name/Season$season_number.jpg"
-					sleep 0.5
-					mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-					wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
+				rm "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg"
+				sleep 0.5
+				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
 			fi
-			sleep 1.5
+		else
+			postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" | awk '{ print $1 }')
+			if [[ $postersize -lt 10000 ]]
+			then
+				rm "$ASSET_FOLDER/$asset_name/Season$season_number.jpg"
+				sleep 0.5
+				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
+			fi
 		fi
+		sleep 1.5
 	fi
 }
 function get-season-infos () {
