@@ -23,7 +23,7 @@ with open("tmp/plex_animes_export.tsv", "w") as export_plex:
                 location = str(video.locations)[2:-2]
                 path = pathlib.PurePath(location)
                 folder = str(path.name)
-                seasons = str(video.str(video.seasons()))
+                seasons = video.str(video.seasons())
                 last_season = re.search("(\d+)(?!.*\d)", seasons).group()
                 export=(tvdb + "\t" + title + "\t" + folder + "\t"+ last_season + "\n")
                 export_plex.write(export)
