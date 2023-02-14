@@ -98,44 +98,6 @@ function get-mal-season-poster () {
 		fi
 	fi
 }
-function get-season-infos () {
-	mal_backup_id=$mal_id
-	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-	if [[ $season_check != -1 ]]
-	then
-		printf "    seasons:\n      0:\n        user_rating: 0\n" >> $METADATA
-		season_number=1
-		total_score=0
-		while [ $season_number -le $season_count ];
-		do
-			mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-			anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-			if [[ -n "$mal_id" ]] && [[ -n "$anilist_id" ]]
-			then
-				get-mal-infos
-				get-anilist-infos
-				title=$(get-anilist-title)
-				score_mal=$(get-mal-rating)
-				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n" >> $METADATA
-				total_score=`bc <<<"scale=2; $score_mal + $total_score"`
-				get-mal-season-poster
-			fi
-			((season_number++))
-		done
-		score_mal=`bc <<<"scale=2; $total_score/$season_count"`
-	else
-		printf "    seasons:\n      0:\n        user_rating: 0\n" >> $METADATA
-		season_number=1
-		while [ $season_number -le $season_count ];
-		do
-			printf "      $season_number:\n        user_rating: 0\n" >> $METADATA
-			((season_number++))
-		done
-		mal_id=$mal_backup_id
-		score_mal=$(get-mal-rating)
-	fi
-	mal_id=$mal_backup_id
-}
 function get-mal-tags () {
 	(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 	}
@@ -180,6 +142,44 @@ function download-anime-id-mapping () {
 		sleep 30
 	done
 }
+function get-season-infos () {
+	mal_backup_id=$mal_id
+	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+	if [[ $season_check != -1 ]]
+	then
+		printf "    seasons:\n      0:\n        user_rating: 0\n" >> $METADATA
+		season_number=1
+		total_score=0
+		while [ $season_number -le $season_count ];
+		do
+			mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+			anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+			if [[ -n "$mal_id" ]] && [[ -n "$anilist_id" ]]
+			then
+				get-mal-infos
+				get-anilist-infos
+				title=$(get-anilist-title)
+				score_mal=$(get-mal-rating)
+				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n" >> $METADATA
+				total_score=`bc <<<"scale=2; $score_mal + $total_score"`
+				get-mal-season-poster
+			fi
+			((season_number++))
+		done
+		score=`bc <<<"scale=2; $total_score/$season_count"`
+	else
+		printf "    seasons:\n      0:\n        user_rating: 0\n" >> $METADATA
+		season_number=1
+		while [ $season_number -le $season_count ];
+		do
+			printf "      $season_number:\n        user_rating: 0\n" >> $METADATA
+			((season_number++))
+		done
+		mal_id=$mal_backup_id
+		score=$(get-mal-rating)
+	fi
+	mal_id=$mal_backup_id
+}
 function write-metadata () {
 	get-mal-infos
 	if [[ $media_type == "animes" ]]
@@ -217,6 +217,14 @@ function write-metadata () {
 	echo "    studio: ${mal_studios}"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
-	get-season-infos
-	echo "    user_rating: $average_score" >> $METADATA
+	if [[ $media_type == "animes" ]]
+	then
+		get-season-infos
+		echo "    user_rating: $score" >> $METADATA
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+	else
+		score_mal=$(get-mal-rating)
+		echo "    critic_rating: $score_mal" >> $METADATA
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
+	fi
 }
