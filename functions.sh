@@ -109,7 +109,7 @@ function get-season-infos () {
 	if [[ $season_count -gt 1 ]]
 	then
 		echo "1"
-		season_check=$(jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+		season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 		if [[ $season_check != -1 ]]
 		then
 			printf "    seasons:\n" >> $METADATA
