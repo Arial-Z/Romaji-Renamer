@@ -118,9 +118,10 @@ function get-season-infos () {
 			do
 				echo "2"
 				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+				echo "$mal_id"
 				get-mal-infos
-				rating=$(get-mal-rating)
-				printf "      $season_number:\n        user_rating: $rating\n" >> $METADATA
+				score_mal=$(get-mal-rating)
+				printf "      $season_number:\n        user_rating: $score_mal\n" >> $METADATA
 				get-mal-season-poster
 				((season_number++))
 			done
