@@ -113,7 +113,7 @@ function get-season-infos () {
 		then
 			printf "    seasons:\n" >> $METADATA
 			season_number=1
-			while [ $season_number -ge $season_count ];
+			while [ $season_number -le $season_count ];
 			do
 				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 				get-mal-infos
