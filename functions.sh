@@ -72,7 +72,7 @@ function get-mal-poster () {
 	fi
 }
 function get-mal-season-poster () {
-	if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]
+	if [ ! -f "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" ] | [ ! -f "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" ]
 	then
 		sleep 0.5
 		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
@@ -85,20 +85,24 @@ function get-mal-season-poster () {
 		fi
 		sleep 1.5
 	else
-		postersize=$(du -b "$ASSET_FOLDER/$asset_name/poster.jpg" | awk '{ print $1 }')
-		if [[ $postersize -lt 10000 ]]
-		then
 			if [[$season_number -lt 10 ]]
 			then
-				rm "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg"
-				sleep 0.5
-				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
+				postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" | awk '{ print $1 }')
+				if [[ $postersize -lt 10000 ]]
+				then
+					rm "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg"
+					sleep 0.5
+					mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+					wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
+				fi
 			else
-				rm "$ASSET_FOLDER/$asset_name/Season$season_number.jpg"
-				sleep 0.5
-				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
+				postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" | awk '{ print $1 }')
+				if [[ $postersize -lt 10000 ]]
+				then
+					rm "$ASSET_FOLDER/$asset_name/Season$season_number.jpg"
+					sleep 0.5
+					mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+					wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
 			fi
 			sleep 1.5
 		fi
