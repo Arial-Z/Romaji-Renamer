@@ -106,6 +106,8 @@ function get-season-infos () {
 		if [[ $season_check != -1 ]]
 		then
 			printf "    seasons:\n" >> $METADATA
+			printf "      0:\n" >> $METADATA
+			printf "        user_rating: 0\n" >> $METADATA
 			season_number=1
 			total_score=0
 			while [ $season_number -le $season_count ];
@@ -127,6 +129,12 @@ function get-season-infos () {
 				((season_number++))
 			done
 		fi
+	else
+		printf "    seasons:\n" >> $METADATA
+		printf "      0:\n" >> $METADATA
+		printf "        user_rating: 0\n" >> $METADATA
+		printf "      1:\n" >> $METADATA
+		printf "        user_rating: 0\n" >> $METADATA
 	fi
 	mal_id=$mal_backup_id
 }
