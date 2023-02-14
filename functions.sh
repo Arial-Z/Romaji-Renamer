@@ -147,7 +147,7 @@ function get-season-infos () {
 	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 	if [[ $season_check != -1 ]]
 	then
-		printf "    seasons:\n      0:\n        user_rating: 0\n" >> $METADATA
+		printf "    seasons:\n      0:\n        user_rating: 0.1\n" >> $METADATA
 		season_number=1
 		total_score=0
 		while [ $season_number -le $season_count ];
@@ -168,11 +168,11 @@ function get-season-infos () {
 		done
 		score=`bc <<<"scale=2; $total_score/$season_count"`
 	else
-		printf "    seasons:\n      0:\n        user_rating: 0\n" >> $METADATA
+		printf "    seasons:\n      0:\n        user_rating: 0.1\n" >> $METADATA
 		season_number=1
 		while [ $season_number -le $season_count ];
 		do
-			printf "      $season_number:\n        user_rating: 0\n" >> $METADATA
+			printf "      $season_number:\n        user_rating: 0.1\n" >> $METADATA
 			((season_number++))
 		done
 		mal_id=$mal_backup_id
