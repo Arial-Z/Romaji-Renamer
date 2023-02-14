@@ -221,11 +221,11 @@ function write-metadata () {
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
 	get-season-infos
-	if [[ total_score -eq 0 ]]
+	if [[ total_score != 0 ]]
 	then
+		echo "    user_rating: $average_score" >> $METADATA
+	else
 		score_mal=$(get-mal-rating)
 		echo "    user_rating: $score_mal" >> $METADATA
-	else
-		echo "    user_rating: $total_score" >> $METADATA
 	fi
 }
