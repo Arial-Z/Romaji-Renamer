@@ -15,7 +15,7 @@ MOVIE_LIBRARY_NAME=environ.get('MOVIE_LIBRARY_NAME')
 
 plex = PlexServer(url, token)
 movies = plex.library.section(MOVIE_LIBRARY_NAME)
-with open("tmp/plex_movies_export.tsv", "w") as export_plex:
+with open(path.join(basedir, "tmp/plex_movies_export.tsv"), "w") as export_plex:
         for video in movies.search():
                 title = str(video.title)
                 ids = str(video.guids)

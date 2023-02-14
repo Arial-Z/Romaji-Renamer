@@ -121,7 +121,7 @@ function get-season-infos () {
 					printf "      $season_number:\n" >> $METADATA
 					printf "        title: \"$title\"" >> $METADATA
 					printf "        user_rating: $score_mal\n" >> $METADATA
-					total_score=$($score_mal + $total_score)
+					total_score=$(($score_mal + $total_score))
 					get-mal-season-poster
 				fi
 				((season_number++))
