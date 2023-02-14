@@ -71,7 +71,7 @@ function get-mal-poster () {
 		fi
 	fi
 }
-function get-mal-poster-season () {
+function get-mal-season-poster () {
 	if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]
 	then
 		sleep 0.5
@@ -111,15 +111,15 @@ function get-season-infos () {
 		season_check=$(jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 		if [[ $season_check != -1 ]]
 		then
-			printf "    seasons:"
+			printf "    seasons:" >> $METADATA
 			season_number=1
 			while [ $season_number -ge $season_count ];
 			do
 				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 				get-mal-infos
 				rating=$(get-mal-rating)
-				printf "      $season_number:\n        user_rating: $rating"
-				get-mal-poster-season
+				printf "      $season_number:\n        user_rating: $rating" >> $METADATA
+				get-mal-season-poster
 				((season_number++))
 			done
 		fi
