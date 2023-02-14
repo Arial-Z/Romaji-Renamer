@@ -11,7 +11,7 @@ function get-mal-id-from-tvdb-id () {
 function get-mal-id-from-imdb-id () {
 	jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-movies-id.json
 }
-	function get-anilist-id () {
+function get-anilist-id () {
 	if [[ $media_type == "animes" ]]
 	then
 		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
@@ -19,10 +19,10 @@ function get-mal-id-from-imdb-id () {
 		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-movies-id.json
 	fi
 }
-	function get-tvdb-id () {
+function get-tvdb-id () {
 	jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
-	function get-mal-infos () {
+function get-mal-infos () {
 	if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]
 	then
 		sleep 0.5
@@ -30,7 +30,7 @@ function get-mal-id-from-imdb-id () {
 		sleep 1.5
 	fi
 }
-	function get-anilist-infos () {
+function get-anilist-infos () {
 	if [ ! -f $SCRIPT_FOLDER/data/title-$mal_id.json ]
 	then
 		sleep 0.5
@@ -41,16 +41,16 @@ function get-mal-id-from-imdb-id () {
 		sleep 1.5
 	fi
 }
-	function get-anilist-title () {
+function get-anilist-title () {
 	jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
 }
-	function get-mal-eng-title () {
+function get-mal-eng-title () {
 	jq '.data.title_english' -r $SCRIPT_FOLDER/data/$mal_id.json
 }
-	function get-mal-rating () {
+function get-mal-rating () {
 	jq '.data.score' -r $SCRIPT_FOLDER/data/$mal_id.json
 }
-	function get-mal-poster () {
+function get-mal-poster () {
 	if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]
 	then
 		sleep 0.5
@@ -71,7 +71,61 @@ function get-mal-id-from-imdb-id () {
 		fi
 	fi
 }
-	function get-mal-tags () {
+function get-mal-poster-season () {
+	if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]
+	then
+		sleep 0.5
+		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+		mkdir "$ASSET_FOLDER/$asset_name"
+		if [[$season_number -lt 10 ]]
+		then
+			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
+		else
+			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
+		fi
+		sleep 1.5
+	else
+		postersize=$(du -b "$ASSET_FOLDER/$asset_name/poster.jpg" | awk '{ print $1 }')
+		if [[ $postersize -lt 10000 ]]
+		then
+			if [[$season_number -lt 10 ]]
+			then
+				rm "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg"
+				sleep 0.5
+				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
+			else
+				rm "$ASSET_FOLDER/$asset_name/Season$season_number.jpg"
+				sleep 0.5
+				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
+			fi
+			sleep 1.5
+		fi
+	fi
+}
+function get-season-infos () {
+	mal_backup_id=$mal_id
+	if [[ $season_count -gt 1 ]]
+	then
+		if [[ jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json != -1 ]]
+		then
+			printf "    seasons:"
+			season_number=1
+			while [ $season_number -ge $season_count ];
+			do
+				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+				get-mal-infos
+				rating=$(get-mal-rating)
+				printf "      $season_number:\n        user_rating: $rating"
+				get-mal-poster-season
+				((season_number++))
+			done
+		fi
+	fi
+	mal_id=$mal_backup_id
+}
+function get-mal-tags () {
 	(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 	}
 	function get-mal-studios() {
@@ -154,4 +208,5 @@ function write-metadata () {
 	echo "    studio: ${mal_studios}"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
+	get-season-infos
 }
