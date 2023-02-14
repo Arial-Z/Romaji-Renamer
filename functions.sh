@@ -108,6 +108,7 @@ function get-season-infos () {
 	mal_backup_id=$mal_id
 	if [[ $season_count -gt 1 ]]
 	then
+		echo "1"
 		season_check=$(jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 		if [[ $season_check != -1 ]]
 		then
@@ -115,6 +116,7 @@ function get-season-infos () {
 			season_number=1
 			while [ $season_number -le $season_count ];
 			do
+				echo "2"
 				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 				get-mal-infos
 				rating=$(get-mal-rating)
