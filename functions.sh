@@ -74,9 +74,9 @@ function get-mal-poster () {
 function get-mal-season-poster () {
 	if [[ $season_number -lt 10 ]]
 	then
-		assets_filepath=$("$ASSET_FOLDER/$asset_name/Season0$season_number.jpg")
+		assets_filepath=$(echo "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg")
 	else
-		assets_filepath=$("$ASSET_FOLDER/$asset_name/Season$season_number.jpg")
+		assets_filepath=$(echo "$ASSET_FOLDER/$asset_name/Season$season_number.jpg")
 	fi
 	if [ ! -f "$assets_filepath" ]
 	then
