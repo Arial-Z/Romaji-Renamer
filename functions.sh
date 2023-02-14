@@ -197,7 +197,7 @@ function write-metadata () {
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	score_mal=$(get-mal-rating)
-	echo "    critic_rating: $score_mal" >> $METADATA
+	echo "    user_rating: $score_mal" >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $METADATA
