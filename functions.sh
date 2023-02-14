@@ -72,15 +72,17 @@ function get-mal-poster () {
 	fi
 }
 function get-mal-season-poster () {
-	if [ ! -f "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" ] | [ ! -f "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" ]
+	if [ ! -f "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" ] || [ ! -f "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" ]
 	then
 		sleep 0.5
 		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-		mkdir "$ASSET_FOLDER/$asset_name"
+		mkdir "$ASSET_FOLDER/$asset_name"cd
 		if [[$season_number -lt 10 ]]
 		then
+			echo "$season_number is less than 10"
 			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
 		else
+			echo "$season_number is more than 10"
 			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
 		fi
 		sleep 1.5
