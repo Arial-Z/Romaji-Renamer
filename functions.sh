@@ -107,14 +107,21 @@ function get-season-infos () {
 		then
 			printf "    seasons:\n" >> $METADATA
 			season_number=1
+			total_score=0
 			while [ $season_number -le $season_count ];
 			do
 				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+				Anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 				if [[ -n "$mal_id" ]]
 				then
 					get-mal-infos
+					get-anilist-infos
+					title=$(get-anilist-title)
 					score_mal=$(get-mal-rating)
-					printf "      $season_number:\n        user_rating: $score_mal\n" >> $METADATA
+					printf "      $season_number:\n" >> $METADATA
+					printf "        title: \"$title\"" >> $METADATA
+					printf "        user_rating: $score_mal\n" >> $METADATA
+					total_score=$($score_mal + $total_score)
 					get-mal-season-poster
 				fi
 				((season_number++))
@@ -185,8 +192,6 @@ function write-metadata () {
 		echo "    original_title: \"$title_eng\"" >> $METADATA
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
-	score_mal=$(get-mal-rating)
-	echo "    user_rating: $score_mal" >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $METADATA
@@ -207,4 +212,11 @@ function write-metadata () {
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
 	get-season-infos
+	if [[ total_score -eq 0 ]]
+	then
+		score_mal=$(get-mal-rating)
+		echo "    user_rating: $score_mal" >> $METADATA
+	else
+		echo "    user_rating: $total_score" >> $METADATA
+	fi
 }
