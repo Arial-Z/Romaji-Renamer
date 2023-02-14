@@ -72,41 +72,30 @@ function get-mal-poster () {
 	fi
 }
 function get-mal-season-poster () {
-	if [ ! -f "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" ] || [ ! -f "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" ]
+	if [[ $season_number -lt 10 ]]
+	then
+		assets_filepath=$($ASSET_FOLDER/$asset_name/Season0$season_number.jpg)
+	else
+		assets_filepath=$($ASSET_FOLDER/$asset_name/Season$season_number.jpg)
+	fi
+	if [ ! -f "$assets_filepath" ]
 	then
 		sleep 0.5
 		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 		mkdir "$ASSET_FOLDER/$asset_name"cd
-		if [[ $season_number -lt 10 ]]
-		then
-			echo "$season_number is less than 10"
-			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
-		else
-			echo "$season_number is more than 10"
-			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
-		fi
+			wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
 		sleep 1.5
 	else
-		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-		if [[ $season_number -lt 10 ]]
+		postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
+		if [[ $postersize -lt 10000 ]]
 		then
-			postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" | awk '{ print $1 }')
-			if [[ $postersize -lt 10000 ]]
-			then
-				rm "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg"
-				sleep 0.5
-				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
-			fi
-		else
-			postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" | awk '{ print $1 }')
-			if [[ $postersize -lt 10000 ]]
-			then
-				rm "$ASSET_FOLDER/$asset_name/Season$season_number.jpg"
-				sleep 0.5
-				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season$season_number.jpg" "$mal_poster_url"
-			fi
+			rm "$assets_filepath"
+			sleep 0.5
+			mkdir "$ASSET_FOLDER/$asset_name"
+			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+			wget --no-use-server-timestamps -O "$file" "$mal_poster_url"
+			sleep 1.5
 		fi
-		sleep 1.5
 	fi
 }
 function get-season-infos () {
