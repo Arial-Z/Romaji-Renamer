@@ -77,7 +77,7 @@ function get-mal-season-poster () {
 		sleep 0.5
 		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 		mkdir "$ASSET_FOLDER/$asset_name"cd
-		if [[$season_number -lt 10 ]]
+		if [[ $season_number -lt 10 ]]
 		then
 			echo "$season_number is less than 10"
 			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" "$mal_poster_url"
@@ -88,7 +88,7 @@ function get-mal-season-poster () {
 		sleep 1.5
 	else
 		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-		if [[$season_number -lt 10 ]]
+		if [[ $season_number -lt 10 ]]
 		then
 			postersize=$(du -b "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg" | awk '{ print $1 }')
 			if [[ $postersize -lt 10000 ]]
