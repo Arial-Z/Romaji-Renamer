@@ -115,7 +115,6 @@ function download-anime-id-mapping () {
 		sleep 30
 	done
 }
-}
 function get-mal-season-poster () {
 	if [[ $season_number -lt 10 ]]
 	then
