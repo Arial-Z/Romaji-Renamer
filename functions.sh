@@ -70,6 +70,7 @@ function get-mal-poster () {
 			sleep 1.5
 		fi
 	fi
+}
 function get-mal-tags () {
 	(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 	}
