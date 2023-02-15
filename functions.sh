@@ -70,34 +70,6 @@ function get-mal-poster () {
 			sleep 1.5
 		fi
 	fi
-}
-function get-mal-season-poster () {
-	if [[ $season_number -lt 10 ]]
-	then
-		assets_filepath=$(echo "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg")
-	else
-		assets_filepath=$(echo "$ASSET_FOLDER/$asset_name/Season$season_number.jpg")
-	fi
-	if [ ! -f "$assets_filepath" ]
-	then
-		sleep 0.5
-		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-		mkdir "$ASSET_FOLDER/$asset_name"
-			wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
-		sleep 1.5
-	else
-		postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
-		if [[ $postersize -lt 10000 ]]
-		then
-			rm "$assets_filepath"
-			sleep 0.5
-			mkdir "$ASSET_FOLDER/$asset_name"
-			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-			wget --no-use-server-timestamps -O "$file" "$mal_poster_url"
-			sleep 1.5
-		fi
-	fi
-}
 function get-mal-tags () {
 	(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 	}
@@ -142,15 +114,48 @@ function download-anime-id-mapping () {
 		sleep 30
 	done
 }
+}
+function get-mal-season-poster () {
+	if [[ $season_number -lt 10 ]]
+	then
+		assets_filepath=$(echo "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg")
+	else
+		assets_filepath=$(echo "$ASSET_FOLDER/$asset_name/Season$season_number.jpg")
+	fi
+	if [ ! -f "$assets_filepath" ]
+	then
+		sleep 0.5
+		mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+		mkdir "$ASSET_FOLDER/$asset_name"
+			wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
+		sleep 1.5
+	else
+		postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
+		if [[ $postersize -lt 10000 ]]
+		then
+			rm "$assets_filepath"
+			sleep 0.5
+			mkdir "$ASSET_FOLDER/$asset_name"
+			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+			wget --no-use-server-timestamps -O "$file" "$mal_poster_url"
+			sleep 1.5
+		fi
+	fi
+}
 function get-season-infos () {
 	mal_backup_id=$mal_id
 	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 	if [[ $season_check != -1 ]]
 	then
-		printf "    seasons:\n      0:\n        user_rating: 0.1\n" >> $METADATA
+		if [[ $last_season -eq total_seasons ]]
+		then
+			printf "    seasons:\n" >> $METADATA
+		else
+			printf "    seasons:\n      0:\n        user_rating: 0.1\n" >> $METADATA
+		fi
 		season_number=1
 		total_score=0
-		while [ $season_number -le $season_count ];
+		while [ $season_number -le $last_season ];
 		do
 			mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 			anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
@@ -166,11 +171,16 @@ function get-season-infos () {
 			fi
 			((season_number++))
 		done
-		score=`bc <<<"scale=2; $total_score/$season_count"`
+		score=`bc <<<"scale=2; $total_score/$last_season"`
 	else
-		printf "    seasons:\n      0:\n        user_rating: 0.1\n" >> $METADATA
+				if [[ $last_season -eq total_seasons ]]
+		then
+			printf "    seasons:\n" >> $METADATA
+		else
+			printf "    seasons:\n      0:\n        user_rating: 0.1\n" >> $METADATA
+		fi
 		season_number=1
-		while [ $season_number -le $season_count ];
+		while [ $season_number -le $last_season ];
 		do
 			printf "      $season_number:\n        user_rating: 0.1\n" >> $METADATA
 			((season_number++))

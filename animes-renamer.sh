@@ -57,14 +57,15 @@ then
 				line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | cut -d : -f 1)
 				title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $2}')
 				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $3}')
-				season_count=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $4}')
-				printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\t$season_count\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+				last_season=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $4}')
+				total_seasons=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $5}')
+				printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 			fi
 		fi
 	done < $SCRIPT_FOLDER/override-ID-animes.tsv
 fi
-while IFS=$'\t' read -r tvdb_id title_plex asset_name season_count										# then get the other ID from the ID mapping and download json data
+while IFS=$'\t' read -r tvdb_id title_plex asset_name last_season total_seasons										# then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 	then
@@ -83,7 +84,7 @@ do
 		get-mal-infos
 		get-anilist-infos
 		title_anime=$(get-anilist-title)
-		printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\t$season_count\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+		printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/animes.tsv" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/tmp/plex_animes_export.tsv
@@ -136,7 +137,7 @@ then
 fi
 
 # write PMM metadata file from ID/animes.tsv and jikan API
-while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name season_count
+while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name last_season total_seasons
 do
 	write-metadata
 done < $SCRIPT_FOLDER/ID/animes.tsv
