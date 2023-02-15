@@ -147,12 +147,7 @@ function get-season-infos () {
 	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 	if [[ $season_check != -1 ]]
 	then
-		if [[ $last_season -eq total_seasons ]]
-		then
-			printf "    seasons:\n" >> $METADATA
-		else
-			printf "    seasons:\n      0:\n        label: unwanted\n" >> $METADATA
-		fi
+		printf "    seasons:\n" >> $METADATA
 		season_number=1
 		total_score=0
 		while [ $season_number -le $last_season ];
@@ -165,7 +160,7 @@ function get-season-infos () {
 				get-anilist-infos
 				title=$(get-anilist-title)
 				score_mal=$(get-mal-rating)
-				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n        label: wanted\n" >> $METADATA
+				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n        label: score\n" >> $METADATA
 				total_score=`bc <<<"scale=2; $score_mal + $total_score"`
 				get-mal-season-poster
 			fi
@@ -173,18 +168,6 @@ function get-season-infos () {
 		done
 		score=`bc <<<"scale=2; $total_score/$last_season"`
 	else
-				if [[ $last_season -eq total_seasons ]]
-		then
-			printf "    seasons:\n" >> $METADATA
-		else
-			printf "    seasons:\n      0:\n        label: unwanted\n" >> $METADATA
-		fi
-		season_number=1
-		while [ $season_number -le $last_season ];
-		do
-			printf "      $season_number:\n        label: unwanted\n" >> $METADATA
-			((season_number++))
-		done
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
 	fi
