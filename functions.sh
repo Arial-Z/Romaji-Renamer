@@ -151,7 +151,7 @@ function get-season-infos () {
 		then
 			printf "    seasons:\n" >> $METADATA
 		else
-			printf "    seasons:\n      0:\n        season_label: unwanted\n" >> $METADATA
+			printf "    seasons:\n      0:\n        label: unwanted\n" >> $METADATA
 		fi
 		season_number=1
 		total_score=0
@@ -165,7 +165,7 @@ function get-season-infos () {
 				get-anilist-infos
 				title=$(get-anilist-title)
 				score_mal=$(get-mal-rating)
-				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n        season_label: wanted\n" >> $METADATA
+				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n        label: wanted\n" >> $METADATA
 				total_score=`bc <<<"scale=2; $score_mal + $total_score"`
 				get-mal-season-poster
 			fi
@@ -177,12 +177,12 @@ function get-season-infos () {
 		then
 			printf "    seasons:\n" >> $METADATA
 		else
-			printf "    seasons:\n      0:\n        season_label: unwanted\n" >> $METADATA
+			printf "    seasons:\n      0:\n        label: unwanted\n" >> $METADATA
 		fi
 		season_number=1
 		while [ $season_number -le $last_season ];
 		do
-			printf "      $season_number:\n        season_label: unwanted\n" >> $METADATA
+			printf "      $season_number:\n        label: unwanted\n" >> $METADATA
 			((season_number++))
 		done
 		mal_id=$mal_backup_id
