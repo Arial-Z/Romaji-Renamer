@@ -37,7 +37,7 @@ download-anime-id-mapping
 
 
 # export movies list from plex
-python $SCRIPT_FOLDER/plex_movies_export.py
+python3 $SCRIPT_FOLDER/plex_movies_export.py
 
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
 override_line=$(wc -l < $SCRIPT_FOLDER/override-ID-movies.tsv)

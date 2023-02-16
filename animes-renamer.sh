@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_FOLDER=$(pwd)
+SCRIPT_FOLDER=$(dirname "$(readlink -f "$0")")
 media_type=animes
 source $SCRIPT_FOLDER/.env
 source $SCRIPT_FOLDER/functions.sh
@@ -36,7 +36,7 @@ fi
 download-anime-id-mapping
 
 # export animes list from plex
-python $SCRIPT_FOLDER/plex_animes_export.py
+python3 $SCRIPT_FOLDER/plex_animes_export.py
 
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
 override_line=$(wc -l < $SCRIPT_FOLDER/override-ID-animes.tsv)
