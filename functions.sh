@@ -215,7 +215,7 @@ function write-metadata () {
 	if [[ $media_type == "animes" ]]
 	then
 		get-season-infos
-		echo "    user_rating: $score" >> $METADATA
+		echo "    critic_rating: $score" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	else
 		score=$(get-mal-rating)
