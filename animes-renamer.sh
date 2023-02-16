@@ -16,12 +16,6 @@ else
 	find $SCRIPT_FOLDER/data/* -mtime +4 -exec rm {} \;					#delete json data if older than 2 days
 	find $SCRIPT_FOLDER/data/ongoing.tsv -mmin +720 -exec rm {} \;			#delete ongoing if older than 12h
 fi
-if [ ! -d $POSTERS_FOLDER ]											#check if exist and create folder for posters
-then
-	mkdir $POSTERS_FOLDER
-else
-	find $ASSET_FOLDER/$asset_name/* -mtime +60 -exec rm {} \;						#delete posters if older than 30 days
-fi
 if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
 then
 	mkdir $SCRIPT_FOLDER/ID
