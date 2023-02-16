@@ -159,19 +159,20 @@ function get-season-infos () {
 				get-mal-infos
 				get-anilist-infos
 				title=$(get-anilist-title)
-				score_mal=$(get-mal-rating)
-				score_mal=`bc <<<"scale=1; $score_mal"`
-				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n        label: score\n" >> $METADATA
-				total_score=`bc <<<"scale=1; $score_mal + $total_score"`
+				score_season=$(get-mal-rating)
+				score_season=$(printf '%.*f\n' 1 $score_season)
+				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_season\n        label: score\n" >> $METADATA
+				total_score=`bc <<<"scale=2; $score_season + $total_score"`
 				get-mal-season-poster
 			fi
 			((season_number++))
 		done
 		score=`bc <<<"scale=2; $total_score/$last_season"`
+		score=$(printf '%.*f\n' 1 $score)
 	else
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
-		score=`bc <<<"scale=1; $score"`
+		score=$(printf '%.*f\n' 1 $score)
 	fi
 	mal_id=$mal_backup_id
 }
@@ -193,7 +194,6 @@ function write-metadata () {
 		echo "    original_title: \"$title_eng\"" >> $METADATA
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 	mal_tags=$(get-mal-tags)
 	echo "    genre.sync: Anime,${mal_tags}"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
@@ -218,9 +218,10 @@ function write-metadata () {
 		echo "    user_rating: $score" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	else
-		score_mal=$(get-mal-rating)
-		score=`bc <<<"scale=1; $score"`
-		echo "    critic_rating: $score_mal" >> $METADATA
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
+		score=$(get-mal-rating)
+		score=$(printf '%.*f\n' 1 $score)
+		echo "    critic_rating: $score" >> $METADATA
+		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	fi
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 }
