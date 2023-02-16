@@ -160,8 +160,9 @@ function get-season-infos () {
 				get-anilist-infos
 				title=$(get-anilist-title)
 				score_mal=$(get-mal-rating)
+				score_mal==`bc <<<"scale=1; $score_mal"`
 				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n        label: score\n" >> $METADATA
-				total_score=`bc <<<"scale=2; $score_mal + $total_score"`
+				total_score=`bc <<<"scale=1; $score_mal + $total_score"`
 				get-mal-season-poster
 			fi
 			((season_number++))
