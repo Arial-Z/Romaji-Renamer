@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SCRIPT_FOLDER=$(pwd)
 media_type=animes
 source $SCRIPT_FOLDER/.env
 source $SCRIPT_FOLDER/functions.sh

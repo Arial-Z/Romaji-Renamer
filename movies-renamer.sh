@@ -1,5 +1,6 @@
 #!/bin/bash
 
+SCRIPT_FOLDER=$(pwd)
 media_type=movies
 source $SCRIPT_FOLDER/.env
 source $SCRIPT_FOLDER/functions.sh
@@ -14,6 +15,7 @@ then
 else
 	find $SCRIPT_FOLDER/data/* -mtime +4 -exec rm {} \;                           #delete json data if older than 2 days
 fi
+
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
 	mkdir $SCRIPT_FOLDER/ID
