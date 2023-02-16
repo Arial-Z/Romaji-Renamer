@@ -160,7 +160,7 @@ function get-season-infos () {
 				get-anilist-infos
 				title=$(get-anilist-title)
 				score_mal=$(get-mal-rating)
-				score_mal==`bc <<<"scale=1; $score_mal"`
+				score_mal=`bc <<<"scale=1; $score_mal"`
 				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_mal\n        label: score\n" >> $METADATA
 				total_score=`bc <<<"scale=1; $score_mal + $total_score"`
 				get-mal-season-poster
@@ -171,6 +171,7 @@ function get-season-infos () {
 	else
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
+		score=`bc <<<"scale=1; $score"`
 	fi
 	mal_id=$mal_backup_id
 }
@@ -218,6 +219,7 @@ function write-metadata () {
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	else
 		score_mal=$(get-mal-rating)
+		score=`bc <<<"scale=1; $score"`
 		echo "    critic_rating: $score_mal" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score_mal\n" >> $LOG
 	fi
