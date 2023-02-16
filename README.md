@@ -26,7 +26,7 @@ First you need a GNU/Linux OS to run bash script<br/>
   - Install JQ which is a json parser see: https://stedolan.github.io/jq/ (Present by default on unRAID 6.10.0 and later.)<br/>
   - install python plexapi
   ```
-  pip install python plexapi
+  pip install plexapi
   ```
   - install python-dotenv
   ```
