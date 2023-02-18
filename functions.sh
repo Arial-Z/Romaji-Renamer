@@ -152,32 +152,33 @@ function get-season-infos () {
 		then
 			printf "      0:\n        label.remove: score\n" >> $METADATA
 			printf "      1:\n        label.remove: score\n" >> $METADATA
-		fi
-		if [[ $last_season -ne $total_seasons ]]
-		then
-			printf "      0:\n        label.remove: score\n" >> $METADATA
-		fi
-		season_number=1
-		total_score=0
-		while [ $season_number -le $last_season ];
-		do
-			mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-			anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-			if [[ -n "$mal_id" ]] && [[ -n "$anilist_id" ]]
+		else
+			if [[ $last_season -ne $total_seasons ]]
 			then
-				get-mal-infos
-				get-anilist-infos
-				title=$(get-anilist-title)
-				score_season=$(get-mal-rating)
-				score_season=$(printf '%.*f\n' 1 $score_season)
-				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_season\n        label: score\n" >> $METADATA
-				total_score=$(echo | awk -v v1=$score_season -v v2=$total_score '{print v1 + v2 }')
-				get-mal-season-poster
+				printf "      0:\n        label.remove: score\n" >> $METADATA
 			fi
-			((season_number++))
-		done
-		score=$(echo | awk -v v1=$total_score -v v2=$last_season '{print v1 / v2 }')
-		score=$(printf '%.*f\n' 1 $score)
+			season_number=1
+			total_score=0
+			while [ $season_number -le $last_season ];
+			do
+				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+				anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+				if [[ -n "$mal_id" ]] && [[ -n "$anilist_id" ]]
+				then
+					get-mal-infos
+					get-anilist-infos
+					title=$(get-anilist-title)
+					score_season=$(get-mal-rating)
+					score_season=$(printf '%.*f\n' 1 $score_season)
+					printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_season\n        label: score\n" >> $METADATA
+					total_score=$(echo | awk -v v1=$score_season -v v2=$total_score '{print v1 + v2 }')
+					get-mal-season-poster
+				fi
+				((season_number++))
+			done
+			score=$(echo | awk -v v1=$total_score -v v2=$last_season '{print v1 / v2 }')
+			score=$(printf '%.*f\n' 1 $score)
+		fi
 	else
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
