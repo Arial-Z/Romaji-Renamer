@@ -145,9 +145,18 @@ function get-mal-season-poster () {
 function get-season-infos () {
 	mal_backup_id=$mal_id
 	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-	if [[ $season_check != -1 ]] && [[ $last_season -ne 1 ]]
+	if [[ $season_check != -1 ]]
 	then
 		printf "    seasons:\n" >> $METADATA
+		if [[ $last_season -eq 1 ]] && [ $total_season -eq 2 ]]
+		then
+			printf "      0:\n        label.remove: score\n" >> $METADATA
+			printf "      1:\n        label.remove: score\n" >> $METADATA
+		fi
+		if [[ $last_season -ne $total_season ]]
+		then
+			printf "      0:\n        label.remove: score\n" >> $METADATA
+		fi
 		season_number=1
 		total_score=0
 		while [ $season_number -le $last_season ];
@@ -170,6 +179,7 @@ function get-season-infos () {
 		score=$(echo | awk -v v1=$total_score -v v2=$last_season '{print v1 / v2 }')
 		score=$(printf '%.*f\n' 1 $score)
 	else
+	if 
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)

@@ -25,10 +25,13 @@ with open(path.join(basedir, "tmp/plex_animes_export.tsv"), "w") as export_plex,
                         location = str(video.locations)[2:-2]
                         path = pathlib.PurePath(location)
                         folder = str(path.name)
+                        total_seasons = str(video.childCount)
                         seasons = str(video.seasons())
                         last_season = re.search("(\d+)(?!.*\d)", seasons).group()
-                        export=(tvdb + "\t" + title + "\t" + folder + "\t"+ last_season + "\n")
+                        export=(tvdb + "\t" + title + "\t" + folder + "\t"+ last_season + total_seasons + "\n")
                         export_plex.write(export)
+                        print(export)
                 else :
                         export=(title + "no id found" + ids + "\n")
                         export_fail.write(export)
+                        print(export)
