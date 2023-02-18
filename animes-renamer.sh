@@ -1,6 +1,7 @@
 #!/bin/bash
 
 SCRIPT_FOLDER=$(dirname "$(readlink -f "$0")")
+echo "$SCRIPT_FOLDER"
 media_type=animes
 source $SCRIPT_FOLDER/.env
 source $SCRIPT_FOLDER/functions.sh
