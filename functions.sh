@@ -148,7 +148,7 @@ function get-season-infos () {
 	if [[ $season_check != -1 ]]
 	then
 		printf "    seasons:\n" >> $METADATA
-		if [[ $last_season -eq 1 ]] && [ $total_season -eq 2 ]]
+		if [[ $last_season -eq 1 ]] && [[ $total_season -eq 2 ]]
 		then
 			printf "      0:\n        label.remove: score\n" >> $METADATA
 			printf "      1:\n        label.remove: score\n" >> $METADATA
@@ -179,7 +179,6 @@ function get-season-infos () {
 		score=$(echo | awk -v v1=$total_score -v v2=$last_season '{print v1 / v2 }')
 		score=$(printf '%.*f\n' 1 $score)
 	else
-	if 
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)
