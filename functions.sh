@@ -148,12 +148,12 @@ function get-season-infos () {
 	if [[ $season_check != -1 ]]
 	then
 		printf "    seasons:\n" >> $METADATA
-		if [[ $last_season -eq 1 ]] && [[ $total_season -eq 2 ]]
+		if [[ $last_season -eq 1 ]] && [[ $total_seasons -eq 2 ]]
 		then
 			printf "      0:\n        label.remove: score\n" >> $METADATA
 			printf "      1:\n        label.remove: score\n" >> $METADATA
 		fi
-		if [[ $last_season -ne $total_season ]]
+		if [[ $last_season -ne $total_seasons ]]
 		then
 			printf "      0:\n        label.remove: score\n" >> $METADATA
 		fi
