@@ -162,12 +162,12 @@ function get-season-infos () {
 				score_season=$(get-mal-rating)
 				score_season=$(printf '%.*f\n' 1 $score_season)
 				printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_season\n        label: score\n" >> $METADATA
-				total_score=`bc <<<"scale=2; $score_season + $total_score"`
+				total_score=$(echo | awk -v v1=$score_season -v v2=$total_score '{print v1 + v2 }')
 				get-mal-season-poster
 			fi
 			((season_number++))
 		done
-		score=`bc <<<"scale=2; $total_score/$last_season"`
+		score=$(echo | awk -v v1=$total_score -v v2=$last_season '{print v1 / v2 }')
 		score=$(printf '%.*f\n' 1 $score)
 	else
 		mal_id=$mal_backup_id
