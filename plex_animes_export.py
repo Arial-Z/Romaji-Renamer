@@ -28,7 +28,7 @@ with open(path.join(basedir, "tmp/plex_animes_export.tsv"), "w") as export_plex,
                         total_seasons = str(video.childCount)
                         seasons = str(video.seasons())
                         last_season = re.search("(\d+)(?!.*\d)", seasons).group()
-                        export=(tvdb + "\t" + title + "\t" + folder + "\t"+ last_season + total_seasons + "\n")
+                        export=(tvdb + "\t" + title + "\t" + folder + "\t" + last_season + "\t" +  total_seasons + "\n")
                         export_plex.write(export)
                         print(export)
                 else :
