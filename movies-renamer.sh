@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_FOLDER=$(pwd)
+SCRIPT_FOLDER=$(dirname "$(readlink -f "$0")")
 media_type=movies
 source $SCRIPT_FOLDER/.env
 source $SCRIPT_FOLDER/functions.sh
