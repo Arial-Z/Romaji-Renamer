@@ -145,7 +145,7 @@ function get-mal-season-poster () {
 function get-season-infos () {
 	mal_backup_id=$mal_id
 	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-	if [[ $season_check != -1 ]]
+	if [[ $season_check != -1 ]] && [[ $total_seasons -ge 2 ]]
 	then
 		printf "    seasons:\n" >> $METADATA
 		if [[ $last_season -eq 1 ]] && [[ $total_seasons -eq 2 ]]
