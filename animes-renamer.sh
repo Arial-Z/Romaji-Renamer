@@ -1,6 +1,6 @@
 #!/bin/bash
 
-SCRIPT_FOLDER=$(dirname "$(readlink -f "$0")")
+SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 echo "$SCRIPT_FOLDER"
 media_type=animes
 source $SCRIPT_FOLDER/.env
