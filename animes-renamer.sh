@@ -17,6 +17,10 @@ else
 	find $SCRIPT_FOLDER/data/* -mtime +4 -exec rm {} \;					#delete json data if older than 2 days
 	find $SCRIPT_FOLDER/data/ongoing.tsv -mmin +720 -exec rm {} \;			#delete ongoing if older than 12h
 fi
+if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if exist and create folder for json data
+then
+	mkdir $SCRIPT_FOLDER/tmp
+fi
 if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
 then
 	mkdir $SCRIPT_FOLDER/ID
