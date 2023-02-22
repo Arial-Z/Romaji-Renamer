@@ -2,14 +2,8 @@
 
 A Bash script to import MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMS) metadata file.<br/>
 The following are imported in your PMS:
-  - Romanji title from Anilist (Show and seasons)
-  - MAL rating (Show and seasons)
-  - All tags over on MyAnimelist
-  - Studios from MyAnimelist
-  - Posters from MyAnimelist
-  - Airing status (As Label)
-  
-  Here what it's look like
+
+Here what will be imported for each of your animes :
 ```
   330692:                                                 # TVDB_ID for PMM to import
     title: "Yuru Camp△"                                   # Title from Anilist
