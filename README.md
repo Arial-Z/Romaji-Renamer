@@ -7,22 +7,22 @@ Here what will be imported for each of your animes :
 ```
 330692:                                                 # TVDB_ID for PMM to import
   title: "Yuru Camp△"                                   # Title from Anilist
-  sort_title: "Yuru Camp△"
+  sort_title: "Yuru Camp△"                              # Sort Title : Either Anilist title or English title (in settings)
   original_title: "Laid-Back Camp"                      # English title from MAL
   genre.sync: Anime,Slice of Life,CGDCT,Iyashikei       # All genre from MAL (genres, themes and demographics)
   label.remove: Ongoing                                 # Airing status from MAL (add or remove Ongoing label)
   studio: C-Station                                     # Studio from MAL
-  seasons:
+  seasons:                                              # Season import
     0:                                                  # Season 0 import                 
-      label.remove: score
+      label.remove: score                               
     1:                                                  # Season 1 import
       title: "Yuru Camp△"                               # Title from Anilist                            
       user_rating: 8.3                                  # Rating from MAL
-      label: score
+      label: score                                      # Add label score to use PMM overlays
     2:                                                  # Season 1 import
       title: "Yuru Camp△ SEASON 2"                      # Title from Anilist
       user_rating: 8.5                                  # Rating from MAL
-      label: score
+      label: score                                      # Add label score to use PMM overlays
   critic_rating: 8.4                                    # Show rating average rating of the seasons (Or MAL score if no seasons)
 ```
   
