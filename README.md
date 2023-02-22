@@ -1,14 +1,16 @@
 # Plex-Romaji-Renamer
 
-A Bash script to import MAL metadata to your Plex Media Server. This is done with a Plex-Meta-Manager (PMS) metadata file.<br/>
+A Bash script to import MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMS) metadata file.<br/>
 The following are imported in your PMS:
-  - Romanji title from Anilist.
-  - English title from Anilist.
-  - MAL score to critics rating.
-  - All tags over on MyAnimelist.
+  - Romanji title from Anilist
+  - English title from MyAnimelist
+  - MAL rating to critics rating
+  - Season name from Anilist
+  - Season MAL rating to user rating
+  - All tags over on MyAnimelist
   - Studios from MyAnimelist
-  - Posters from MyAnimelist.
-  - Airing status (As Label).
+  - Posters from MyAnimelist
+  - Airing status (As Label)
   
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is untested</b>
   
