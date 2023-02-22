@@ -30,7 +30,7 @@ The following are imported in your PMS:
         user_rating: 8.5                                  # Rating from MAL
         label: score
     critic_rating: 8.4                                    # Show global rating : average score of the seasons
-    ```
+```
   
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is untested</b>
   
