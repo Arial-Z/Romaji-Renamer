@@ -23,7 +23,7 @@ Here what will be imported for each of your animes :
         title: "Yuru Camp△ SEASON 2"                      # Title from Anilist
         user_rating: 8.5                                  # Rating from MAL
         label: score
-    critic_rating: 8.4                                    # Show global rating : average score of the seasons
+    critic_rating: 8.4                                    # Show global rating : average score of the seasons (Or the MAL score if no seasons)
 ```
   
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is untested</b>
