@@ -2,15 +2,35 @@
 
 A Bash script to import MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMS) metadata file.<br/>
 The following are imported in your PMS:
-  - Romanji title from Anilist
-  - English title from MyAnimelist
-  - MAL rating to critics rating
-  - Season name from Anilist
-  - Season MAL rating to user rating
+  - Romanji title from Anilist (Show and seasons)
+  - MAL rating (Show and seasons)
   - All tags over on MyAnimelist
   - Studios from MyAnimelist
   - Posters from MyAnimelist
   - Airing status (As Label)
+  
+  Here what it's look like
+```
+  330692:                                                 # TVDB_ID for PMM to import
+    title: "Yuru Camp△"                                   # Title from Anilist
+    sort_title: "Yuru Camp△"
+    original_title: "Laid-Back Camp"                      # English title from MAL
+    genre.sync: Anime,Slice of Life,CGDCT,Iyashikei       # All genre from MAL (genres, themes and demographics)
+    label.remove: Ongoing                                 # Airing status from MAL (add or remove Ongoing label)
+    studio: C-Station                                     # Studio from MAL
+    seasons:
+      0:                                                  # Season 0 import                 
+        label.remove: score
+      1:                                                  # Season 1 import
+        title: "Yuru Camp△"                               # Title from Anilist                            
+        user_rating: 8.3                                  # Rating from MAL
+        label: score
+      2:                                                  # Season 1 import
+        title: "Yuru Camp△ SEASON 2"                      # Title from Anilist
+        user_rating: 8.5                                  # Rating from MAL
+        label: score
+    critic_rating: 8.4                                    # Show global rating : average score of the seasons
+    ```
   
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is untested</b>
   
