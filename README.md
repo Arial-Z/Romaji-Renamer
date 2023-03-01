@@ -56,7 +56,7 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
   - Extract the script on a desired location.<br/>
   - Navigate to its location.<br/>
   - Rename default.env to .env<br/>
-  - Edit config.conf and fill out the variables.<br/>
+  - Edit .env and fill out the variables.<br/>
 ```
 #Url of the Plex server (Needed)
 plex_url=http://127.0.0.1:32400
