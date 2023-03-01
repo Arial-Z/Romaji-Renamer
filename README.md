@@ -6,7 +6,7 @@ The following are imported in your PMS:
 Here what will be imported for each of your animes :
 ```
 330692:                                                 # TVDB_ID for PMM to import
-  title: "Yuru Camp△"                                   # Title from Anilist
+  title: "Yuru Camp△"                                   # Title : Either Anilist title or English title (in settings)
   sort_title: "Yuru Camp△"                              # Sort Title : Either Anilist title or English title (in settings)
   original_title: "Laid-Back Camp"                      # English title from MAL
   genre.sync: Anime,Slice of Life,CGDCT,Iyashikei       # All genre from MAL (genres, themes and demographics)
