@@ -167,7 +167,16 @@ function get-season-infos () {
 				then
 					get-mal-infos
 					get-anilist-infos
-					title=$(get-anilist-title)
+					if [[ $MAIN_TITLE_ENG == "Yes" ]]
+					then
+						title=$(get-anilist-title)
+						if [ "$title_eng" == "null" ]
+						then
+							title=$(get-anilist-title)
+						fi
+					else
+						title=$(get-anilist-title)
+					fi
 					score_season=$(get-mal-rating)
 					score_season=$(printf '%.*f\n' 1 $score_season)
 					printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_season\n        label: score\n" >> $METADATA
