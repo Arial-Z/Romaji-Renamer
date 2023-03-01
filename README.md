@@ -55,7 +55,7 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
 ### Step 3 - Configure the script
   - Extract the script on a desired location.<br/>
   - Navigate to its location.<br/>
-  - Rename default.env to .env<br/>
+  - Copy default.env to .env<br/>
   - Edit .env and fill out the variables.<br/>
 ```
 #Url of the Plex server (Needed)
@@ -80,7 +80,7 @@ METADATA_ANIMES=/path/to/PMM/config/animes-mal.yml
 METADATA_MOVIES=/path/to/PMM/config/movies-mal.yml
 
 # Folder where the logs of script are kept (Default is okay change if you want)
-LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
+LOG_FOLDER=$SCRIPT_FOLDER/logs
 
 # Use the english name as title (and also sort_title) instead of the romaji one (Yes/No)
 MAIN_TITLE_ENG=No
@@ -94,7 +94,7 @@ SORT_TITLE_ENG=No
 ```
   Animes:
     metadata_path:
-    - file: config/animes/animes-mal.yml
+    - file: config/animes-mal.yml
 ```
 Configuration finished.
 ### Running the bash script manually or via CRON.
@@ -108,7 +108,7 @@ You can also add it to CRON and make sure to run it before PMM (be careful it ta
 
 ### override-ID
 Some animes won't be matched and the metadata will be missing, you can see them error in the log, in PMM metadata files or plex directly<br/>
-Cause are missing MAL ID for the TVDB ID / IMDB ID or the first corresponding MAL ID is not the "main" anime<br/>
+Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 #### Animes
 to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-animes.tsv<br/>
 it look like this, be carreful to use **tab** as separator (studio is optional)
