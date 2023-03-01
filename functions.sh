@@ -169,7 +169,7 @@ function get-season-infos () {
 					get-anilist-infos
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
 					then
-						title=$(get-anilist-title)
+						title=$(get-mal-eng-title)
 						if [ "$title_eng" == "null" ]
 						then
 							title=$(get-anilist-title)
