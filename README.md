@@ -81,6 +81,12 @@ METADATA_MOVIES=/path/to/PMM/config/movies-mal.yml
 
 # Folder where the logs of script are kept (Default is okay change if you want)
 LOG_FOLDER=$SCRIPT_FOLDER/logs/$(date +%Y.%m.%d).log
+
+# Use the english name as title (and also sort_title) instead of the romaji one (Yes/No)
+MAIN_TITLE_ENG=No
+
+# Use the english name as sort_title instead of the romaji one (Yes/No)
+SORT_TITLE_ENG=No
 ```
 
 ### Step 4 - Configure PMM 

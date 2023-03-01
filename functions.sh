@@ -46,6 +46,10 @@ function get-anilist-title () {
 }
 function get-mal-eng-title () {
 	jq '.data.title_english' -r $SCRIPT_FOLDER/data/$mal_id.json
+	if [ "$title_eng" == "null" ]
+	then
+		title_eng=$title_anime
+	fi
 }
 function get-mal-rating () {
 	jq '.data.score' -r $SCRIPT_FOLDER/data/$mal_id.json
@@ -194,13 +198,20 @@ function write-metadata () {
 	else
 		echo "  $imdb_id:" >> $METADATA
 	fi
-	echo "    title: \"$title_anime\"" >> $METADATA	
-	echo "    sort_title: \"$title_anime\"" >> $METADATA
 	title_eng=$(get-mal-eng-title)
-	if [ "$title_eng" == "null" ]
+	if [[ $MAIN_TITLE_ENG == "Yes" ]]
 	then
+		echo "    title: \"$title_eng\"" >> $METADATA
+		echo "    sort_title: \"$title_eng\"" >> $METADATA
 		echo "    original_title: \"$title_anime\"" >> $METADATA
-	else 
+	else
+		echo "    title: \"$title_anime\"" >> $METADATA
+		if [[ $SORT_TITLE_ENG == "Yes" ]]
+		then
+			echo "    sort_title: \"$title_eng\"" >> $METADATA
+		else
+			echo "    sort_title: \"$title_anime\"" >> $METADATA
+		fi
 		echo "    original_title: \"$title_eng\"" >> $METADATA
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
