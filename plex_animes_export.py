@@ -32,6 +32,6 @@ with open(path.join(basedir, "tmp/plex_animes_export.tsv"), "w") as export_plex,
                         export_plex.write(export)
                         print(export)
                 else :
-                        export=(title + "no id found" + ids + "\n")
+                        export=(title + " no id found" + ids + "\n")
                         export_fail.write(export)
                         print(export)
