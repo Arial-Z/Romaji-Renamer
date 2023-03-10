@@ -214,7 +214,7 @@ function write-metadata () {
 		printf "    sort_title: |-\n      $title_eng\n" >> $METADATA
 		printf "    original_title: |-\n      $title_anime\n" >> $METADATA
 	else
-		printf "    title: |-\n      $title_animez\n" >> $METADATA
+		printf "    title: |-\n      $title_anime\n" >> $METADATA
 		if [[ $SORT_TITLE_ENG == "Yes" ]]
 		then
 			printf "    sort_title: |-\n      $title_eng\n" >> $METADATA
