@@ -210,18 +210,18 @@ function write-metadata () {
 	fi
 	if [[ $MAIN_TITLE_ENG == "Yes" ]]
 	then
-		echo "    title: \"$title_eng\"" >> $METADATA
-		echo "    sort_title: \"$title_eng\"" >> $METADATA
-		echo "    original_title: \"$title_anime\"" >> $METADATA
+		printf "    title: |\n      $title_eng\n" >> $METADATA
+		printf "    sort_title: |\n      $title_eng\n" >> $METADATA
+		printf "    original_title: |\n      $title_anime\n" >> $METADATA
 	else
-		echo "    title: \"$title_anime\"" >> $METADATA
+		printf "    title: |\n      $title_anime\n" >> $METADATA
 		if [[ $SORT_TITLE_ENG == "Yes" ]]
 		then
-			echo "    sort_title: \"$title_eng\"" >> $METADATA
+			printf "    sort_title: |\n      $title_eng\n" >> $METADATA
 		else
-			echo "    sort_title: \"$title_anime\"" >> $METADATA
+			printf "    sort_title: |\n      $title_anime\n" >> $METADATA
 		fi
-		echo "    original_title: \"$title_eng\"" >> $METADATA
+		eprintf "    original_title: |\n      $title_en\n" >> $METADATA
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	mal_tags=$(get-mal-tags)
