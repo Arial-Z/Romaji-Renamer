@@ -108,8 +108,8 @@ function download-anime-id-mapping () {
 		fi
 		if [[ $wait_time == 4 ]]
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - error can't download anime ID mapping file, exiting" >> $LOG
-			echo "error can't download anime ID mapping file, exiting"
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S) - error can't download anime ID mapping file, exiting\n" >> $LOG
+			printf "error can't download anime ID mapping file, exiting\n"
 			exit 1
 		fi
 		sleep 30
@@ -179,7 +179,7 @@ function get-season-infos () {
 					fi
 					score_season=$(get-mal-rating)
 					score_season=$(printf '%.*f\n' 1 $score_season)
-					printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_season\n        label: score\n" >> $METADATA
+					printf "      $season_number:\n        title: |\n          $title\n        user_rating: $score_season\n        label: score\n" >> $METADATA
 					total_score=$(echo | awk -v v1=$score_season -v v2=$total_score '{print v1 + v2 }')
 					get-mal-season-poster
 				fi
@@ -199,9 +199,9 @@ function write-metadata () {
 	get-mal-infos
 	if [[ $media_type == "animes" ]]
 	then
-		echo "  $tvdb_id:" >> $METADATA
+		printf "  $tvdb_id:\n" >> $METADATA
 	else
-		echo "  $imdb_id:" >> $METADATA
+		printf "  $imdb_id:\n" >> $METADATA
 	fi
 	title_eng=$(get-mal-eng-title)
 		if [ "$title_eng" == "null" ]
@@ -225,32 +225,32 @@ function write-metadata () {
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	mal_tags=$(get-mal-tags)
-	echo "    genre.sync: Anime,${mal_tags}"  >> $METADATA
+	printf "    genre.sync: Anime,${mal_tags}\n"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
 	if [[ $media_type == "animes" ]]
 	then
 		if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "$mal_id"
 		then
-			echo "    label: Ongoing" >> $METADATA
+			printf "    label: Ongoing\n" >> $METADATA
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel add Ongoing\n" >> $LOG
 		else
-			echo "    label.remove: Ongoing" >> $METADATA
+			printf "    label.remove: Ongoing\n" >> $METADATA
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
 		fi
 	fi
 	get-mal-studios
-	echo "    studio: ${mal_studios}"  >> $METADATA
+	printf "    studio: ${mal_studios}\n"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
 	if [[ $media_type == "animes" ]]
 	then
 		get-season-infos
-		echo "    critic_rating: $score" >> $METADATA
+		printf "    critic_rating: $score\n" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	else
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)
-		echo "    critic_rating: $score" >> $METADATA
+		printf "    critic_rating: $score\n" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
