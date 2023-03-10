@@ -199,9 +199,9 @@ function write-metadata () {
 	get-mal-infos
 	if [[ $media_type == "animes" ]]
 	then
-		printf "  $tvdb_id:\n" >> $METADATA
+		echo "  $tvdb_id:" >> $METADATA
 	else
-		printf "  $imdb_id:\n" >> $METADATA
+		echo "  $imdb_id:" >> $METADATA
 	fi
 	title_eng=$(get-mal-eng-title)
 		if [ "$title_eng" == "null" ]
@@ -210,47 +210,47 @@ function write-metadata () {
 	fi
 	if [[ $MAIN_TITLE_ENG == "Yes" ]]
 	then
-		printf "    title: |\n      \"$title_eng\"\n" >> $METADATA
-		printf "    sort_title: |\n      \"$title_eng\"\n" >> $METADATA
-		printf "    original_title: |\n      \"$title_anime\"\n" >> $METADATA
+		echo "    title: \"$title_eng\"" >> $METADATA
+		echo "    sort_title: \"$title_eng\"" >> $METADATA
+		echo "    original_title: \"$title_anime\"" >> $METADATA
 	else
-		printf "    title: |\n      \"$title_anime\"\n" >> $METADATA
+		echo "    title: \"$title_anime\"" >> $METADATA
 		if [[ $SORT_TITLE_ENG == "Yes" ]]
 		then
-			printf "    sort_title: |\n      \"$title_eng\"\n" >> $METADATA
+			echo "    sort_title: \"$title_eng\"" >> $METADATA
 		else
-			printf "    sort_title: |\n      \"$title_anime\"\n" >> $METADATA
+			echo "    sort_title: \"$title_anime\"" >> $METADATA
 		fi
-		printf "    original_title: |\n      \"$title_eng\"\n" >> $METADATA
+		echo "    original_title: \"$title_eng\"" >> $METADATA
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	mal_tags=$(get-mal-tags)
-	printf "    genre.sync: Anime,${mal_tags}\n"  >> $METADATA
+	echo "    genre.sync: Anime,${mal_tags}"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
 	if [[ $media_type == "animes" ]]
 	then
 		if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "$mal_id"
 		then
-			printf "    label: Ongoing\n" >> $METADATA
+			echo "    label: Ongoing" >> $METADATA
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel add Ongoing\n" >> $LOG
 		else
-			printf "    label.remove: Ongoing\n" >> $METADATA
+			echo "    label.remove: Ongoing" >> $METADATA
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
 		fi
 	fi
 	get-mal-studios
-	printf "    studio: ${mal_studios}\n"  >> $METADATA
+	echo "    studio: ${mal_studios}"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
 	if [[ $media_type == "animes" ]]
 	then
 		get-season-infos
-		printf "    critic_rating: $score\n" >> $METADATA
+		echo "    critic_rating: $score" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	else
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)
-		printf "    critic_rating: $score\n" >> $METADATA
+		echo "    critic_rating: $score" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
