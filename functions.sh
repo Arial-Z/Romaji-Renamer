@@ -221,7 +221,7 @@ function write-metadata () {
 		else
 			printf "    sort_title: |\n      $title_anime\n" >> $METADATA
 		fi
-		eprintf "    original_title: |\n      $title_en\n" >> $METADATA
+		printf "    original_title: |\n      $title_en\n" >> $METADATA
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	mal_tags=$(get-mal-tags)
