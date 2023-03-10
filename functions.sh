@@ -42,10 +42,10 @@ function get-anilist-infos () {
 	fi
 }
 function get-anilist-title () {
-	jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
+	jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json | sed -e "s/\"/'/g"
 }
 function get-mal-eng-title () {
-	jq '.data.title_english' -r $SCRIPT_FOLDER/data/$mal_id.json
+	jq '.data.title_english' -r $SCRIPT_FOLDER/data/$mal_id.json | sed -e "s/\"/'/g"
 }
 function get-mal-rating () {
 	jq '.data.score' -r $SCRIPT_FOLDER/data/$mal_id.json
@@ -179,7 +179,7 @@ function get-season-infos () {
 					fi
 					score_season=$(get-mal-rating)
 					score_season=$(printf '%.*f\n' 1 $score_season)
-					printf "      $season_number:\n        title: |\n          $title\n        user_rating: $score_season\n        label: score\n" >> $METADATA
+					printf "      $season_number:\n        title: \"$title\"\n        user_rating: $score_season\n        label: score\n" >> $METADATA
 					total_score=$(echo | awk -v v1=$score_season -v v2=$total_score '{print v1 + v2 }')
 					get-mal-season-poster
 				fi
@@ -210,18 +210,18 @@ function write-metadata () {
 	fi
 	if [[ $MAIN_TITLE_ENG == "Yes" ]]
 	then
-		printf "    title: |\n      $title_eng\n" >> $METADATA
-		printf "    sort_title: |\n      $title_eng\n" >> $METADATA
-		printf "    original_title: |\n      $title_anime\n" >> $METADATA
+		printf "    title: \"$title_eng\"\n" >> $METADATA
+		printf "    sort_title: \"$title_eng\"\n" >> $METADATA
+		printf "    original_title: \"$title_anime\"\n" >> $METADATA
 	else
-		printf "    title: |\n      $title_anime\n" >> $METADATA
+		printf "    title: \"$title_anime\"\n" >> $METADATA
 		if [[ $SORT_TITLE_ENG == "Yes" ]]
 		then
-			printf "    sort_title: |\n      $title_eng\n" >> $METADATA
+			printf "    sort_title: \"$title_eng\"\n" >> $METADATA
 		else
-			printf "    sort_title: |\n      $title_anime\n" >> $METADATA
+			printf "    sort_title: \"$title_anime\"\n" >> $METADATA
 		fi
-		printf "    original_title: |\n      $title_eng\n" >> $METADATA
+		printf "    original_title: \"$title_eng\"\n" >> $METADATA
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime:\n" >> $LOG
 	mal_tags=$(get-mal-tags)
