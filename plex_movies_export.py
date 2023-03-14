@@ -13,7 +13,7 @@ url = environ.get('plex_url')
 token = environ.get('plex_token')
 MOVIE_LIBRARY_NAME=environ.get('MOVIE_LIBRARY_NAME')
 
-plex = PlexServer(url, token)
+plex = PlexServer(url, token, timeout=300)
 movies = plex.library.section(MOVIE_LIBRARY_NAME)
 with open(path.join(basedir, "tmp/plex_movies_export.tsv"), "w") as export_plex, open(path.join(basedir, "tmp/plex_failed_movies.tsv"), "w") as export_fail:
         for video in movies.search():

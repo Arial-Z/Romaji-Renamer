@@ -13,7 +13,7 @@ url = environ.get('plex_url')
 token = environ.get('plex_token')
 ANIME_LIBRARY_NAME=environ.get('ANIME_LIBRARY_NAME')
 
-plex = PlexServer(url, token, timeout=300, container_size=20)
+plex = PlexServer(url, token, timeout=300)
 animes = plex.library.section(ANIME_LIBRARY_NAME)
 with open(path.join(basedir, "tmp/plex_animes_export.tsv"), "w") as export_plex, open(path.join(basedir, "tmp/plex_failed_animes.tsv"), "w") as export_fail:
         for video in animes.search():
