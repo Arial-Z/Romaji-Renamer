@@ -29,7 +29,7 @@ Here what will be imported for each of your animes :
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is untested</b>
   
  ## How it works:
-  - Plex-Romaji-Renamer will export your Animes and TVDB/IMDB ids from Plex with python plexapi
+  - Plex-Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
   - Then it will then retrieve their MAL/Anilist IDs from my mapping list https://github.com/Arial-Z/Animes-ID
   - Use the Jikan API to get metadata from MAL
   - Use the anilist API to get the Romaji title
