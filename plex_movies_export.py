@@ -4,10 +4,6 @@ from os import environ, path
 import re
 import pathlib
 
-[plexapi]
-container_size = 20
-timeout = 120
-
 # Find .env file
 basedir = path.abspath(path.dirname(__file__))
 load_dotenv(path.join(basedir, '.env'))
