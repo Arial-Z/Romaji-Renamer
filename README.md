@@ -19,7 +19,7 @@ Here what will be imported for each of your animes :
       title: "Yuru Camp△"                               # Title from Anilist                            
       user_rating: 8.3                                  # Rating from MAL
       label: score                                      # Add label score to use PMM overlays
-    2:                                                  # Season 1 import
+    2:                                                  # Season 2 import
       title: "Yuru Camp△ SEASON 2"                      # Title from Anilist
       user_rating: 8.5                                  # Rating from MAL
       label: score                                      # Add label score to use PMM overlays
