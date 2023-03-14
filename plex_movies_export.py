@@ -4,6 +4,7 @@ from os import environ, path
 import re
 import pathlib
 
+[plexapi]
 container_size = 20
 timeout = 120
 
