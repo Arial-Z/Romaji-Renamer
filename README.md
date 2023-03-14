@@ -29,11 +29,11 @@ Here what will be imported for each of your animes :
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is untested</b>
   
  ## How it works:
-  - Plex-Romaji-Renamer will export Anime and TVDBids from python plexapi
-  - Then it will then retrieve the tvdb / imdb / MAL / Anilist IDs from my json list
-  - Use the Jikan API to get metadata from MAL;
-  - Use the anilist API to get the Romaji title;
-  - Create and update a PMM metadata file to import everything in to your PMS when PMM runs.
+  - Plex-Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
+  - Then it will then retrieve their MAL/Anilist IDs from my mapping list https://github.com/Arial-Z/Animes-ID
+  - Use the Jikan API to get metadata from MAL
+  - Use the anilist API to get the Romaji title
+  - Create and update a PMM metadata file to import everything in to your Plex when PMM runs.
 
 ### Step 1 - Prerequisites
 First you need a GNU/Linux OS to run bash script<br/>
@@ -87,6 +87,9 @@ MAIN_TITLE_ENG=No
 
 # Use the english name as sort_title instead of the romaji one (Yes/No)
 SORT_TITLE_ENG=No
+
+# Mal Data cache time (in days min : 1)
+MAL_CACHE_TIME=3
 ```
 
 ### Step 4 - Configure PMM 
@@ -127,18 +130,12 @@ tt16360006	50549	Bubble
 tt9598270	34439	Code Geass: Hangyaku no Lelouch II - Handou
 tt9844256	34440	Code Geass: Hangyaku no Lelouch III - Oudou
 tt8100900	34438	Code Geass: Hangyaku no Lelouch I - Koudou
-tt9277666	6624	Kara no Kyoukai Remix: Gate of Seventh Heaven
-tt1155650	2593	Kara no Kyoukai Movie 1: Fukan Fuukei
-tt1155651	3782	Kara no Kyoukai Movie 2: Satsujin Kousatsu (Zen)
-tt1155652	3783	Kara no Kyoukai Movie 3: Tsuukaku Zanryuu
-tt1233474	4280	Kara no Kyoukai Movie 4: Garan no Dou
-tt1278060	4282	Kara no Kyoukai Movie 5: Mujun Rasen
 ```
 create a new line and manually enter the IMDB-ID and MAL-ID, MAL-TITLE
 
 ### Thanks
   - To Plex for Plex
-  - To meisnate12 for Plex-Meta-Manager and Plex-Meta-Manager-Anime-IDs.
+  - To meisnate12 for Plex-Meta-Manager.
   - To plexapi
   - To https://jikan.moe/ for their MAL API.
   - To MAL for being here.
