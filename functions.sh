@@ -42,13 +42,13 @@ function get-anilist-infos () {
 	fi
 }
 function get-anilist-title () {
-	jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
+	jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/title-$mal_id.json"
 }
 function get-mal-eng-title () {
-	jq '.data.title_english' -r $SCRIPT_FOLDER/data/$mal_id.json
+	jq '.data.title_english' -r "$SCRIPT_FOLDER/data/$mal_id.json"
 }
 function get-mal-rating () {
-	jq '.data.score' -r $SCRIPT_FOLDER/data/$mal_id.json
+	jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json"
 }
 function get-mal-poster () {
 	if [[ $POSTER_DOWNLOAD == "Yes" ]]
