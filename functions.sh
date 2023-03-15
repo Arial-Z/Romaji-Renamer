@@ -6,49 +6,49 @@ MATCH_LOG=$LOG_FOLDER/missing-id.log
 
 # functions
 function get-mal-id-from-tvdb-id () {
-	jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json"
+	jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
 function get-mal-id-from-imdb-id () {
-	jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .mal_id' -r "$SCRIPT_FOLDER/tmp/list-movies-id.json"
+	jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-movies-id.json
 }
 function get-anilist-id () {
 	if [[ $media_type == "animes" ]]
 	then
-		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json"
+		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 	else
-		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-movies-id.json"
+		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-movies-id.json
 	fi
 }
 function get-tvdb-id () {
-	jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json"
+	jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
 function get-mal-infos () {
-	if [ ! -f "$SCRIPT_FOLDER/data/$mal_id.json" ]
+	if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]
 	then
 		sleep 0.5
-		curl "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/data/$mal_id.json"
+		curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json
 		sleep 1.5
 	fi
 }
 function get-anilist-infos () {
-	if [ ! -f "$SCRIPT_FOLDER/data/title-$mal_id.json" ]
+	if [ ! -f $SCRIPT_FOLDER/data/title-$mal_id.json ]
 	then
 		sleep 0.5
 		curl 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
+		--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/title-$mal_id.json
 		sleep 1.5
 	fi
 }
 function get-anilist-title () {
-	jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/title-$mal_id.json"
+	jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
 }
 function get-mal-eng-title () {
-	jq '.data.title_english' -r "$SCRIPT_FOLDER/data/$mal_id.json"
+	jq '.data.title_english' -r $SCRIPT_FOLDER/data/$mal_id.json
 }
 function get-mal-rating () {
-	jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json"
+	jq '.data.score' -r $SCRIPT_FOLDER/data/$mal_id.json
 }
 function get-mal-poster () {
 	if [[ $POSTER_DOWNLOAD == "Yes" ]]
@@ -56,7 +56,7 @@ function get-mal-poster () {
 		if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]
 		then
 			sleep 0.5
-			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 			mkdir "$ASSET_FOLDER/$asset_name"
 			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
 			sleep 1.5
@@ -67,7 +67,7 @@ function get-mal-poster () {
 				rm "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 0.5
 				mkdir "$ASSET_FOLDER/$asset_name"
-				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
 				sleep 1.5
 			fi
@@ -75,21 +75,21 @@ function get-mal-poster () {
 	fi
 }
 function get-mal-tags () {
-	(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json") | awk '{print $0}' | paste -s -d, -
+	(jq '.data.genres  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.demographics  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json && jq '.data.themes  | .[] | .name' -r $SCRIPT_FOLDER/data/$mal_id.json) | awk '{print $0}' | paste -s -d, -
 	}
 	function get-mal-studios() {
-	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w  $mal_id
+	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
 	then
-		line=$(grep -w -n $mal_id "$SCRIPT_FOLDER/$OVERRIDE" | cut -d : -f 1)
-		studio=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $4}')
+		line=$(grep -w -n $mal_id $SCRIPT_FOLDER/$OVERRIDE | cut -d : -f 1)
+		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
 		if [[ -z "$studio" ]]
 		then
-			mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+			mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
 		else
 			mal_studios=$(echo "$studio")
 		fi
 	else
-		mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+		mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
 	fi
 }
 function download-anime-id-mapping () {
@@ -98,10 +98,10 @@ function download-anime-id-mapping () {
 	do
 		if [[ $media_type == "animes" ]]
 		then
-			wget -O "$SCRIPT_FOLDER/tmp/list-animes-id.json" "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json"
+			wget -O $SCRIPT_FOLDER/tmp/list-animes-id.json "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json"
 			size=$(du -b $SCRIPT_FOLDER/tmp/list-animes-id.json | awk '{ print $1 }')
 		else
-			wget -O "$SCRIPT_FOLDER/tmp/list-movies-id.json" "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json"
+			wget -O $SCRIPT_FOLDER/tmp/list-movies-id.json "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json"
 			size=$(du -b $SCRIPT_FOLDER/tmp/list-movies-id.json | awk '{ print $1 }')
 		fi
 			((wait_time++))
@@ -130,9 +130,9 @@ function get-mal-season-poster () {
 		if [ ! -f "$assets_filepath" ]
 		then
 			sleep 0.5
-			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 			mkdir "$ASSET_FOLDER/$asset_name"
-			wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
+				wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
 			sleep 1.5
 		else
 			postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
@@ -140,9 +140,9 @@ function get-mal-season-poster () {
 			then
 				rm "$assets_filepath"
 				sleep 0.5
-				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
 				mkdir "$ASSET_FOLDER/$asset_name"
-				wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
+				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
+				wget --no-use-server-timestamps -O "$file" "$mal_poster_url"
 				sleep 1.5
 			fi
 		fi
@@ -150,7 +150,7 @@ function get-mal-season-poster () {
 }
 function get-season-infos () {
 	mal_backup_id=$mal_id
-	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
+	season_check=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 	if [[ $season_check != -1 ]] && [[ $total_seasons -ge 2 ]]
 	then
 		printf "    seasons:\n" >> $METADATA
@@ -167,8 +167,8 @@ function get-season-infos () {
 			total_score=0
 			while [ $season_number -le $last_season ];
 			do
-				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
-				anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
+				mal_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+				anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
 				if [[ -n "$mal_id" ]] && [[ -n "$anilist_id" ]]
 				then
 					get-mal-infos
