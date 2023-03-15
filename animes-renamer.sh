@@ -64,7 +64,7 @@ then
 		fi
 	done < $SCRIPT_FOLDER/override-ID-animes.tsv
 fi
-while IFS=$'\t' read -r tvdb_id title_plex asset_name last_season total_seasons										# then get the other ID from the ID mapping and download json data
+while IFS=$'\t' read -r tvdb_id title_plex asset_name last_season total_seasons 		# then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 	then
@@ -72,11 +72,9 @@ do
 		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no mal id
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
-			continue
 		elif [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid Anilist ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
-			continue
 		else
 			get-mal-infos
 			get-anilist-infos
