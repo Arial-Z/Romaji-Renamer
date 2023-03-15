@@ -158,6 +158,8 @@ function get-season-infos () {
 		then
 			printf "      0:\n        label.remove: score\n" >> $METADATA
 			printf "      1:\n        label.remove: score\n" >> $METADATA
+			mal_id=$mal_backup_id
+			score=$(get-mal-rating)
 		else
 			if [[ $last_season -ne $total_seasons ]]
 			then
@@ -185,7 +187,7 @@ function get-season-infos () {
 					fi
 					score_season=$(get-mal-rating)
 					score_season=$(printf '%.*f\n' 1 $score_season)
-					printf "      $season_number:\n        title: |-\n         $title\n        user_rating: $score_season\n        label: score\n" >> $METADATA
+					printf "      $season_number:\n        title: |-\n          $title\n        user_rating: $score_season\n        label: score\n" >> $METADATA
 					total_score=$(echo | awk -v v1=$score_season -v v2=$total_score '{print v1 + v2 }')
 					get-mal-season-poster
 				fi
@@ -197,7 +199,6 @@ function get-season-infos () {
 	else
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
-		score=$(printf '%.*f\n' 1 $score)
 	fi
 	mal_id=$mal_backup_id
 }
