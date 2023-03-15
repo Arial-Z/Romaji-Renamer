@@ -23,7 +23,7 @@ function get-tvdb-id () {
 	jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
 function get-mal-infos () {
-	if [ ! -f $SCRIPT_FOLDER/data/$mal_id.json ]
+	if [ ! -f "$SCRIPT_FOLDER/data/$mal_id.json" ]
 	then
 		sleep 0.5
 		curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json
@@ -31,7 +31,7 @@ function get-mal-infos () {
 	fi
 }
 function get-anilist-infos () {
-	if [ ! -f $SCRIPT_FOLDER/data/title-$mal_id.json ]
+	if [ ! -f "$SCRIPT_FOLDER/data/title-$mal_id.json" ]
 	then
 		sleep 0.5
 		curl 'https://graphql.anilist.co/' \

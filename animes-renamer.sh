@@ -10,29 +10,29 @@ OVERRIDE=override-ID-$media_type.tsv
 
 # check if files and folder exist
 echo "metadata:" > $METADATA
-if [ ! -d $SCRIPT_FOLDER/data ]										#check if exist and create folder for json data
+if [ ! -d "$SCRIPT_FOLDER/data" ]										#check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/data
 else
 	find $SCRIPT_FOLDER/data/* -mtime +$MAL_CACHE_TIME -exec rm {} \;					#delete json data if older than 2 days
 	find $SCRIPT_FOLDER/data/ongoing.tsv -mmin +720 -exec rm {} \;			#delete ongoing if older than 12h
 fi
-if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if exist and create folder for json data
+if [ ! -d "$SCRIPT_FOLDER/tmp" ]										#check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/tmp
 fi
-if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
+if [ ! -d "$SCRIPT_FOLDER/ID" ]											#check if exist and create folder and file for ID
 then
 	mkdir $SCRIPT_FOLDER/ID
 	touch $SCRIPT_FOLDER/ID/animes.tsv
-elif [ ! -f $SCRIPT_FOLDER/ID/animes.tsv ]
+elif [ ! -f "$SCRIPT_FOLDER/ID/animes.tsv" ]
 then
 	touch $SCRIPT_FOLDER/ID/animes.tsv
 else
 	rm $SCRIPT_FOLDER/ID/animes.tsv
 	touch $SCRIPT_FOLDER/ID/animes.tsv
 fi
-if [ ! -d $LOG_FOLDER ]
+if [ ! -d "$LOG_FOLDER" ]
 then
 	mkdir $LOG_FOLDER
 fi
