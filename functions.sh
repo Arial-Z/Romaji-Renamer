@@ -26,7 +26,7 @@ function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/$mal_id.json" ]
 	then
 		sleep 0.5
-		curl "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/data/$mal_id.json
+		curl "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/data/$mal_id.json"
 		sleep 1.5
 	fi
 }
@@ -37,7 +37,7 @@ function get-anilist-infos () {
 		curl 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > $SCRIPT_FOLDER/data/title-$mal_id.json
+		--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
 		sleep 1.5
 	fi
 }
@@ -98,10 +98,10 @@ function download-anime-id-mapping () {
 	do
 		if [[ $media_type == "animes" ]]
 		then
-			wget -O $SCRIPT_FOLDER/tmp/list-animes-id.json "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json"
+			wget -O "$SCRIPT_FOLDER/tmp/list-animes-id.json" "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json"
 			size=$(du -b $SCRIPT_FOLDER/tmp/list-animes-id.json | awk '{ print $1 }')
 		else
-			wget -O $SCRIPT_FOLDER/tmp/list-movies-id.json "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json"
+			wget -O "$SCRIPT_FOLDER/tmp/list-movies-id.json" "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json"
 			size=$(du -b $SCRIPT_FOLDER/tmp/list-movies-id.json | awk '{ print $1 }')
 		fi
 			((wait_time++))
@@ -132,7 +132,7 @@ function get-mal-season-poster () {
 			sleep 0.5
 			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
 			mkdir "$ASSET_FOLDER/$asset_name"
-				wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
+			wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
 			sleep 1.5
 		else
 			postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
@@ -140,9 +140,9 @@ function get-mal-season-poster () {
 			then
 				rm "$assets_filepath"
 				sleep 0.5
-				mkdir "$ASSET_FOLDER/$asset_name"
 				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-				wget --no-use-server-timestamps -O "$file" "$mal_poster_url"
+				mkdir "$ASSET_FOLDER/$asset_name"
+				wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
 				sleep 1.5
 			fi
 		fi
