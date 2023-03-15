@@ -160,6 +160,7 @@ function get-season-infos () {
 			printf "      1:\n        label.remove: score\n" >> $METADATA
 			mal_id=$mal_backup_id
 			score=$(get-mal-rating)
+			score=$(printf '%.*f\n' 1 $score)
 		else
 			if [[ $last_season -ne $total_seasons ]]
 			then
@@ -199,6 +200,7 @@ function get-season-infos () {
 	else
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
+		score=$(printf '%.*f\n' 1 $score)
 	fi
 	mal_id=$mal_backup_id
 }
