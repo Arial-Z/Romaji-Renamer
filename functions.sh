@@ -267,6 +267,7 @@ function write-metadata () {
 				get-season-infos
 				printf "    critic_rating: $score\n" >> $METADATA
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+			fi
 		else
 			get-season-infos
 			printf "    critic_rating: $score\n" >> $METADATA
