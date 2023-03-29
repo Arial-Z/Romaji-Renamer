@@ -91,6 +91,9 @@ SORT_TITLE_ENG=No
 # Download MAL poster (Yes/No)
 POSTER_DOWNLOAD=Yes
 
+# Ignore seasons infos from MAL (rating, name and poster) (Yes/No)
+IGNORE_SEASONS=No
+
 # Mal Data cache time (in days min : 1)
 MAL_CACHE_TIME=3
 ```
@@ -120,8 +123,10 @@ to fix animes ID you can create a request at https://github.com/Anime-Lists/anim
 it look like this, be carreful to use **tab** as separator (studio is optional)
 ```
 tvdb-id	mal-id	Name	Studio
-76013	627	Major	
-114801	6702	Fairy Tail	A-1 Pictures
+tvdb-id	mal-id	Name	Studio	ignore_seasons
+114801	6702	Fairy Tail	A-1 Pictures	yes
+79685	263	Hajime no Ippo		
+76013	627	Major		
 ```
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
