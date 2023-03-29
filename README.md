@@ -122,7 +122,6 @@ Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-animes.tsv<br/>
 it look like this, be carreful to use **tab** as separator (studio is optional)
 ```
-tvdb-id	mal-id	Name	Studio
 tvdb-id	mal-id	Name	Studio	ignore_seasons
 114801	6702	Fairy Tail	A-1 Pictures	yes
 79685	263	Hajime no Ippo		
