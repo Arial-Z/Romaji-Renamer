@@ -272,7 +272,6 @@ function write-metadata () {
 			printf "    critic_rating: $score\n" >> $METADATA
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 		fi
-	fi
 	else
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)
