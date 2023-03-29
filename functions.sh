@@ -251,11 +251,28 @@ function write-metadata () {
 	printf "    studio: ${mal_studios}\n"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
-	if [[ $media_type == "animes" ]]
+	if [[ $media_type == "animes" ]] && [[ $IGNORE_SEASONS != "Yes" ]]
 	then
-		get-season-infos
-		printf "    critic_rating: $score\n" >> $METADATA
-		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
+		then
+			line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $mal_id | cut -d : -f 1)
+			if sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $5}' | grep -i -w "Yes"
+			then
+				score=$(get-mal-rating)
+				score=$(printf '%.*f\n' 1 $score)
+				printf "    critic_rating: $score\n" >> $METADATA
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tseasons ignored\n" >> $LOG
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+			else
+				get-season-infos
+				printf "    critic_rating: $score\n" >> $METADATA
+				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+		else
+			get-season-infos
+			printf "    critic_rating: $score\n" >> $METADATA
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+		fi
+	fi
 	else
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)

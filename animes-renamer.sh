@@ -47,7 +47,7 @@ python3 $SCRIPT_FOLDER/plex_animes_export.py
 override_line=$(wc -l < $SCRIPT_FOLDER/override-ID-animes.tsv)
 if [[ $override_line -gt 1 ]]
 then
-	while IFS=$'\t' read -r tvdb_id mal_id title_anime studio									# First add the override animes to the ID file
+	while IFS=$'\t' read -r tvdb_id mal_id title_anime studio ignore_seasons					# First add the override animes to the ID file
 	do
 		if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 		then
