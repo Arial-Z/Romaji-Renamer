@@ -103,7 +103,7 @@ then
 		fi
 		((ongoingpage++))
 	done
-	sort -n $SCRIPT_FOLDER/tmp/ongoing-dirty.tsv | uniq > data/ongoing.tsv
+	sort -n $SCRIPT_FOLDER/tmp/ongoing-dirty.tsv | uniq > tmp/ongoing.tsv
 	while read -r mal_id
 	do
 		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
