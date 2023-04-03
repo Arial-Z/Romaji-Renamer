@@ -19,6 +19,8 @@ fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/tmp
+else
+	rm $SCRIPT_FOLDER/tmp/*
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then

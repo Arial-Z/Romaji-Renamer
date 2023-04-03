@@ -20,6 +20,8 @@ fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/tmp
+else
+	rm $SCRIPT_FOLDER/tmp/*
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
 then
@@ -98,10 +100,8 @@ then
 		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json								# stop if page is empty
 		then
 			break
-			echo "Stop loop"
 		fi
 		((ongoingpage++))
-		echo "page up $ongoingpage"
 	done
 	while read -r mal_id
 	do
