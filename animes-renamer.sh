@@ -98,8 +98,10 @@ then
 		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json								# stop if page is empty
 		then
 			break
+			echo "Stop loop"
 		fi
 		((ongoingpage++))
+		echo "page up $ongoingpage"
 	done
 	while read -r mal_id
 	do
