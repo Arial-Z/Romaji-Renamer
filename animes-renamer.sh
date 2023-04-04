@@ -20,8 +20,6 @@ fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/tmp
-else
-	rm $SCRIPT_FOLDER/tmp/*
 fi
 if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
 then
@@ -91,6 +89,8 @@ done < $SCRIPT_FOLDER/tmp/plex_animes_export.tsv
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
 if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]              								# check if already exist
 then
+	rm $SCRIPT_FOLDER/tmp/ongoing-dirty.tsv
+	rm $SCRIPT_FOLDER/tmp/ongoing-dirty.tsv
 	ongoingpage=0
 	while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 	do
