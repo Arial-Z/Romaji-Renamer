@@ -48,7 +48,13 @@ function get-mal-eng-title () {
 	jq '.data.title_english' -r "$SCRIPT_FOLDER/data/$mal_id.json"
 }
 function get-mal-rating () {
-	jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json"
+	mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+	if [[ "$mal_score" == "null" ]]
+	then
+		echo 0
+	else
+		echo $mal_score
+	fi
 }
 function get-mal-poster () {
 	if [[ $POSTER_DOWNLOAD == "Yes" ]]
@@ -201,7 +207,6 @@ function get-season-infos () {
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)
-		echo "$mal_id score : $score"
 	fi
 	mal_id=$mal_backup_id
 }
