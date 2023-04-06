@@ -48,6 +48,7 @@ function get-mal-eng-title () {
 	jq '.data.title_english' -r "$SCRIPT_FOLDER/data/$mal_id.json"
 }
 function get-mal-rating () {
+	mal_score=0
 	mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json")
 	if [[ "$mal_score" == "null" ]]
 	then
@@ -202,7 +203,7 @@ function get-season-infos () {
 			done
 			score=$(echo | awk -v v1=$total_score -v v2=$last_season '{print v1 / v2 }')
 			score=$(printf '%.*f\n' 1 $score)
-			echo "$mal_id score : $score"
+			score=$(printf '%.*f\n' 1 $score)
 		fi
 	else
 		mal_id=$mal_backup_id
