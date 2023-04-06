@@ -89,21 +89,20 @@ done < $SCRIPT_FOLDER/tmp/plex_animes_export.tsv
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
 if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]              								# check if already exist
 then
-	rm $SCRIPT_FOLDER/tmp/ongoing-dirty.tsv
-	rm $SCRIPT_FOLDER/tmp/ongoing-dirty.tsv
+	:> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv
 	ongoingpage=0
 	while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 	do
-		curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-tmp.json
+		curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-mal.json
 		sleep 2
-		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-tmp.json >> $SCRIPT_FOLDER/tmp/ongoing-dirty.tsv	# store the mal ID of the ongoing show
-		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-tmp.json								# stop if page is empty
+		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-mal.json >> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv	# store the mal ID of the ongoing show
+		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-mal.json								# stop if page is empty
 		then
 			break
 		fi
 		((ongoingpage++))
 	done
-	sort -n $SCRIPT_FOLDER/tmp/ongoing-dirty.tsv | uniq > tmp/ongoing.tsv
+	sort -n $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv | uniq > tmp/ongoing.tsv
 	while read -r mal_id
 	do
 		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
