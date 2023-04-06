@@ -203,12 +203,13 @@ function get-season-infos () {
 			done
 			score=$(echo | awk -v v1=$total_score -v v2=$last_season '{print v1 / v2 }')
 			score=$(printf '%.*f\n' 1 $score)
-			score=$(printf '%.*f\n' 1 $score)
+			echo "$mal_id score : $score"
 		fi
 	else
 		mal_id=$mal_backup_id
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)
+		echo "$mal_id score : $score"
 	fi
 	mal_id=$mal_backup_id
 }
