@@ -10,7 +10,7 @@ Here what will be imported for each of your animes :
   sort_title: "Yuru Camp△"                              # Sort Title : Either Anilist title or English title (in settings)
   original_title: "Laid-Back Camp"                      # English title from MAL
   genre.sync: Anime,Slice of Life,CGDCT,Iyashikei       # All genre from MAL (genres, themes and demographics)
-  label.remove: Ongoing                                 # Airing status from MAL (add or remove Ongoing label)
+  label.remove: Ongoing                                 # Airing status from Anilist (add or remove Ongoing label)
   studio: C-Station                                     # Studio from MAL
   seasons:                                              # Season import
     0:                                                  # Season 0 import                 
