@@ -23,13 +23,9 @@ fi
 if [ ! -d $SCRIPT_FOLDER/ID ]											#check if exist and create folder and file for ID
 then
 	mkdir $SCRIPT_FOLDER/ID
-	touch $SCRIPT_FOLDER/ID/animes.tsv
-elif [ ! -f $SCRIPT_FOLDER/ID/animes.tsv ]
-then
-	touch $SCRIPT_FOLDER/ID/animes.tsv
+	:> $SCRIPT_FOLDER/ID/animes.tsv
 else
-	rm $SCRIPT_FOLDER/ID/animes.tsv
-	touch $SCRIPT_FOLDER/ID/animes.tsv
+	:> $SCRIPT_FOLDER/ID/animes.tsv
 fi
 if [ ! -d $LOG_FOLDER ]
 then

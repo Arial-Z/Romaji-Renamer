@@ -23,13 +23,9 @@ fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
 	mkdir $SCRIPT_FOLDER/ID
-	touch $SCRIPT_FOLDER/ID/movies.tsv
-elif [ ! -f $SCRIPT_FOLDER/ID/movies.tsv ]
-then
-	touch $SCRIPT_FOLDER/ID/movies.tsv
+	:> $SCRIPT_FOLDER/ID/movies.tsv
 else
-	rm $SCRIPT_FOLDER/ID/movies.tsv
-	touch $SCRIPT_FOLDER/ID/movies.tsv
+	:> $SCRIPT_FOLDER/ID/movies.tsv
 fi
 if [ ! -d $LOG_FOLDER ]
 then
