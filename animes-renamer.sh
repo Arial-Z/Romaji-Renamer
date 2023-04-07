@@ -15,7 +15,6 @@ then
 	mkdir $SCRIPT_FOLDER/data
 else
 	find $SCRIPT_FOLDER/data/* -mtime +$MAL_CACHE_TIME -exec rm {} \;					#delete json data if older than 2 days
-	find $SCRIPT_FOLDER/data/ongoing.tsv -mmin +720 -exec rm {} \;			#delete ongoing if older than 12h
 fi
 if [ ! -d $SCRIPT_FOLDER/tmp ]										#check if exist and create folder for json data
 then
@@ -87,53 +86,55 @@ do
 done < $SCRIPT_FOLDER/tmp/plex_animes_export.tsv
 
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
-if [ ! -f $SCRIPT_FOLDER/data/ongoing.tsv ]              								# check if already exist
-then
-	:> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv
-	ongoingpage=0
-	while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
-	do
-		curl "https://api.jikan.moe/v4/anime?status=airing&page=$ongoingpage&order_by=member&order=desc&genres_exclude=12&min_score=4" > $SCRIPT_FOLDER/tmp/ongoing-mal.json
-		sleep 2
-		jq ".data[].mal_id" -r $SCRIPT_FOLDER/tmp/ongoing-mal.json >> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv	# store the mal ID of the ongoing show
-		if grep "\"has_next_page\":false," $SCRIPT_FOLDER/tmp/ongoing-mal.json								# stop if page is empty
+:> $SCRIPT_FOLDER/data/ongoing.tsv
+:> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv
+ongoingpage=1
+while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
+do
+	sleep 0.5
+	curl 'https://graphql.anilist.co/' \
+	-X POST \
+	-H 'content-type: application/json' \
+	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { idMal } } }" }' > $SCRIPT_FOLDER/tmp/ongoing-anilist.json
+	sleep 1.5
+	jq '.data.Page.media[] | select( .idMal != null ) | .idMal' -r $SCRIPT_FOLDER/tmp/ongoing-anilist.json >> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv	# store the mal ID of the ongoing show
+	if grep -w ":false}" $SCRIPT_FOLDER/tmp/ongoing-anilist.json								# stop if page is empty
+	then
+		break
+	fi
+	((ongoingpage++))
+done
+sort -n $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv | uniq > tmp/ongoing.tsv
+while read -r mal_id
+do
+	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
+	then
+		printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
+	else
+		tvdb_id=$(get-tvdb-id)																	# convert the mal id to tvdb id (to get the main anime)
+		if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]										# Ignore anime with no mal to tvdb id conversion
 		then
-			break
-		fi
-		((ongoingpage++))
-	done
-	sort -n $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv | uniq > tmp/ongoing.tsv
-	while read -r mal_id
-	do
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
-		then
-			printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
+			continue
 		else
-			tvdb_id=$(get-tvdb-id)																	# convert the mal id to tvdb id (to get the main anime)
-			if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]										# Ignore anime with no mal to tvdb id conversion
+			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id 2>/dev/null
 			then
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for : MAL : $mal_id" >> $LOG
-				continue
+				line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
+				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
+				printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 			else
-				if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id 2>/dev/null
+				mal_id=$(get-mal-id-from-tvdb-id)
+				if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id
 				then
-					line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
-					mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
-					printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
+					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid MAL ID for : TVDB : $tvdb_id" >> $LOG
+					continue
 				else
-					mal_id=$(get-mal-id-from-tvdb-id)
-					if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id
-					then
-						echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid MAL ID for : TVDB : $tvdb_id" >> $LOG
-						continue
-					else
-						printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
-					fi
+					printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 				fi
 			fi
 		fi
-	done < $SCRIPT_FOLDER/tmp/ongoing.tsv
-fi
+	fi
+done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 
 # write PMM metadata file from ID/animes.tsv and jikan API
 while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name last_season total_seasons
