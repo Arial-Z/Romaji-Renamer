@@ -119,8 +119,8 @@ You can also add it to CRON and make sure to run it before PMM (be careful it ta
 Some animes won't be matched and the metadata will be missing, you can see them error in the log, in PMM metadata files or plex directly<br/>
 Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 #### Animes
-to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-animes.tsv<br/>
-it look like this, be carreful to use **tab** as separator (studio is optional)
+to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
+you can also use the override file, copy `override-ID-animes.tsv.example` to `override-ID-animes.tsv` and add new entries, it look like this, be carreful to use **tab** as separator (studio and ignore_seasons are optional)
 ```
 tvdb-id	mal-id	Name	Studio	ignore_seasons
 114801	6702	Fairy Tail	A-1 Pictures	yes
@@ -129,8 +129,8 @@ tvdb-id	mal-id	Name	Studio	ignore_seasons
 ```
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
-to fix movies ID you can create a request at https://github.com/Anime-Lists/anime-lists/ you can also directly edit this file : override-ID-movies.tsv<br/>
-it look like this, be carreful to use **tab** as separator (studio is optional)
+to fix movies ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
+you can also use the override file, copy `override-ID-movies.tsv.example` to `override-ID-movies.tsv` and add new entries, it look like this, be carreful to use **tab** as separator (studio is optional)
 ```
 imdb-id	mal-id	Name	Studio
 tt16360006	50549	Bubble
