@@ -260,23 +260,23 @@ function write-metadata () {
 			then
 				score=$(get-mal-rating)
 				score=$(printf '%.*f\n' 1 $score)
-				printf "    critic_rating: $score\n" >> $METADATA
+				printf "    $WANTED_RATING: $score\n" >> $METADATA
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tseasons ignored\n" >> $LOG
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 			else
 				get-season-infos
-				printf "    critic_rating: $score\n" >> $METADATA
+				printf "    $WANTED_RATING: $score\n" >> $METADATA
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 			fi
 		else
 			get-season-infos
-			printf "    critic_rating: $score\n" >> $METADATA
+			printf "    $WANTED_RATING: $score\n" >> $METADATA
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 		fi
 	else
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)
-		printf "    critic_rating: $score\n" >> $METADATA
+		printf "    $WANTED_RATING: $score\n" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
