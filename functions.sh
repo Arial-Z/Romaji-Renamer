@@ -37,7 +37,7 @@ function get-anilist-infos () {
 		curl 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
 		sleep 1.5
 	fi
 }
@@ -48,7 +48,14 @@ function get-mal-eng-title () {
 	jq '.data.title_english' -r "$SCRIPT_FOLDER/data/$mal_id.json"
 }
 function get-mal-rating () {
-	jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json"
+	mal_score=0
+	mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+	if [[ "$mal_score" == "null" ]]
+	then
+		echo 0
+	else
+		echo $mal_score
+	fi
 }
 function get-mal-poster () {
 	if [[ $POSTER_DOWNLOAD == "Yes" ]]

@@ -23,13 +23,9 @@ fi
 if [ ! -d $SCRIPT_FOLDER/ID ]
 then
 	mkdir $SCRIPT_FOLDER/ID
-	touch $SCRIPT_FOLDER/ID/movies.tsv
-elif [ ! -f $SCRIPT_FOLDER/ID/movies.tsv ]
-then
-	touch $SCRIPT_FOLDER/ID/movies.tsv
+	:> $SCRIPT_FOLDER/ID/movies.tsv
 else
-	rm $SCRIPT_FOLDER/ID/movies.tsv
-	touch $SCRIPT_FOLDER/ID/movies.tsv
+	:> $SCRIPT_FOLDER/ID/movies.tsv
 fi
 if [ ! -d $LOG_FOLDER ]
 then
@@ -44,8 +40,7 @@ download-anime-id-mapping
 python3 $SCRIPT_FOLDER/plex_movies_export.py
 
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
-override_line=$(wc -l < $SCRIPT_FOLDER/override-ID-movies.tsv)
-if [[ $override_line -gt 1 ]]
+if [ -f $SCRIPT_FOLDER/override-ID-movies.tsv ]
 then
 	while IFS=$'\t' read -r imdb_id mal_id title_anime studio                                                                       # First add the override animes to the ID file
 	do
