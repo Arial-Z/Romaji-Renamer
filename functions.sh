@@ -2,7 +2,7 @@
 
 #General variables
 LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
-MATCH_LOG=$LOG_FOLDER/missing-id.log
+MATCH_LOG=$LOG_FOLDER/${media_type}_missing-id.log
 
 # functions
 function get-mal-id-from-tvdb-id () {
@@ -273,23 +273,23 @@ function write-metadata () {
 			then
 				score=$(get-mal-rating)
 				score=$(printf '%.*f\n' 1 $score)
-				printf "    $WANTED_RATING: $score\n" >> $METADATA
+				printf "    ${WANTED_RATING}_rating: $score\n" >> $METADATA
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tseasons ignored\n" >> $LOG
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 			else
 				get-season-infos
-				printf "    $WANTED_RATING: $score\n" >> $METADATA
+				printf "    ${WANTED_RATING}_rating: $score\n" >> $METADATA
 				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 			fi
 		else
 			get-season-infos
-			printf "    $WANTED_RATING: $score\n" >> $METADATA
+			printf "    ${WANTED_RATING}_rating: $score\n" >> $METADATA
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 		fi
 	else
 		score=$(get-mal-rating)
 		score=$(printf '%.*f\n' 1 $score)
-		printf "    $WANTED_RATING: $score\n" >> $METADATA
+		printf "    ${WANTED_RATING}_rating: $score\n" >> $METADATA
 		printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 	fi
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
