@@ -50,6 +50,12 @@ function get-mal-eng-title () {
 function get-mal-rating () {
 	mal_score=0
 	mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+	if [[ "$mal_score" == "0.0" ]]
+	then
+		rm "$SCRIPT_FOLDER/data/$mal_id.json"
+		get-mal-infos
+		mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+	fi
 	if [[ "$mal_score" == "null" ]]
 	then
 		echo 0
