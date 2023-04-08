@@ -82,7 +82,7 @@ METADATA_MOVIES=/path/to/PMM/config/movies-mal.yml
 # Folder where the logs of script are kept (Default is okay change if you want)
 LOG_FOLDER=$SCRIPT_FOLDER/logs
 
-# Type of rating used in Plex (audience_rating, critic_rating or user_rating) only user rating is avalaible for seasons
+# Type of rating used in Plex (audience, critic or user) only user rating is avalaible for seasons
 WANTED_RATING=critic_rating
 
 # Use the english name as title (and also sort_title) instead of the romaji one (Yes/No)
