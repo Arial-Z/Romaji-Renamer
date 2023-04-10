@@ -104,7 +104,9 @@ while read -r mal_id
 do
 	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
 	then
-		printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
+		line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
+		tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $1}')
+		printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 	else
 		tvdb_id=$(get-tvdb-id)																	# convert the mal id to tvdb id (to get the main anime)
 		if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]										# Ignore anime with no mal to tvdb id conversion
@@ -112,21 +114,7 @@ do
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for MAL : $mal_id" >> $LOG
 			continue
 		else
-			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $tvdb_id 2>/dev/null
-			then
-				line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
-				mal_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $2}')
-				printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
-			else
-				mal_id=$(get-mal-id-from-tvdb-id)
-				if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no tvdb to mal id
-				then
-					echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid MAL ID for TVDB : $tvdb_id" >> $LOG
-					continue
-				else
-					printf "$mal_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
-				fi
-			fi
+			printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 		fi
 	fi
 done < $SCRIPT_FOLDER/tmp/ongoing.tsv
