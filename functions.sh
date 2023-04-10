@@ -91,18 +91,21 @@ function get-mal-tags () {
 	(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json") | awk '{print $0}' | paste -s -d, -
 	}
 	function get-mal-studios() {
-	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
+	if [ -f $SCRIPT_FOLDER/$OVERRIDE ]
 	then
-		line=$(grep -w -n $mal_id $SCRIPT_FOLDER/$OVERRIDE | cut -d : -f 1)
-		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
-		if [[ -z "$studio" ]]
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
 		then
-			mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+			line=$(grep -w -n $mal_id $SCRIPT_FOLDER/$OVERRIDE | cut -d : -f 1)
+			studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
+			if [[ -z "$studio" ]]
+			then
+				mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r "$SCRIPT_FOLDER/data/$mal_id.json")
+			else
+				mal_studios=$(echo "$studio")
+			fi
 		else
-			mal_studios=$(echo "$studio")
+			mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r "$SCRIPT_FOLDER/data/$mal_id.json")
 		fi
-	else
-		mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r "$SCRIPT_FOLDER/data/$mal_id.json")
 	fi
 }
 function download-anime-id-mapping () {
