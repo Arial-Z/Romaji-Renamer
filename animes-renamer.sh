@@ -106,6 +106,7 @@ do
 	then
 		line=$(grep -w -n $tvdb_id $SCRIPT_FOLDER/ID/animes.tsv | cut -d : -f 1)
 		tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $1}')
+		echo "mal ID : $mal_id in ID/animes.tsv tvdb id : $tvdb_id"
 		printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 	else
 		tvdb_id=$(get-tvdb-id)																	# convert the mal id to tvdb id (to get the main anime)
@@ -114,6 +115,7 @@ do
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - Ongoing invalid TVDB ID for MAL : $mal_id" >> $LOG
 			continue
 		else
+			echo "mal ID : $mal_id found tvdb id : $tvdb_id"
 			printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 		fi
 	fi
