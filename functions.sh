@@ -33,7 +33,7 @@ function get-mal-infos () {
 	then
 		sleep 0.5
 		curl "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/data/$mal_id.json"
-		sleep 1.5
+		sleep 1.6
 	fi
 }
 function get-anilist-infos () {
@@ -44,7 +44,7 @@ function get-anilist-infos () {
 		-X POST \
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
-		sleep 2
+		sleep 1.6
 	fi
 }
 function get-anilist-title () {
