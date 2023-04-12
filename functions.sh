@@ -44,7 +44,7 @@ function get-anilist-infos () {
 		-X POST \
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
-		sleep 1.5
+		sleep 2
 	fi
 }
 function get-anilist-title () {
