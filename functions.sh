@@ -103,10 +103,9 @@ function get-mal-studios() {
 		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
 		if [[ -z "$studio" ]]
 		then
-			studio=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
-			mal_studios=$(echo "$studio")
+			jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json
 		else
-			mal_studios=$(echo "$studio")
+			echo "$studio"
 		fi
 	fi
 }
