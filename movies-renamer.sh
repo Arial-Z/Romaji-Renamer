@@ -48,7 +48,7 @@ then
 		then
 			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | grep -w  $imdb_id
 			then
-				line=$(awk -F"\t" '{print $1}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $imdb_id | cut -d : -f 1)
+				line=$(awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | grep -w -n $imdb_id | cut -d : -f 1)
 				title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $2}')
 				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $3}')
 				printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv

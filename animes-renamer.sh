@@ -47,7 +47,7 @@ then
 		then
 			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -w $tvdb_id
 			then
-				line=$(awk -F"\t" '{print $1}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $tvdb_id | cut -d : -f 1)
+				line=$(awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -w -n $tvdb_id | cut -d : -f 1)
 				title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $2}')
 				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $3}')
 				last_season=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $4}')
@@ -104,7 +104,7 @@ while read -r mal_id
 do
 	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
 	then
-		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $mal_id | cut -d : -f 1)
+		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w -n $mal_id | cut -d : -f 1)
 		tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $1}')
 		printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 	else
