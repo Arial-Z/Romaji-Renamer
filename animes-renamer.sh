@@ -91,6 +91,15 @@ do
 	-X POST \
 	-H 'content-type: application/json' \
 	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { idMal } } }" }' > $SCRIPT_FOLDER/tmp/ongoing-anilist.json
+	if  grep -w "\"Too Many Requests.\",\"status\": 429" $SCRIPT_FOLDER/tmp/ongoing-anilist.json
+	then
+		echo "Anilist API limit reached watiting"
+		sleep 62
+		curl 'https://graphql.anilist.co/' \
+		-X POST \
+		-H 'content-type: application/json' \
+		--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { idMal } } }" }' > $SCRIPT_FOLDER/tmp/ongoing-anilist.json
+	fi
 	sleep 1.5
 	jq '.data.Page.media[] | select( .idMal != null ) | .idMal' -r $SCRIPT_FOLDER/tmp/ongoing-anilist.json >> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv	# store the mal ID of the ongoing show
 	if grep -w ":false}" $SCRIPT_FOLDER/tmp/ongoing-anilist.json								# stop if page is empty
