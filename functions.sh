@@ -100,13 +100,15 @@ function get-mal-studios() {
 	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
 	then
 		line=$(grep -w -n $mal_id $SCRIPT_FOLDER/$OVERRIDE | cut -d : -f 1)
-		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
+	studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
 		if [[ -z "$studio" ]]
-		then
-			jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json
+	then
+			mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
 		else
-			echo "$studio"
+			mal_studios=$(echo "$studio")
 		fi
+	else
+	mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
 	fi
 }
 function download-anime-id-mapping () {
@@ -264,8 +266,8 @@ function write-metadata () {
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
 		fi
 	fi
-	studio=$(get-mal-studios)
-	printf "    studio: ${studio}\n"  >> $METADATA
+	get-mal-studios
+	printf "    studio: ${mal_studios}\n"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
 	if [[ $media_type == "animes" ]] && [[ $IGNORE_SEASONS != "Yes" ]]
