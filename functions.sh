@@ -44,7 +44,7 @@ function get-anilist-infos () {
 		-X POST \
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
-		if  grep -w "[{\"message\": \"Too Many Requests.\",\"status\": 429}]" $SCRIPT_FOLDER/data/title-$mal_id.json
+		if  grep -w "\"Too Many Requests.\",\"status\": 429" $SCRIPT_FOLDER/data/title-$mal_id.json
 		then
 			echo "Anilist API limit reached watiting"
 			sleep 62
