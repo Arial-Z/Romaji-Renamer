@@ -33,7 +33,7 @@ function get-mal-infos () {
 	then
 		sleep 0.5
 		curl "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/data/$mal_id.json"
-		sleep 1.6
+		sleep 1.5
 	fi
 }
 function get-anilist-infos () {
@@ -44,11 +44,22 @@ function get-anilist-infos () {
 		-X POST \
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
-		sleep 1.6
+		if  grep -w "[{\"message\": \"Too Many Requests.\",\"status\": 429}]" $SCRIPT_FOLDER/data/title-$mal_id.json
+		then
+			echo "Anilist API limit reached watiting"
+			sleep 62
+			curl 'https://graphql.anilist.co/' \
+			-X POST \
+			-H 'content-type: application/json' \
+			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
+			sleep 1.5
+		else
+			sleep 1.5
+		
 	fi
 }
 function get-anilist-title () {
-	jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/title-$mal_id.json"
+	jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
 }
 function get-mal-eng-title () {
 	jq '.data.title_english' -r "$SCRIPT_FOLDER/data/$mal_id.json"
