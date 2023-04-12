@@ -264,8 +264,8 @@ function write-metadata () {
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
 		fi
 	fi
-	get-mal-studios
-	printf "    studio: ${mal_studios}\n"  >> $METADATA
+	studio=$(get-mal-studios)
+	printf "    studio: ${studio}\n"  >> $METADATA
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $mal_studios\n" >> $LOG
 	get-mal-poster
 	if [[ $media_type == "animes" ]] && [[ $IGNORE_SEASONS != "Yes" ]]
