@@ -31,7 +31,7 @@ if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
 fi
-
+create-override
 # Download anime mapping json data
 download-anime-id-mapping
 

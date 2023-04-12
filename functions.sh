@@ -5,6 +5,12 @@ LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/${media_type}_missing-id.log
 
 # functions
+function create-override () {
+	if [ ! -f $SCRIPT_FOLDER/$OVERRIDE ]
+	then
+		cp $SCRIPT_FOLDER/$OVERRIDE.exmaple $SCRIPT_FOLDER/$OVERRIDE
+	fi
+}
 function get-mal-id-from-tvdb-id () {
 	jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .mal_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
 }
@@ -91,21 +97,16 @@ function get-mal-tags () {
 	(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json") | awk '{print $0}' | paste -s -d, -
 	}
 function get-mal-studios() {
-	if [ -f $SCRIPT_FOLDER/$OVERRIDE ]
+	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
 	then
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
+		line=$(grep -w -n $mal_id $SCRIPT_FOLDER/$OVERRIDE | cut -d : -f 1)
+		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
+		if [[ -z "$studio" ]]
 		then
-			line=$(grep -w -n $mal_id $SCRIPT_FOLDER/$OVERRIDE | cut -d : -f 1)
-			studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
-			if [[ -z "$studio" ]]
-			then
-				mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r "$SCRIPT_FOLDER/data/$mal_id.json")
-			else
-				mal_studios=$(echo "$studio")
-			fi
+			mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
+		else
+			mal_studios=$(echo "$studio")
 		fi
-	else
-		mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r "$SCRIPT_FOLDER/data/$mal_id.json")
 	fi
 }
 function download-anime-id-mapping () {
