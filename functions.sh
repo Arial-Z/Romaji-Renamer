@@ -55,7 +55,7 @@ function get-anilist-infos () {
 			sleep 1.5
 		else
 			sleep 1.5
-		
+		fi
 	fi
 }
 function get-anilist-title () {
