@@ -8,7 +8,7 @@ MATCH_LOG=$LOG_FOLDER/${media_type}_missing-id.log
 function create-override () {
 	if [ ! -f $SCRIPT_FOLDER/$OVERRIDE ]
 	then
-		cp $SCRIPT_FOLDER/$OVERRIDE.exmaple $SCRIPT_FOLDER/$OVERRIDE
+		cp $SCRIPT_FOLDER/$OVERRIDE.example $SCRIPT_FOLDER/$OVERRIDE
 	fi
 }
 function get-mal-id-from-tvdb-id () {
