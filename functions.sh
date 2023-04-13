@@ -39,7 +39,6 @@ function get-mal-infos () {
 function get-anilist-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/title-$mal_id.json" ]
 	then
-		sleep 0.5
 		curl 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
@@ -52,10 +51,8 @@ function get-anilist-infos () {
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
-			sleep 1.5
-		else
-			sleep 1.5
 		fi
+		sleep 0.7
 	fi
 }
 function get-anilist-title () {
