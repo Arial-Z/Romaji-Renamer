@@ -31,9 +31,13 @@ function get-tvdb-id () {
 function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/$mal_id.json" ]
 	then
-		sleep 0.5
-		curl "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/data/$mal_id.json"
-		sleep 1.5
+		curl -s -o $SCRIPT_FOLDER/data/$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmpjikan-limit-rate.txt
+		if  grep -w "429" $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
+		then
+			sleep 10
+			curl -s -o $SCRIPT_FOLDER/data/$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
+		fi
+		sleep 1.1
 	fi
 }
 function get-anilist-infos () {
@@ -42,21 +46,29 @@ function get-anilist-infos () {
 		curl 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
-		if  grep -w "\"Too Many Requests.\",\"status\": 429" $SCRIPT_FOLDER/data/title-$mal_id.json
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json" -D $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt
+		rate_limit=0
+		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt)
+		if [[ rate_limit -lt 3 ]]
 		then
 			echo "Anilist API limit reached watiting"
-			sleep 62
-			curl 'https://graphql.anilist.co/' \
-			-X POST \
-			-H 'content-type: application/json' \
-			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
+			sleep 30
+		else
+			sleep 0.7
 		fi
-		sleep 0.7
 	fi
 }
 function get-anilist-title () {
-	jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
+	anilist_title=null
+	anilist_title=$(jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json)
+	if [[ "$anilist_title" == "null" ]]
+	then
+		rm $SCRIPT_FOLDER/data/title-$mal_id.json
+		get-anilist-infos
+		jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
+	else
+		echo $anilist_title
+	fi
 }
 function get-mal-eng-title () {
 	jq '.data.title_english' -r "$SCRIPT_FOLDER/data/$mal_id.json"

@@ -76,13 +76,13 @@ do
 		get-mal-infos
 		get-anilist-infos
 		title_anime=$(get-anilist-title)
-		printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+		printf "$imdb_id\t$mal_id\t$anilist_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/movies.tsv" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/tmp/plex_movies_export.tsv
 
 # write PMM metadata file from ID/movies.tsv and jikan API
-while IFS=$'\t' read -r imdb_id mal_id title_anime title_plex asset_name
+while IFS=$'\t' read -r imdb_id mal_id anilist_id title_anime title_plex asset_name
 do
 	write-metadata
 done < $SCRIPT_FOLDER/ID/movies.tsv

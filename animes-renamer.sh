@@ -74,7 +74,7 @@ do
 			get-mal-infos
 			get-anilist-infos
 			title_anime=$(get-anilist-title)
-			printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+			printf "$tvdb_id\t$mal_id\t$anilist_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/animes.tsv" >> $LOG
 		fi
 	fi
@@ -129,7 +129,7 @@ do
 done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 
 # write PMM metadata file from ID/animes.tsv and jikan API
-while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name last_season total_seasons
+while IFS=$'\t' read -r tvdb_id mal_id anilist_id title_anime title_plex asset_name last_season total_seasons
 do
 	write-metadata
 done < $SCRIPT_FOLDER/ID/animes.tsv
