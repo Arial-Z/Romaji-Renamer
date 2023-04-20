@@ -8,7 +8,7 @@ MATCH_LOG=$LOG_FOLDER/${media_type}-missing-id.log
 function create-override () {
 	if [ ! -f $SCRIPT_FOLDER/$OVERRIDE ]
 	then
-		cp $SCRIPT_FOLDER/$OVERRIDE.example $SCRIPT_FOLDER/$OVERRIDE
+		cp $SCRIPT_FOLDER/override-ID-${media_type}.example.tsv $SCRIPT_FOLDER/$OVERRIDE
 	fi
 }
 function get-mal-id-from-tvdb-id () {
@@ -120,7 +120,7 @@ function get-mal-studios() {
 	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
 	then
 		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $mal_id | cut -d : -f 1)
-		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
+		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $5}')
 		if [[ -z "$studio" ]]
 		then
 			mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
