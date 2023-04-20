@@ -2,7 +2,7 @@
 
 #General variables
 LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
-MATCH_LOG=$LOG_FOLDER/${media_type}_missing-id.log
+MATCH_LOG=$LOG_FOLDER/${media_type}-missing-id.log
 
 # functions
 function create-override () {

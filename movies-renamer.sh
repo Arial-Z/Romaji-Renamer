@@ -32,6 +32,7 @@ then
 	mkdir $LOG_FOLDER
 fi
 create-override
+:> $MATCH_LOG
 # Download anime mapping json data
 download-anime-id-mapping
 
