@@ -47,7 +47,7 @@ python3 $SCRIPT_FOLDER/plex_movies_export.py
 # create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
 if [ -f $SCRIPT_FOLDER/override-ID-movies.tsv ]
 then
-	while IFS=$'\t' read -r imdb_id mal_id title_anime studio                                                                       # First add the override animes to the ID file
+	while IFS=$'\t' read -r imdb_id mal_id anilist_id title_anime studio                                                                       # First add the override animes to the ID file
 	do
 		if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 		then
@@ -56,7 +56,7 @@ then
 				line=$(awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | grep -w -n $imdb_id | cut -d : -f 1)
 				title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $2}')
 				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $3}')
-				printf "$imdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+				printf "$imdb_id\t$mal_id\t$anilist_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 			fi
 		fi
