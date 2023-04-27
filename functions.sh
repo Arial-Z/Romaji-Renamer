@@ -31,7 +31,7 @@ function get-tvdb-id () {
 function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/$mal_id.json" ]
 	then
-		curl -s -o $SCRIPT_FOLDER/data/$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmpjikan-limit-rate.txt
+		curl -s -o $SCRIPT_FOLDER/data/$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
 		if  grep -w "429" $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
 		then
 			sleep 10
