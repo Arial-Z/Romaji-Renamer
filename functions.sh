@@ -96,7 +96,10 @@ function get-mal-poster () {
 		then
 			sleep 0.5
 			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
-			mkdir "$ASSET_FOLDER/$asset_name"
+			if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+			then
+				mkdir "$ASSET_FOLDER/$asset_name"
+			fi
 			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
 			sleep 1.5
 		else
@@ -105,7 +108,10 @@ function get-mal-poster () {
 			then
 				rm "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 0.5
-				mkdir "$ASSET_FOLDER/$asset_name"
+				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+				then
+					mkdir "$ASSET_FOLDER/$asset_name"
+				fi
 				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
 				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
 				sleep 1.5
