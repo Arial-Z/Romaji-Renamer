@@ -45,11 +45,11 @@ if [ -f $SCRIPT_FOLDER/override-ID-animes.tsv ]
 then
 	while IFS=$'\t' read -r tvdb_id mal_id anilist_id title_anime studio ignore_seasons					# First add the override animes to the ID file
 	do
-		if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
+		if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -q -w $tvdb_id
 		then
-			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -w $tvdb_id
+			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -q -w $tvdb_id
 			then
-				line=$(awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -w -n $tvdb_id | cut -d : -f 1)
+				line=$(awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | grep -q -w -n $tvdb_id | cut -d : -f 1)
 				title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $2}')
 				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $3}')
 				last_season=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $4}')
@@ -68,7 +68,7 @@ then
 fi
 while IFS=$'\t' read -r tvdb_id title_plex asset_name last_season total_seasons 		# then get the other ID from the ID mapping and download json data
 do
-	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
+	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -q -w $tvdb_id
 	then
 		mal_id=$(get-mal-id-from-tvdb-id)
 		anilist_id=$(get-anilist-id)
@@ -99,7 +99,7 @@ do
 	-X POST \
 	-H 'content-type: application/json' \
 	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { idMal } } }" }' > $SCRIPT_FOLDER/tmp/ongoing-anilist.json
-	if  grep -w "\"Too Many Requests.\",\"status\": 429" $SCRIPT_FOLDER/tmp/ongoing-anilist.json
+	if  grep -q -w "\"Too Many Requests.\",\"status\": 429" $SCRIPT_FOLDER/tmp/ongoing-anilist.json
 	then
 		echo "Anilist API limit reached watiting"
 		sleep 62
@@ -110,7 +110,7 @@ do
 	fi
 	sleep 1.5
 	jq '.data.Page.media[] | select( .idMal != null ) | .idMal' -r $SCRIPT_FOLDER/tmp/ongoing-anilist.json >> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv	# store the mal ID of the ongoing show
-	if grep -w ":false}" $SCRIPT_FOLDER/tmp/ongoing-anilist.json								# stop if page is empty
+	if grep -q -w ":false}" $SCRIPT_FOLDER/tmp/ongoing-anilist.json								# stop if page is empty
 	then
 		break
 	fi
@@ -119,9 +119,9 @@ done
 sort -n $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv | uniq > $SCRIPT_FOLDER/tmp/ongoing.tsv
 while read -r mal_id
 do
-	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
+	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -q -w  $mal_id
 	then
-		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w -n $mal_id | cut -d : -f 1)
+		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -q -w -n $mal_id | cut -d : -f 1)
 		tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $1}')
 		printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
 	else

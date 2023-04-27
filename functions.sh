@@ -32,7 +32,7 @@ function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/$mal_id.json" ]
 	then
 		curl -s -o $SCRIPT_FOLDER/data/$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
-		if  grep -w "429" $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
+		if  grep -q -w "429" $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
 		then
 			sleep 10
 			curl -s -o $SCRIPT_FOLDER/data/$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
@@ -48,7 +48,7 @@ function get-anilist-infos () {
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json" -D $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt
 		rate_limit=0
-		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt)
+		rate_limit=$(grep -q -oP '(?<=x-ratelimit-remaining: )[0-9]+' $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt)
 		if [[ rate_limit -lt 3 ]]
 		then
 			echo "Anilist API limit reached watiting"
@@ -123,9 +123,9 @@ function get-mal-tags () {
 	(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json") | awk '{print $0}' | paste -s -d, -
 	}
 function get-mal-studios() {
-	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
+	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -q -w  $mal_id
 	then
-		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $mal_id | cut -d : -f 1)
+		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -q -w -n $mal_id | cut -d : -f 1)
 		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $5}')
 		if [[ -z "$studio" ]]
 		then
@@ -289,7 +289,7 @@ function write-metadata () {
 	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $mal_tags\n" >> $LOG
 	if [[ $media_type == "animes" ]]
 	then
-		if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "$tvdb_id"
+		if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -q -w "$tvdb_id"
 		then
 			printf "    label: Ongoing\n" >> $METADATA
 			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel add Ongoing\n" >> $LOG
@@ -304,10 +304,10 @@ function write-metadata () {
 	get-mal-poster
 	if [[ $media_type == "animes" ]] && [[ $IGNORE_SEASONS != "Yes" ]]
 	then
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
+		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -q -w  $mal_id
 		then
-			line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $mal_id | cut -d : -f 1)
-			if sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $5}' | grep -i -w "Yes"
+			line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -q -w -n $mal_id | cut -d : -f 1)
+			if sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $5}' | grep -q -i -w "Yes"
 			then
 				score=$(get-mal-rating)
 				score=$(printf '%.*f\n' 1 $score)
