@@ -31,10 +31,7 @@ if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
 fi
-if [ -f $MATCH_LOG ]
-then
-	rm $MATCH_LOG
-fi
+:> $MATCH_LOG
 create-override
 
 # Download anime mapping json data
