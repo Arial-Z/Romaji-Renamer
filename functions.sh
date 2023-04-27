@@ -125,6 +125,7 @@ function get-mal-tags () {
 function get-mal-studios() {
 	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
 	then
+		echo "that grep ?"
 		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $mal_id | cut -d : -f 1)
 		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $5}')
 		if [[ -z "$studio" ]]
