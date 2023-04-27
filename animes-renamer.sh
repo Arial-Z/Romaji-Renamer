@@ -68,10 +68,10 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no mal id
 		then
-			echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid MAL ID for tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 		elif [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
-			echo "invalid Anilist ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid Anilist ID for tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 		else
 			get-mal-infos
 			get-anilist-infos

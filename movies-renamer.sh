@@ -66,13 +66,13 @@ do
 		mal_id=$(get-mal-id-from-imdb-id)
 		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]                                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
-			echo "invalid MAL ID for : imdb : $imdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid MAL ID for imdb : $imdb_id / $title_plex" >> $MATCH_LOG
 			continue
 		fi
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
-			echo "invalid Anilist ID for : imdb : $imdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid Anilist ID for imdb : $imdb_id / $title_plex" >> $MATCH_LOG
 			continue
 		fi
 		get-mal-infos
