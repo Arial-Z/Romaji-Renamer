@@ -31,7 +31,7 @@ if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
 fi
-if [ -d $MATCH_LOG ]
+if [ -f $MATCH_LOG ]
 then
 	rm $MATCH_LOG
 fi
@@ -71,10 +71,10 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no mal id
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 		elif [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid Anilist ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid Anilist ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 		else
 			get-mal-infos
 			get-anilist-infos

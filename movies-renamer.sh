@@ -31,7 +31,7 @@ if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
 fi
-if [ -d $MATCH_LOG ]
+if [ -f $MATCH_LOG ]
 then
 	rm $MATCH_LOG
 fi
@@ -69,13 +69,13 @@ do
 		mal_id=$(get-mal-id-from-imdb-id)
 		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]                                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : imdb : $imdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid MAL ID for : imdb : $imdb_id / $title_plex" >> $MATCH_LOG
 			continue
 		fi
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid Anilist ID for : imdb : $imdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid Anilist ID for : imdb : $imdb_id / $title_plex" >> $MATCH_LOG
 			continue
 		fi
 		get-mal-infos
