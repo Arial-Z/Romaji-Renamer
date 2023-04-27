@@ -119,9 +119,9 @@ done
 sort -n $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv | uniq > $SCRIPT_FOLDER/tmp/ongoing.tsv
 while read -r mal_id
 do
-	echo "that grep ?"
 	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w  $mal_id
 	then
+		echo "that grep ?"
 		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w -n $mal_id | cut -d : -f 1)
 		tvdb_id=$(sed -n "${line}p" $SCRIPT_FOLDER/ID/animes.tsv | awk -F"\t" '{print $1}')
 		printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/ongoing.tsv
