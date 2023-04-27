@@ -96,7 +96,7 @@ function get-mal-poster () {
 		then
 			sleep 0.5
 			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
-			if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+			if [[ ! -d "$ASSET_FOLDER/$asset_name" ]]
 			then
 				mkdir "$ASSET_FOLDER/$asset_name"
 			fi
@@ -108,7 +108,7 @@ function get-mal-poster () {
 			then
 				rm "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 0.5
-				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+				if [[ ! -d "$ASSET_FOLDER/$asset_name" ]]
 				then
 					mkdir "$ASSET_FOLDER/$asset_name"
 				fi
