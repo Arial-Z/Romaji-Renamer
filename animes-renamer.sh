@@ -54,6 +54,12 @@ then
 				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $3}')
 				last_season=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $4}')
 				total_seasons=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $5}')
+				if [[ -z "$title_anime" ]]
+				then
+					get-mal-infos
+					get-anilist-infos
+					title_anime=$(get-anilist-title)
+				fi
 				printf "$tvdb_id\t$mal_id\t$anilist_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 			fi

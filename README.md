@@ -123,17 +123,17 @@ Some animes won't be matched and the metadata will be missing, you can see them 
 Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 #### Animes
 to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
-you can also use the override file, copy `override-ID-animes.tsv.example` to `override-ID-animes.tsv` and add new entries, it look like this, be carreful to use **tab** as separator (studio and ignore_seasons are optional)
+you can also use the override file, copy `override-ID-animes.tsv.example` to `override-ID-animes.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title, studio and ignore_seasons are optional and can be used to force corresponding string)
 ```
-tvdb-id	mal-id	anilist-id Name	Studio	ignore_seasons
-114801	6702	6702  Fairy Tail	A-1 Pictures	yes
-79685	263	 263  Hajime no Ippo		
-76013	627	627 Major		
+tvdb-id	mal-id	anilist-id	Title	Studio	ignore_seasons
+114801	6702	6702		A-1 Pictures	yes
+79685	263	263	Hajime no Ippo		
+76013	627	627	Major
 ```
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
 to fix movies ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
-you can also use the override file, copy `override-ID-movies.tsv.example` to `override-ID-movies.tsv` and add new entries, it look like this, be carreful to use **tab** as separator (studio is optional)
+you can also use the override file, copy `override-ID-movies.tsv.example` to `override-ID-movies.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title and studio are optional and can be used to force corresponding string)
 ```
 imdb-id	mal-id	anilist-id  Name	Studio
 tt16360006	50549 142455	Bubble
