@@ -94,21 +94,19 @@ done < $SCRIPT_FOLDER/tmp/plex_animes_export.tsv
 ongoingpage=1
 while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 do
-	sleep 0.5
 	curl 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
-	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { idMal } } }" }' > $SCRIPT_FOLDER/tmp/ongoing-anilist.json
-	if  grep -w "\"Too Many Requests.\",\"status\": 429" $SCRIPT_FOLDER/tmp/ongoing-anilist.json
+	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { idMal } } }" }' > $SCRIPT_FOLDER/tmp/ongoing-anilist.json -D $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt
+	rate_limit=0
+	rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt)
+	if [[ rate_limit -lt 3 ]]
 	then
 		echo "Anilist API limit reached watiting"
-		sleep 62
-		curl 'https://graphql.anilist.co/' \
-		-X POST \
-		-H 'content-type: application/json' \
-		--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { idMal } } }" }' > $SCRIPT_FOLDER/tmp/ongoing-anilist.json
+		sleep 30
+	else
+		sleep 0.7
 	fi
-	sleep 1.5
 	jq '.data.Page.media[] | select( .idMal != null ) | .idMal' -r $SCRIPT_FOLDER/tmp/ongoing-anilist.json >> $SCRIPT_FOLDER/tmp/ongoing-tmp.tsv	# store the mal ID of the ongoing show
 	if grep -w ":false}" $SCRIPT_FOLDER/tmp/ongoing-anilist.json								# stop if page is empty
 	then
