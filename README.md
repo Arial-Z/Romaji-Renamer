@@ -24,7 +24,7 @@ Here what will be imported for each of your animes :
       label: score                                      # Add label score to use PMM overlays
   critic_rating: 8.4                                    # Show rating average rating of the seasons (Or MAL score if no seasons)
 ```
-MAL Posters for Animes and seasons can also be downloaded imported inside the PMM assets folder
+MAL Posters for animes and seasons can also be downloaded and imported inside the PMM assets folder
 
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is unsupported</b>
   
