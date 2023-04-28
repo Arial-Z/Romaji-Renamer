@@ -1,7 +1,6 @@
 # Plex-Romaji-Renamer
 
 A Bash script to import MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMS) metadata file.<br/>
-The following are imported in your PMS:
 
 Here what will be imported for each of your animes :
 ```
@@ -25,8 +24,9 @@ Here what will be imported for each of your animes :
       label: score                                      # Add label score to use PMM overlays
   critic_rating: 8.4                                    # Show rating average rating of the seasons (Or MAL score if no seasons)
 ```
-  
-Designed for Plex TV agent / Plex Movie Agent, <b>Hama is untested</b>
+MAL Posters for Animes and seasons can also be downloaded imported inside the PMM assets folder
+
+Designed for Plex TV agent / Plex Movie Agent, <b>Hama is unsupported</b>
   
  ## How it works:
   - Plex-Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
