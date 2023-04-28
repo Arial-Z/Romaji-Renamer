@@ -2,13 +2,13 @@
 
 #General variables
 LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
-MATCH_LOG=$LOG_FOLDER/${media_type}_missing-id.log
+MATCH_LOG=$LOG_FOLDER/${media_type}-missing-id.log
 
 # functions
 function create-override () {
 	if [ ! -f $SCRIPT_FOLDER/$OVERRIDE ]
 	then
-		cp $SCRIPT_FOLDER/$OVERRIDE.example $SCRIPT_FOLDER/$OVERRIDE
+		cp $SCRIPT_FOLDER/override-ID-${media_type}.example.tsv $SCRIPT_FOLDER/$OVERRIDE
 	fi
 }
 function get-mal-id-from-tvdb-id () {
@@ -31,9 +31,13 @@ function get-tvdb-id () {
 function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/$mal_id.json" ]
 	then
-		sleep 0.5
-		curl "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/data/$mal_id.json"
-		sleep 1.5
+		curl -s -o $SCRIPT_FOLDER/data/$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
+		if  grep -w "429" $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
+		then
+			sleep 10
+			curl -s -o $SCRIPT_FOLDER/data/$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
+		fi
+		sleep 1.1
 	fi
 }
 function get-anilist-infos () {
@@ -42,21 +46,29 @@ function get-anilist-infos () {
 		curl 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
-		if  grep -w "\"Too Many Requests.\",\"status\": 429" $SCRIPT_FOLDER/data/title-$mal_id.json
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json" -D $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt
+		rate_limit=0
+		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt)
+		if [[ rate_limit -lt 3 ]]
 		then
 			echo "Anilist API limit reached watiting"
-			sleep 62
-			curl 'https://graphql.anilist.co/' \
-			-X POST \
-			-H 'content-type: application/json' \
-			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji } } }" }' > "$SCRIPT_FOLDER/data/title-$mal_id.json"
+			sleep 30
+		else
+			sleep 0.7
 		fi
-		sleep 0.7
 	fi
 }
 function get-anilist-title () {
-	jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
+	anilist_title=null
+	anilist_title=$(jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json)
+	if [[ "$anilist_title" == "null" ]]
+	then
+		rm $SCRIPT_FOLDER/data/title-$mal_id.json
+		get-anilist-infos
+		jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/title-$mal_id.json
+	else
+		echo $anilist_title
+	fi
 }
 function get-mal-eng-title () {
 	jq '.data.title_english' -r "$SCRIPT_FOLDER/data/$mal_id.json"
@@ -84,7 +96,10 @@ function get-mal-poster () {
 		then
 			sleep 0.5
 			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
-			mkdir "$ASSET_FOLDER/$asset_name"
+			if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+			then
+				mkdir "$ASSET_FOLDER/$asset_name"
+			fi
 			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
 			sleep 1.5
 		else
@@ -93,7 +108,10 @@ function get-mal-poster () {
 			then
 				rm "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 0.5
-				mkdir "$ASSET_FOLDER/$asset_name"
+				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+				then
+					mkdir "$ASSET_FOLDER/$asset_name"
+				fi
 				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/$mal_id.json")
 				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$mal_poster_url"
 				sleep 1.5
@@ -105,10 +123,10 @@ function get-mal-tags () {
 	(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/data/$mal_id.json") | awk '{print $0}' | paste -s -d, -
 	}
 function get-mal-studios() {
-	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
+	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w $mal_id
 	then
 		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $mal_id | cut -d : -f 1)
-		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
+		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $5}')
 		if [[ -z "$studio" ]]
 		then
 			mal_studios=$(jq '.data.studios[0] | [.name]| @tsv' -r $SCRIPT_FOLDER/data/$mal_id.json)
@@ -158,7 +176,10 @@ function get-mal-season-poster () {
 		then
 			sleep 0.5
 			mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-			mkdir "$ASSET_FOLDER/$asset_name"
+			if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+			then
+				mkdir "$ASSET_FOLDER/$asset_name"
+			fi
 			wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
 			sleep 1.5
 		else
@@ -168,7 +189,10 @@ function get-mal-season-poster () {
 				rm "$assets_filepath"
 				sleep 0.5
 				mal_poster_url=$(jq '.data.images.jpg.large_image_url' -r $SCRIPT_FOLDER/data/$mal_id.json)
-				mkdir "$ASSET_FOLDER/$asset_name"
+				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+				then
+					mkdir "$ASSET_FOLDER/$asset_name"
+				fi
 				wget --no-use-server-timestamps -O "$assets_filepath" "$mal_poster_url"
 				sleep 1.5
 			fi

@@ -31,7 +31,9 @@ if [ ! -d $LOG_FOLDER ]
 then
 	mkdir $LOG_FOLDER
 fi
+:> $MATCH_LOG
 create-override
+
 # Download anime mapping json data
 download-anime-id-mapping
 
@@ -41,7 +43,7 @@ python3 $SCRIPT_FOLDER/plex_animes_export.py
 # create ID/animes.tsv from the clean list ( tvdb_id	mal_id	title_anime	title_plex )
 if [ -f $SCRIPT_FOLDER/override-ID-animes.tsv ]
 then
-	while IFS=$'\t' read -r tvdb_id mal_id title_anime studio ignore_seasons					# First add the override animes to the ID file
+	while IFS=$'\t' read -r tvdb_id mal_id anilist_id title_anime studio ignore_seasons					# First add the override animes to the ID file
 	do
 		if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/animes.tsv | grep -w $tvdb_id
 		then
@@ -52,7 +54,13 @@ then
 				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $3}')
 				last_season=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $4}')
 				total_seasons=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_animes_export.tsv | awk -F"\t" '{print $5}')
-				printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+				if [[ -z "$title_anime" ]]
+				then
+					get-mal-infos
+					get-anilist-infos
+					title_anime=$(get-anilist-title)
+				fi
+				printf "$tvdb_id\t$mal_id\t$anilist_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
 			fi
 		fi
@@ -66,15 +74,15 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]						# Ignore anime with no mal id
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid MAL ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid MAL ID for tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 		elif [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - invalid Anilist ID for : tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid Anilist ID for tvdb : $tvdb_id / $title_plex" >> $MATCH_LOG
 		else
 			get-mal-infos
 			get-anilist-infos
 			title_anime=$(get-anilist-title)
-			printf "$tvdb_id\t$mal_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
+			printf "$tvdb_id\t$mal_id\t$anilist_id\t$title_anime\t$title_plex\t$asset_name\t$last_season\t$total_seasons\n" >> $SCRIPT_FOLDER/ID/animes.tsv
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/animes.tsv" >> $LOG
 		fi
 	fi
@@ -129,7 +137,7 @@ do
 done < $SCRIPT_FOLDER/tmp/ongoing.tsv
 
 # write PMM metadata file from ID/animes.tsv and jikan API
-while IFS=$'\t' read -r tvdb_id mal_id title_anime title_plex asset_name last_season total_seasons
+while IFS=$'\t' read -r tvdb_id mal_id anilist_id title_anime title_plex asset_name last_season total_seasons
 do
 	write-metadata
 done < $SCRIPT_FOLDER/ID/animes.tsv
