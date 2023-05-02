@@ -1,20 +1,17 @@
 #!/bin/bash
 
+# SCRIPT VARIABLES
+SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source $SCRIPT_FOLDER/functions.sh
+media_type=animes
+
 #USER VARIABLES
 limit_download=20
 # Path to the created seasonal-animes-download file
 DOWNLOAD_ANIMES_COLLECTION=$SCRIPT_FOLDER/seasonal-animes-download.yml
 
-
-SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-echo "$SCRIPT_FOLDER"
-source $SCRIPT_FOLDER/functions.sh
-media_type=animes
+#SCRIPT
 :> $SCRIPT_FOLDER/data/seasonal.tsv
-
-
-
-
 download-anime-id-mapping
 current_season=$(wget -qO- 'https://anilist.co/search/anime/this-season' | gawk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' | awk '{print toupper($1);}')
 echo "Current season : $current_season"
