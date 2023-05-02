@@ -10,7 +10,7 @@ SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 echo "$SCRIPT_FOLDER"
 source $SCRIPT_FOLDER/functions.sh
 media_type=animes
-
+:> $SCRIPT_FOLDER/data/seasonal.tsv
 
 
 
