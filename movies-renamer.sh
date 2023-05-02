@@ -9,7 +9,6 @@ METADATA=$METADATA_MOVIES
 OVERRIDE=override-ID-$media_type.tsv
 
 # check if files and folder exist
-echo "metadata:" > $METADATA
 if [ ! -d $SCRIPT_FOLDER/data ]                                                                                 #check if exist and create folder for json data
 then
 	mkdir $SCRIPT_FOLDER/data
@@ -90,6 +89,7 @@ do
 done < $SCRIPT_FOLDER/tmp/plex_movies_export.tsv
 
 # write PMM metadata file from ID/movies.tsv and jikan API
+echo "metadata:" > $METADATA
 while IFS=$'\t' read -r imdb_id mal_id anilist_id title_anime title_plex asset_name
 do
 	write-metadata
