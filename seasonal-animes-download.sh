@@ -3,7 +3,7 @@
 #USER VARIABLES
 limit_download=20
 # Path to the created seasonal-animes-download file
-DOWNLOAD_ANIMES_COLLECTION=/path/to/PMM/config/seasonal-animes-download.yml
+DOWNLOAD_ANIMES_COLLECTION=$SCRIPT_FOLDER/seasonal-animes-download.yml
 
 
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
@@ -28,7 +28,7 @@ do
 	tvdb_id=a
 	tvdb_season=-a
 	tvdb_epoffset=a
-	get-tvdb-id
+	tvdb_id=$(get-tvdb-id)
 	if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]
 	then
 		echo "Seasonal invalid TVDB ID for MAL : $mal_id"
