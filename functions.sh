@@ -97,7 +97,7 @@ function get-romaji-title () {
 		echo "$romaji_title"
 	fi
 }
-function get-romaji-title () {
+function get-english-title () {
 	english_title=null
 	english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 	if [[ "$english_title" == "null" ]]
