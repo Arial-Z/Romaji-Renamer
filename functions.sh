@@ -164,27 +164,41 @@ function get-poster () {
 	then
 		if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]
 		then
-			sleep 0.5
-			poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 			if [ ! -d "$ASSET_FOLDER/$asset_name" ]
 			then
 				mkdir "$ASSET_FOLDER/$asset_name"
 			fi
-			wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$poster_url"
-			sleep 1.0
+			if [[ $POSTER_SOURCE == "MAL" ]]
+			then
+				get-mal-id
+				get-mal-infos
+				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$poster_url"
+				sleep 1.5
+			else
+				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$poster_url"
+				sleep 0.5
+			fi
 		else
 			postersize=$(du -b "$ASSET_FOLDER/$asset_name/poster.jpg" | awk '{ print $1 }')
 			if [[ $postersize -lt 10000 ]]
 			then
 				rm "$ASSET_FOLDER/$asset_name/poster.jpg"
-				sleep 0.5
-				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+				if [[ $POSTER_SOURCE == "MAL" ]]
 				then
-					mkdir "$ASSET_FOLDER/$asset_name"
+					get-mal-id
+					get-mal-infos
+					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+					wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$poster_url"
+					sleep 1.5
+				else
+					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+					wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$poster_url"
+					sleep 0.5
 				fi
-				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$poster_url"
-				sleep 1.0
 			fi
 		fi
 	fi
@@ -212,8 +226,9 @@ function get-season-poster () {
 			postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
 			if [[ $postersize -lt 10000 ]]
 			then
+				echo "API limit sleeping 30sec"
+				sleep 30
 				rm "$assets_filepath"
-				sleep 0.5
 				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
 				then
