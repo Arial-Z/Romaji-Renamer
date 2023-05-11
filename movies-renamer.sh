@@ -40,57 +40,48 @@ download-anime-id-mapping
 # export movies list from plex
 python3 $SCRIPT_FOLDER/plex_movies_export.py
 
-# create ID/movies.tsv ( imdb_id | mal_id | title_anime | title_plex )
+# create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )
 if [ -f $SCRIPT_FOLDER/override-ID-movies.tsv ]
 then
-	while IFS=$'\t' read -r imdb_id mal_id anilist_id title_anime studio                                                                       # First add the override animes to the ID file
+	while IFS=$'\t' read -r imdb_id mal_id anilist_id anime_title studio                                                                       # First add the override animes to the ID file
 	do
 		if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
 		then
 			if awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | grep -w  $imdb_id
 			then
 				line=$(awk -F"\t" '{print $1}' $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | grep -w -n $imdb_id | cut -d : -f 1)
-				title_plex=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $2}')
+				plex_title=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $2}')
 				asset_name=$(sed -n "${line}p" $SCRIPT_FOLDER/tmp/plex_movies_export.tsv | awk -F"\t" '{print $3}')
-				if [[ -z "$title_anime" ]]
+				if [[ -z "$anime_title" ]]
 				then
-					get-mal-infos
 					get-anilist-infos
-					title_anime=$(get-anilist-title)
+					anime_title=$(get-romaji-title)
 				fi
-				printf "$imdb_id\t$mal_id\t$anilist_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $title_anime / $title_plex" >> $LOG
+				printf "$imdb_id\t$mal_id\t$anilist_id\t$anime_title\t$plex_title\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $anime_title / $plex_title" >> $LOG
 			fi
 		fi
 	done < $SCRIPT_FOLDER/override-ID-movies.tsv
 fi
-while IFS=$'\t' read -r imdb_id title_plex asset_name                                                                                      # then get the other ID from the ID mapping and download json data
+while IFS=$'\t' read -r imdb_id plex_title asset_name                                                                                      # then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' $SCRIPT_FOLDER/ID/movies.tsv | grep -w  $imdb_id
-	then
-		mal_id=$(get-mal-id-from-imdb-id)
-		if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]                                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
-		then
-			echo "invalid MAL ID for imdb : $imdb_id / $title_plex" >> $MATCH_LOG
-			continue
-		fi
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
-			echo "invalid Anilist ID for imdb : $imdb_id / $title_plex" >> $MATCH_LOG
+			echo "invalid Anilist ID for imdb : $imdb_id / $plex_title" >> $MATCH_LOG
 			continue
 		fi
-		get-mal-infos
 		get-anilist-infos
-		title_anime=$(get-anilist-title)
-		printf "$imdb_id\t$mal_id\t$anilist_id\t$title_anime\t$title_plex\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $title_anime / $title_plex added to ID/movies.tsv" >> $LOG
+		anime_title=$(get-romaji-title)
+		printf "$imdb_id\t$mal_id\t$anilist_id\t$anime_title\t$plex_title\t$asset_name\n" >> $SCRIPT_FOLDER/ID/movies.tsv
+		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $anime_title / $plex_title added to ID/movies.tsv" >> $LOG
 	fi
 done < $SCRIPT_FOLDER/tmp/plex_movies_export.tsv
 
 # write PMM metadata file from ID/movies.tsv and jikan API
 echo "metadata:" > $METADATA
-while IFS=$'\t' read -r imdb_id mal_id anilist_id title_anime title_plex asset_name
+while IFS=$'\t' read -r imdb_id mal_id anilist_id anime_title plex_title asset_name
 do
 	write-metadata
 done < $SCRIPT_FOLDER/ID/movies.tsv

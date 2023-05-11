@@ -2,13 +2,9 @@
 
 # SCRIPT VARIABLES
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source $SCRIPT_FOLDER/.env
 source $SCRIPT_FOLDER/functions.sh
 media_type=animes
-
-#USER VARIABLES
-limit_download=20
-# Path to the created seasonal-animes-download file
-DOWNLOAD_ANIMES_COLLECTION=$SCRIPT_FOLDER/seasonal-animes-download.yml
 
 #SCRIPT
 :> $SCRIPT_FOLDER/data/seasonal.tsv
@@ -40,7 +36,7 @@ do
 	fi
 done < $SCRIPT_FOLDER/tmp/seasonal-anilist.tsv
 
-tvdb_list=$(head -"$limit_download" $SCRIPT_FOLDER/data/seasonal.tsv | awk '{printf("%s,",$0)}'  | sed 's/,\s*$//')
+tvdb_list=$(head -"$DOWNLOAD_LIMIT" $SCRIPT_FOLDER/data/seasonal.tsv | awk '{printf("%s,",$0)}'  | sed 's/,\s*$//')
 echo $tvdb_list
 
 echo "collections:" > $DOWNLOAD_ANIMES_COLLECTION
