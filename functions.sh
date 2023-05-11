@@ -6,9 +6,9 @@ MATCH_LOG=$LOG_FOLDER/${media_type}-missing-id.log
 
 # functions
 function create-override () {
-	if [ ! -f $SCRIPT_FOLDER/$OVERRIDE ]
+	if [ ! -f "$SCRIPT_FOLDER/$OVERRIDE" ]
 	then
-		cp $SCRIPT_FOLDER/override-ID-${media_type}.example.tsv $SCRIPT_FOLDER/$OVERRIDE
+		cp "$SCRIPT_FOLDER/override-ID-${media_type}.example.tsv" "$SCRIPT_FOLDER/$OVERRIDE"
 	fi
 }
 function download-anime-id-mapping () {
@@ -17,11 +17,11 @@ function download-anime-id-mapping () {
 	do
 		if [[ $media_type == "animes" ]]
 		then
-			wget -O $SCRIPT_FOLDER/tmp/list-animes-id.json "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json"
-			size=$(du -b $SCRIPT_FOLDER/tmp/list-animes-id.json | awk '{ print $1 }')
+			wget -O "$SCRIPT_FOLDER/tmp/list-animes-id.json" "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json"
+			size=$(du -b "$SCRIPT_FOLDER/tmp/list-animes-id.json" | awk '{ print $1 }')
 		else
-			wget -O $SCRIPT_FOLDER/tmp/list-movies-id.json "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json"
-			size=$(du -b $SCRIPT_FOLDER/tmp/list-movies-id.json | awk '{ print $1 }')
+			wget -O "$SCRIPT_FOLDER/tmp/list-movies-id.json" "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json"
+			size=$(du -b "$SCRIPT_FOLDER/tmp/list-movies-id.json" | awk '{ print $1 }')
 		fi
 			((wait_time++))
 		if [[ $size -gt 1000 ]]
@@ -30,7 +30,7 @@ function download-anime-id-mapping () {
 		fi
 		if [[ $wait_time == 4 ]]
 		then
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S) - error can't download anime ID mapping file, exiting\n" >> $LOG
+			printf "$(date +%Y.%m.%d" - "%H:%M:%S) - error can't download anime ID mapping file, exiting\n" >> "$LOG"
 			printf "error can't download anime ID mapping file, exiting\n"
 			exit 1
 		fi
@@ -40,20 +40,20 @@ function download-anime-id-mapping () {
 function get-anilist-id () {
 	if [[ $media_type == "animes" ]]
 	then
-		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
+		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json"
 	else
-		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-movies-id.json
+		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-movies-id.json"
 	fi
 }
 function get-mal-id () {
-	jq '.data.Media.idMal' -r $SCRIPT_FOLDER/data/anilist-$anilist_id.json
+	jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 	if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]				# Ignore anime with no anilist id
 	then
-		echo "invalid MAL ID for Anilist ID : $anilist_id / $plex_title" >> $MATCH_LOG
+		echo "invalid MAL ID for Anilist ID : $anilist_id / $plex_title" >> "$MATCH_LOG"
 	fi
 }
 function get-tvdb-id () {
-	jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json
+	jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json"
 }
 function get-anilist-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" ]
@@ -61,9 +61,9 @@ function get-anilist-infos () {
 		curl 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji, english  }, averageScore, genres, tags { name },studios { edges { node { name, isAnimationStudio } } }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji, english  }, averageScore, genres, tags { name },studios { edges { node { name, isAnimationStudio } } }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
 		rate_limit=0
-		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt)
+		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
 		then
 			echo "Anilist API limit reached watiting"
@@ -76,11 +76,11 @@ function get-anilist-infos () {
 function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/MAL-$mal_id.json" ]
 	then
-		curl -s -o $SCRIPT_FOLDER/data/MAL-$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
-		if  grep -w "429" $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
+		curl -s -o "$SCRIPT_FOLDER/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
+		if  grep -w "429" "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		then
 			sleep 10
-			curl -s -o $SCRIPT_FOLDER/data/MAL-$mal_id.json -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > $SCRIPT_FOLDER/tmp/jikan-limit-rate.txt
+			curl -s -o "$SCRIPT_FOLDER/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		fi
 		sleep 1.1
 	fi
@@ -94,19 +94,35 @@ function get-romaji-title () {
 		get-anilist-infos
 		jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/anilist-$anilist_id.json
 	else
-		echo $romaji_title
+		echo "$romaji_title"
 	fi
 }
 function get-romaji-title () {
 	english_title=null
-	english_title=$(jq '.data.Media.title.english' -r $SCRIPT_FOLDER/data/anilist-$anilist_id.json)
+	english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 	if [[ "$english_title" == "null" ]]
 	then
-		rm $SCRIPT_FOLDER/data/anilist-$anilist_id.json
+		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-anilist-infos
-		jq '.data.Media.title.english' -r $SCRIPT_FOLDER/data/anilist-$anilist_id.json
+		jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 	else
-		echo $english_title
+		echo "$english_title"
+	fi
+}
+function get-score () {
+	anime_score=0
+	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
+	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == '' ]]
+	then
+		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		get-anilist-infos
+		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
+		if [[ "$anime_score" == "null" ]]
+		then
+			echo 0
+		fi
+	else
+		echo "$anime_score"
 	fi
 }
 function get-mal-score () {
@@ -124,39 +140,23 @@ function get-mal-score () {
 			echo 0
 		fi
 	else
-		echo $mal_score
-	fi
-}
-function get-score () {
-	anime_score=0
-	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
-	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == '' ]]
-	then
-		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-		get-anilist-infos
-		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
-		if [[ "$anime_score" == "null" ]]
-		then
-			echo 0
-		fi
-	else
-		echo $anime_score
+		echo "$mal_score"
 	fi
 }
 function get-tags () {
 	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.tags | .[] | select( .rank > 60 ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -s -d, -
 	}
 function get-studios() {
-	if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w $anilist_id
+	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
 	then
-		line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $anilist_id | cut -d : -f 1)
-		studio=$(sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $4}')
+		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
+		studio=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $4}')
 		if [[ -z "$studio" ]]
 		then
-			studio=$(jq '.data.Media.studios.edges[].node | select( .isAnimationStudio == true ) | .name' -r $SCRIPT_FOLDER/data/anilist-$anilist_id.json | head -n 1)
+			studio=$(jq '.data.Media.studios.edges[].node | select( .isAnimationStudio == true ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | head -n 1)
 		fi
 	else
-	studio=$(jq '.data.Media.studios.edges[].node | select( .isAnimationStudio == true ) | .name' -r $SCRIPT_FOLDER/data/anilist-$anilist_id.json | head -n 1)
+	studio=$(jq '.data.Media.studios.edges[].node | select( .isAnimationStudio == true ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | head -n 1)
 	fi
 }
 function get-poster () {
@@ -177,7 +177,6 @@ function get-poster () {
 				sleep 1.5
 			else
 				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 				wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$poster_url"
 				sleep 0.5
 			fi
@@ -195,7 +194,6 @@ function get-poster () {
 					sleep 1.5
 				else
 					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 					wget --no-use-server-timestamps -O "$ASSET_FOLDER/$asset_name/poster.jpg" "$poster_url"
 					sleep 0.5
 				fi
@@ -208,67 +206,77 @@ function get-season-poster () {
 	then
 		if [[ $season_number -lt 10 ]]
 		then
-			assets_filepath=$(echo "$ASSET_FOLDER/$asset_name/Season0$season_number.jpg")
+			assets_filepath=$("$ASSET_FOLDER/$asset_name/Season0$season_number.jpg")
 		else
-			assets_filepath=$(echo "$ASSET_FOLDER/$asset_name/Season$season_number.jpg")
+			assets_filepath=$("$ASSET_FOLDER/$asset_name/Season$season_number.jpg")
 		fi
 		if [ ! -f "$assets_filepath" ]
 		then
-			sleep 0.5
-			poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 			if [ ! -d "$ASSET_FOLDER/$asset_name" ]
 			then
 				mkdir "$ASSET_FOLDER/$asset_name"
 			fi
-			wget --no-use-server-timestamps -O "$assets_filepath" "$poster_url"
-			sleep 1.0
+			if [[ $POSTER_SOURCE == "MAL" ]]
+			then
+				get-mal-id
+				get-mal-infos
+				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+				wget --no-use-server-timestamps -O "$assets_filepath" "$poster_url"
+				sleep 1.5
+			else
+				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+				wget --no-use-server-timestamps -O "$assets_filepath" "$poster_url"
+				sleep 0.5
+			fi
 		else
 			postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
 			if [[ $postersize -lt 10000 ]]
 			then
-				echo "API limit sleeping 30sec"
-				sleep 30
 				rm "$assets_filepath"
-				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+				if [[ $POSTER_SOURCE == "MAL" ]]
 				then
-					mkdir "$ASSET_FOLDER/$asset_name"
+					get-mal-id
+					get-mal-infos
+					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+					wget --no-use-server-timestamps -O "$assets_filepath" "$poster_url"
+					sleep 1.5
+				else
+					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+					wget --no-use-server-timestamps -O "$assets_filepath" "$poster_url"
+					sleep 0.5
 				fi
-				wget --no-use-server-timestamps -O "$assets_filepath" "$poster_url"
-				sleep 1.0
 			fi
 		fi
 	fi
 }
 function get-season-infos () {
 	anilist_backup_id=$anilist_id
-	season_check=$(jq --arg mal_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+	season_check=$(jq --arg mal_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
 	if [[ $season_check != -1 ]] && [[ $total_seasons -ge 2 ]]
 	then
-		printf "    seasons:\n" >> $METADATA
+		printf "    seasons:\n" >> "$METADATA"
 		if [[ $last_season -eq 1 ]] && [[ $total_seasons -eq 2 ]]
 		then
-			printf "      0:\n        label.remove: score\n" >> $METADATA
-			printf "      1:\n        label.remove: score\n" >> $METADATA
+			printf "      0:\n        label.remove: score\n      1:\n        label.remove: score\n" >> "$METADATA"
 			anilist_id=$anilist_backup_id
-			if [[ $SEASON_WANTED_RATING == "ANILIST" ]]
+			if [[ $RATING_SOURCE == "ANILIST" ]]
 			then
 				score=$(get-score)
 			else
 				score=$(get-mal-score)
 			fi
-			score=$(printf '%.*f\n' 1 $score)
+			score=$(printf '%.*f\n' 1 "$score")
 		else
 			if [[ $last_season -ne $total_seasons ]]
 			then
-				printf "      0:\n        label.remove: score\n" >> $METADATA
+				printf "      0:\n        label.remove: score\n" >> "$METADATA"
 			fi
 			season_number=1
 			total_score=0
-			while [ $season_number -le $last_season ];
+			while [ $season_number -le "$last_season" ];
 			do
-				anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-				if [[ -n "$mal_id" ]] && [[ -n "$anilist_id" ]]
+				anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
+				if [[ -n "$anilist_id" ]]
 				then
 					get-anilist-infos
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
@@ -281,31 +289,31 @@ function get-season-infos () {
 					else
 						title=$(get-romaji-title)
 					fi
-					if [[ $SEASON_WANTED_RATING == "ANILIST" ]]
+					if [[ $RATING_SOURCE == "ANILIST" ]]
 					then
 						score_season=$(get-score)
 					else
 						score_season=$(get-mal-score)
 					fi
-					score_season=$(printf '%.*f\n' 1 $score_season)
-					printf "      $season_number:\n        title: |-\n          $title\n        user_rating: $score_season\n        label: score\n" >> $METADATA
-					total_score=$(echo | awk -v v1=$score_season -v v2=$total_score '{print v1 + v2 }')
+					score_season=$(printf '%.*f\n' 1 "$score_season")
+					printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$title" "$score_season" >> "$METADATA"
+					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
 					get-season-poster
 				fi
 				((season_number++))
 			done
-			score=$(echo | awk -v v1=$total_score -v v2=$last_season '{print v1 / v2 }')
-			score=$(printf '%.*f\n' 1 $score)
+			score=$(echo | awk -v v1="$total_score" -v v2="$last_season" '{print v1 / v2 }')
+			score=$(printf '%.*f\n' 1 "$score")
 		fi
 	else
 		anilist_id=$anilist_backup_id
-		if [[ $SEASON_WANTED_RATING == "ANILIST" ]]
+		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
 			score=$(get-score)
 		else
 			score=$(get-mal-score)
 		fi
-		score=$(printf '%.*f\n' 1 $score)
+		score=$(printf '%.*f\n' 1 "$score")
 	fi
 	anilist_id=$anilist_backup_id
 }
@@ -313,9 +321,9 @@ function write-metadata () {
 	get-anilist-infos
 	if [[ $media_type == "animes" ]]
 	then
-		printf "  $tvdb_id:\n" >> $METADATA
+		printf "  %s:\n" "$tvdb_id" >> "$METADATA"
 	else
-		printf "  $imdb_id:\n" >> $METADATA
+		printf "  %s:\n" "$imdb_id" >> "$METADATA"
 	fi
 	english_title=$(get-english-title)
 		if [ "$english_title" == "null" ]
@@ -324,74 +332,71 @@ function write-metadata () {
 	fi
 	if [[ $MAIN_TITLE_ENG == "Yes" ]]
 	then
-		printf "    title: |-\n      $english_title\n" >> $METADATA
-		printf "    sort_title: |-\n      $english_title\n" >> $METADATA
-		printf "    original_title: |-\n      $anime_title\n" >> $METADATA
+		printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$anime_title" >> "$METADATA"
 	else
-		printf "    title: |-\n      $anime_title\n" >> $METADATA
+		printf "    title: |-\n      %s\n" "$anime_title" >> "$METADATA"
 		if [[ $SORT_TITLE_ENG == "Yes" ]]
 		then
-			printf "    sort_title: |-\n      $english_title\n" >> $METADATA
+			printf "    sort_title: |-\n      %s\n" "$english_title" >> "$METADATA"
 		else
-			printf "    sort_title: |-\n      $anime_title\n" >> $METADATA
+			printf "    sort_title: |-\n      %s\n" "$anime_title" >> "$METADATA"
 		fi
-		printf "    original_title: |-\n      $english_title\n" >> $METADATA
+		printf "    original_title: |-\n      %s\n" "$english_title" >> "$METADATA"
 	fi
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - $anime_title:\n" >> $LOG
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - %s:\n" "$anime_title" >> "$LOG"
 	anime_tags=$(get-tags)
-	printf "    genre.sync: Anime,${anime_tags}\n"  >> $METADATA
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\ttags : $anime_tags\n" >> $LOG
+	printf "    genre.sync: Anime,%s\n" "$anime_tags"  >> "$METADATA"
+	printf "%s\t\ttags : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$anime_tags" >> "$LOG"
 	if [[ $media_type == "animes" ]]
 	then
-		if awk -F"\t" '{print "\""$1"\":"}' $SCRIPT_FOLDER/data/ongoing.tsv | grep -w "$tvdb_id"
+		if awk -F"\t" '{print "\""$1"\":"}' "$SCRIPT_FOLDER/data/ongoing.tsv" | grep -w "$tvdb_id"
 		then
-			printf "    label: Ongoing\n" >> $METADATA
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel add Ongoing\n" >> $LOG
+			printf "    label: Ongoing\n" >> "$METADATA"
+			printf "%s\t\tLabel add Ongoing\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
 		else
-			printf "    label.remove: Ongoing\n" >> $METADATA
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tLabel remove Ongoing\n" >> $LOG
+			printf "    label.remove: Ongoing\n" >> "$METADATA"
+			printf "%s\t\tLabel remove Ongoing\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
 		fi
 	fi
 	get-studios
-	printf "    studio: ${studio}\n"  >> $METADATA
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tstudio : $studio\n" >> $LOG
+	printf "    studio: %s\n" "$studio"  >> "$METADATA"
+	printf "%s\t\tstudio : $studio\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
 	get-poster
 	if [[ $media_type == "animes" ]] && [[ $IGNORE_SEASONS != "Yes" ]]
 	then
-		if awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w  $mal_id
+		if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w  "$anilist_id"
 		then
-			line=$(awk -F"\t" '{print $2}' $SCRIPT_FOLDER/$OVERRIDE | grep -w -n $mal_id | cut -d : -f 1)
-			if sed -n "${line}p" $SCRIPT_FOLDER/$OVERRIDE | awk -F"\t" '{print $5}' | grep -i -w "Yes"
+			line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
+			if sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $5}' | grep -i -w "Yes"
 			then
-				score=$(get-anilist-rating)
-				score=$(printf '%.*f\n' 1 $score)
-				printf "    ${WANTED_RATING}_rating: $score\n" >> $METADATA
-				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tseasons ignored\n" >> $LOG
-				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+				if [[ $RATING_SOURCE == "ANILIST" ]]
+				then
+					score=$(get-score)
+				else
+					score=$(get-mal-score)
+				fi
+				score=$(printf '%.*f\n' 1 "$score")
+				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+				printf "%s\t\tseasons ignored\n%s\t\tscore : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$score" >> "$LOG"
 			else
 				get-season-infos
-				printf "    ${WANTED_RATING}_rating: $score\n" >> $METADATA
-				printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+				printf "%s\t\tscore : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$score" >> "$LOG"
 			fi
 		else
 			get-season-infos
-			printf "    ${WANTED_RATING}_rating: $score\n" >> $METADATA
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
+			printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+			printf "%s\t\tscore : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$score" >> "$LOG"
 		fi
 	else
-		score=$(get-rating)
-		score=$(printf '%.*f\n' 1 $score)
-		if [[ $ANILIST_WANTED_RATING == "audience" ]] || [[ $ANILIST_WANTED_RATING == "critic" ]] || [[ $ANILIST_WANTED_RATING == "user" ]]
+		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
-			printf "    ${ANILIST_WANTED_RATING}_rating: $score\n" >> $METADATA
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tAnilist score : $score\n" >> $LOG
+			score=$(get-score)
+		else
+			score=$(get-mal-score)
 		fi
-		if [[ $MAL_WANTED_RATING == "audience" ]] || [[ $ANILIST_WANTED_RATING == "critic" ]] || [[ $ANILIST_WANTED_RATING == "user" ]]
-		then
-			get-mal-score 
-			printf "    ${MAL_WANTED_RATING}_rating: $MAL_score\n" >> $METADATA
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tMAL score : $MAL_score\n" >> $LOG
-		fi
+		score=$(printf '%.*f\n' 1 "$score")
+		printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+		printf "%s\t\tscore : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$score" >> "$LOG"
 	fi
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S)\t\tscore : $score\n" >> $LOG
 }
