@@ -185,6 +185,10 @@ function get-poster () {
 			if [[ $postersize -lt 10000 ]]
 			then
 				rm "$ASSET_FOLDER/$asset_name/poster.jpg"
+				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+				then
+					mkdir "$ASSET_FOLDER/$asset_name"
+				fi
 				if [[ $POSTER_SOURCE == "MAL" ]]
 				then
 					get-mal-id
@@ -233,6 +237,10 @@ function get-season-poster () {
 			if [[ $postersize -lt 10000 ]]
 			then
 				rm "$assets_filepath"
+				if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+				then
+					mkdir "$ASSET_FOLDER/$asset_name"
+				fi
 				if [[ $POSTER_SOURCE == "MAL" ]]
 				then
 					get-mal-id
