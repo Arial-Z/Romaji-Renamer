@@ -259,7 +259,7 @@ function get-season-poster () {
 }
 function get-season-infos () {
 	anilist_backup_id=$anilist_id
-	season_check=$(jq --arg mal_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
+	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
 	if [[ $season_check != -1 ]] && [[ $total_seasons -ge 2 ]]
 	then
 		printf "    seasons:\n" >> "$METADATA"
