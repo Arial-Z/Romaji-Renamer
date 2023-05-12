@@ -95,26 +95,26 @@ function get-romaji-title () {
 		then
 			romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 		else
-			romaji_title=$title_tmp
+			romaji_title="$title_tmp"
 		fi
 	else
 		romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 	fi
 }
 function get-english-title () {
-	title="null"
+	english_title="null"
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -q -w "$anilist_id"
 	then
 		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
-		title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
-		if [[ -z "$title" ]]
+		title_tmp=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
+		if [[ -z "$title_tmp" ]]
 		then
-			jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+			english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 		else
-			echo "$title"
+			english_title="$title_tmp"
 		fi
 	else
-		jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 	fi
 }
 function get-score () {
