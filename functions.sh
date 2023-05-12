@@ -295,15 +295,11 @@ function get-season-infos () {
 				if [[ -n "$anilist_id" ]]
 				then
 					get-anilist-infos
+					get-romaji-title
+					get-english-title
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
 					then
-						title=$(get-english-title)
-						if [ "$title" == "null" ]
-						then
-							title=$(get-romaji-title)
-						fi
-					else
-						title=$(get-romaji-title)
+						english_title=$romaji_title
 					fi
 					if [[ $RATING_SOURCE == "ANILIST" ]]
 					then
@@ -312,7 +308,12 @@ function get-season-infos () {
 						score_season=$(get-mal-score)
 					fi
 					score_season=$(printf '%.*f\n' 1 "$score_season")
-					printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$title" "$score_season" >> "$METADATA"
+					if [[ $MAIN_TITLE_ENG == "Yes" ]]
+					then
+						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$english_title" "$score_season" >> "$METADATA"
+					else
+						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
+					fi
 					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
 					get-season-poster
 				fi
