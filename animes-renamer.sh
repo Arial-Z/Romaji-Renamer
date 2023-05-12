@@ -22,14 +22,12 @@ fi
 if [ ! -d "$SCRIPT_FOLDER/ID" ]											#check if exist and create folder and file for ID
 then
 	mkdir "$SCRIPT_FOLDER/ID"
-	:> "$SCRIPT_FOLDER/ID/animes.tsv"
-else
-	:> "$SCRIPT_FOLDER/ID/animes.tsv"
 fi
 if [ ! -d "$LOG_FOLDER" ]
 then
 	mkdir "$LOG_FOLDER"
 fi
+:> "$SCRIPT_FOLDER/ID/animes.tsv"
 :> "$MATCH_LOG"
 create-override
 

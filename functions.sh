@@ -94,25 +94,9 @@ function get-romaji-title () {
 		if [[ -z "$romaji_title" ]]
 		then
 			romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-			if [[ "$romaji_title" == "null" ]]
-			then
-				rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-				get-anilist-infos
-				jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-			else
-				echo "$romaji_title"
-			fi
 		fi
 	else
 		romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-		if [[ "$romaji_title" == "null" ]]
-		then
-			rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-			get-anilist-infos
-			jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-		else
-			echo "$romaji_title"
-		fi
 	fi
 }
 function get-english-title () {
@@ -124,25 +108,9 @@ function get-english-title () {
 		if [[ -z "$english_title" ]]
 		then
 			english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-			if [[ "$english_title" == "null" ]]
-			then
-				rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-				get-anilist-infos
-				jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-			else
-				echo "$english_title"
-			fi
 		fi
 	else
 		english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-		if [[ "$english_title" == "null" ]]
-		then
-			rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-			get-anilist-infos
-			jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-		else
-			echo "$english_title"
-		fi
 	fi
 }
 function get-score () {
