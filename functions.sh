@@ -86,24 +86,24 @@ function get-mal-infos () {
 	fi
 }
 function get-romaji-title () {
-	title=null
+	romaji_title="null"
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
 	then
 		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
-		title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
-		if [[ -z "$title" ]]
+		title_tmp=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
+		if [[ -z "$title_tmp" ]]
 		then
-			jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+			romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 		else
-			echo "$title"
+			romaji_title=$title_tmp
 		fi
 	else
-		jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 	fi
 }
 function get-english-title () {
-	title=null
-	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
+	title="null"
+	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -q -w "$anilist_id"
 	then
 		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
 		title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
@@ -341,8 +341,8 @@ function write-metadata () {
 	else
 		printf "  %s:\n" "$imdb_id" >> "$METADATA"
 	fi
-	romaji_title=$(get-romaji-title)
-	english_title=$(get-english-title)
+	get-romaji-title
+	get-english-title
 		if [ "$english_title" == "null" ]
 	then
 		english_title=$romaji_title
