@@ -2,12 +2,12 @@
 
 # SCRIPT VARIABLES
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-source $SCRIPT_FOLDER/.env
-source $SCRIPT_FOLDER/functions.sh
+source "$SCRIPT_FOLDER/.env"
+source "$SCRIPT_FOLDER/functions.sh"
 media_type=animes
 
 #SCRIPT
-:> $SCRIPT_FOLDER/data/seasonal.tsv
+:> "$SCRIPT_FOLDER/data/seasonal.tsv"
 download-anime-id-mapping
 current_season=$(wget -qO- 'https://anilist.co/search/anime/this-season' | gawk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' | awk '{print toupper($1);}')
 echo "Current season : $current_season"
@@ -27,8 +27,8 @@ do
 		echo "Seasonal invalid TVDB ID for MAL : $mal_id"
 		continue
 	else
-		tvdb_season=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
-		tvdb_epoffset=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_epoffset' -r $SCRIPT_FOLDER/tmp/list-animes-id.json)
+		tvdb_season=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
+		tvdb_epoffset=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_epoffset' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
 		if [[ "$tvdb_season" -eq 1 ]] && [[ "$tvdb_epoffset" -eq 0 ]]
 		then
 			printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/seasonal.tsv
@@ -37,7 +37,7 @@ do
 done < $SCRIPT_FOLDER/tmp/seasonal-anilist.tsv
 
 tvdb_list=$(head -"$DOWNLOAD_LIMIT" $SCRIPT_FOLDER/data/seasonal.tsv | awk '{printf("%s,",$0)}'  | sed 's/,\s*$//')
-echo $tvdb_list
+echo "$tvdb_list"
 
 echo "collections:" > $DOWNLOAD_ANIMES_COLLECTION
 printf "  seasonal animes download:\n" >> $DOWNLOAD_ANIMES_COLLECTION

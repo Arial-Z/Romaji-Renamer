@@ -30,7 +30,7 @@ function download-anime-id-mapping () {
 		fi
 		if [[ $wait_time == 4 ]]
 		then
-			printf "$(date +%Y.%m.%d" - "%H:%M:%S) - error can't download anime ID mapping file, exiting\n" >> "$LOG"
+			printf "%s - error can't download anime ID mapping file, exiting\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
 			printf "error can't download anime ID mapping file, exiting\n"
 			exit 1
 		fi
@@ -87,12 +87,12 @@ function get-mal-infos () {
 }
 function get-romaji-title () {
 	romaji_title=null
-	romaji_title=$(jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/anilist-$anilist_id.json)
+	romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 	if [[ "$romaji_title" == "null" ]]
 	then
-		rm $SCRIPT_FOLDER/data/anilist-$anilist_id.json
+		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-anilist-infos
-		jq '.data.Media.title.romaji' -r $SCRIPT_FOLDER/data/anilist-$anilist_id.json
+		jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 	else
 		echo "$romaji_title"
 	fi
@@ -210,9 +210,9 @@ function get-season-poster () {
 	then
 		if [[ $season_number -lt 10 ]]
 		then
-			assets_filepath=$("$ASSET_FOLDER/$asset_name/Season0$season_number.jpg")
+			assets_filepath="$ASSET_FOLDER/$asset_name/Season0$season_number.jpg"
 		else
-			assets_filepath=$("$ASSET_FOLDER/$asset_name/Season$season_number.jpg")
+			assets_filepath="$ASSET_FOLDER/$asset_name/Season$season_number.jpg"
 		fi
 		if [ ! -f "$assets_filepath" ]
 		then
