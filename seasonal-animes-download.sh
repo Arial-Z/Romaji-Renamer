@@ -10,7 +10,7 @@ media_type=animes
 :> "$SCRIPT_FOLDER/data/seasonal.tsv"
 download-anime-id-mapping
 current_season=$(wget -qO- 'https://anilist.co/search/anime/this-season' | gawk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' | awk '{print toupper($1);}')
-printf "Current season : %s %s" "$current_season" "$(date +%Y)"
+printf "Current season : %s %s\n" "$current_season" "$(date +%Y)"
 curl 'https://graphql.anilist.co/' \
 -X POST \
 -H 'content-type: application/json' \
