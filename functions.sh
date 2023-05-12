@@ -94,11 +94,23 @@ function get-romaji-title () {
 		if [[ -z "$title_tmp" ]]
 		then
 			romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+			if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
+			then
+				romaji_title=$(echo "$romaji_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
+			fi
 		else
 			romaji_title="$title_tmp"
+			if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
+			then
+				romaji_title=$(echo "$romaji_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
+			fi
 		fi
 	else
 		romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
+		then
+			romaji_title=$(echo "$romaji_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
+		fi
 	fi
 }
 function get-english-title () {
@@ -110,11 +122,23 @@ function get-english-title () {
 		if [[ -z "$title_tmp" ]]
 		then
 			english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+			if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
+			then
+				english_title=$(echo "$english_title" | tr '[:upper:] [:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
+			fi
 		else
 			english_title="$title_tmp"
+			if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
+			then
+				english_title=$(echo "$english_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
+			fi
 		fi
 	else
 		english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
+		then
+			english_title=$(echo "$english_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
+		fi
 	fi
 }
 function get-score () {
