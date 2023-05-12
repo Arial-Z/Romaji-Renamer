@@ -71,7 +71,7 @@ do
 done < "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv"
 
 # write PMM metadata file from ID/movies.tsv and jikan API
-echo "metadata:" > "$METADATA"
+printf "metadata:\n" > "$METADATA"
 while IFS=$'\t' read -r imdb_id anilist_id plex_title asset_name
 do
 	write-metadata
