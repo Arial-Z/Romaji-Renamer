@@ -29,7 +29,6 @@ then
 fi
 :> "$SCRIPT_FOLDER/ID/animes.tsv"
 :> "$MATCH_LOG"
-create-override
 
 # Download anime mapping json data
 download-anime-id-mapping
@@ -38,7 +37,8 @@ download-anime-id-mapping
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
 
 # create ID/animes.tsv
-while IFS=$'\t' read -r tvdb_id anilist_id title studio ignore_seasons					# First add the override animes to the ID file
+create-override
+while IFS=$'\t' read -r tvdb_id anilist_id title_override studio ignore_seasons					# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -w "$tvdb_id"
 	then
@@ -54,7 +54,6 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/override-ID-animes.tsv"
-
 while IFS=$'\t' read -r tvdb_id plex_title asset_name last_season total_seasons 		# then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -w "$tvdb_id"

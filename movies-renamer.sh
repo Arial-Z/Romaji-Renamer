@@ -19,19 +19,16 @@ if [ ! -d "$SCRIPT_FOLDER/tmp" ]										#check if exist and create folder for 
 then
 	mkdir "$SCRIPT_FOLDER/tmp"
 fi
-if [ ! -d "$SCRIPT_FOLDER/ID" ]
+if [ ! -d "$SCRIPT_FOLDER/ID" ]											#check if exist and create folder and file for ID
 then
 	mkdir "$SCRIPT_FOLDER/ID"
-	:> "$SCRIPT_FOLDER/ID/movies.tsv"
-else
-	:> "$SCRIPT_FOLDER/ID/movies.tsv"
 fi
 if [ ! -d "$LOG_FOLDER" ]
 then
 	mkdir "$LOG_FOLDER"
 fi
+:> $SCRIPT_FOLDER/ID/movies.tsv
 :> "$MATCH_LOG"
-create-override
 
 # Download anime mapping json data
 download-anime-id-mapping
@@ -41,28 +38,21 @@ download-anime-id-mapping
 python3 "$SCRIPT_FOLDER/plex_movies_export.py"
 
 # create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )
-if [ -f "$SCRIPT_FOLDER/override-ID-movies.tsv" ]
-then
-	while IFS=$'\t' read -r imdb_id anilist_id anime_title studio                                                                       # First add the override animes to the ID file
-	do
-		if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -w  "$imdb_id"
+create-override
+while IFS=$'\t' read -r imdb_id anilist_id title_override studio                                                                       # First add the override animes to the ID file
+do
+	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -w  "$imdb_id"
+	then
+		if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -w  "$imdb_id"
 		then
-			if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -w  "$imdb_id"
-			then
-				line=$(awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -w -n "$imdb_id" | cut -d : -f 1)
-				plex_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $2}')
-				asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $3}')
-				if [[ -z "$anime_title" ]]
-				then
-					get-anilist-infos
-					anime_title=$(get-romaji-title)
-				fi
-				printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$anime_title" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/ID/movies.tsv"
-				echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $anime_title / $plex_title" >> "$LOG"
-			fi
+			line=$(awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -w -n "$imdb_id" | cut -d : -f 1)
+			plex_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $2}')
+			asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $3}')
+			printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/ID/movies.tsv"
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $anime_title / $plex_title" >> "$LOG"
 		fi
-	done < "$SCRIPT_FOLDER/override-ID-movies.tsv"
-fi
+	fi
+done < "$SCRIPT_FOLDER/override-ID-movies.tsv"
 while IFS=$'\t' read -r imdb_id plex_title asset_name                                                                                      # then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -w  "$imdb_id"
@@ -82,7 +72,7 @@ done < "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv"
 
 # write PMM metadata file from ID/movies.tsv and jikan API
 echo "metadata:" > "$METADATA"
-while IFS=$'\t' read -r imdb_id mal_id anilist_id anime_title plex_title asset_name
+while IFS=$'\t' read -r imdb_id anilist_id plex_title asset_name
 do
 	write-metadata
 done < "$SCRIPT_FOLDER/ID/movies.tsv"
