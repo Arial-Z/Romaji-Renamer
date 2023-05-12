@@ -86,31 +86,35 @@ function get-mal-infos () {
 	fi
 }
 function get-romaji-title () {
-	romaji_title=null
+	title=null
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
 	then
 		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
-		romaji_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
-		if [[ -z "$romaji_title" ]]
+		title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
+		if [[ -z "$title" ]]
 		then
-			romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+			jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		else
+			echo "$title"
 		fi
 	else
-		romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 	fi
 }
 function get-english-title () {
-	english_title=null
+	title=null
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
 	then
 		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
-		english_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
-		if [[ -z "$english_title" ]]
+		title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
+		if [[ -z "$title" ]]
 		then
-			english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+			jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		else
+			echo "$title"
 		fi
 	else
-		english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 	fi
 }
 function get-score () {
