@@ -38,8 +38,7 @@ download-anime-id-mapping
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
 
 # create ID/animes.tsv
-tail -n +2 "$SCRIPT_FOLDER/override-ID-animes.tsv" > "$SCRIPT_FOLDER/tmp/override-ID-animes.tsv"
-while IFS=$'\t' read -r tvdb_id anilist_id anime_title studio ignore_seasons					# First add the override animes to the ID file
+while IFS=$'\t' read -r tvdb_id anilist_id title studio ignore_seasons					# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -w "$tvdb_id"
 	then
