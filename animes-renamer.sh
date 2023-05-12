@@ -79,7 +79,7 @@ do
 	curl 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
-	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/tmp/ongoing-anilist.json -D $SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
+	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/tmp/ongoing-anilist.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
 	rate_limit=0
 	rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 	if [[ rate_limit -lt 3 ]]
