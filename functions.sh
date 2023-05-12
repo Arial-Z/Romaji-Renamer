@@ -87,26 +87,62 @@ function get-mal-infos () {
 }
 function get-romaji-title () {
 	romaji_title=null
-	romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-	if [[ "$romaji_title" == "null" ]]
+	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
 	then
-		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-		get-anilist-infos
-		jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
+		romaji_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
+		if [[ -z "$romaji_title" ]]
+		then
+			romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+			if [[ "$romaji_title" == "null" ]]
+			then
+				rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+				get-anilist-infos
+				jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+			else
+				echo "$romaji_title"
+			fi
+		fi
 	else
-		echo "$romaji_title"
+		romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		if [[ "$romaji_title" == "null" ]]
+		then
+			rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+			get-anilist-infos
+			jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		else
+			echo "$romaji_title"
+		fi
 	fi
 }
 function get-english-title () {
 	english_title=null
-	english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-	if [[ "$english_title" == "null" ]]
+	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
 	then
-		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-		get-anilist-infos
-		jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
+		english_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
+		if [[ -z "$english_title" ]]
+		then
+			english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+			if [[ "$english_title" == "null" ]]
+			then
+				rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+				get-anilist-infos
+				jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+			else
+				echo "$english_title"
+			fi
+		fi
 	else
-		echo "$english_title"
+		english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		if [[ "$english_title" == "null" ]]
+		then
+			rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+			get-anilist-infos
+			jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		else
+			echo "$english_title"
+		fi
 	fi
 }
 function get-score () {
@@ -327,31 +363,32 @@ function get-season-infos () {
 }
 function write-metadata () {
 	get-anilist-infos
-	if [[ $media_type == "animes" ]]
+		if [[ $media_type == "animes" ]]
 	then
 		printf "  %s:\n" "$tvdb_id" >> "$METADATA"
 	else
 		printf "  %s:\n" "$imdb_id" >> "$METADATA"
 	fi
+	romaji_title=$(get-romaji-title)
 	english_title=$(get-english-title)
 		if [ "$english_title" == "null" ]
 	then
-		english_title=$anime_title
+		english_title=$romaji_title
 	fi
 	if [[ $MAIN_TITLE_ENG == "Yes" ]]
 	then
-		printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$anime_title" >> "$METADATA"
+		printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$romaji_title" >> "$METADATA"
 	else
-		printf "    title: |-\n      %s\n" "$anime_title" >> "$METADATA"
+		printf "    title: |-\n      %s\n" "$romaji_title" >> "$METADATA"
 		if [[ $SORT_TITLE_ENG == "Yes" ]]
 		then
 			printf "    sort_title: |-\n      %s\n" "$english_title" >> "$METADATA"
 		else
-			printf "    sort_title: |-\n      %s\n" "$anime_title" >> "$METADATA"
+			printf "    sort_title: |-\n      %s\n" "$romaji_title" >> "$METADATA"
 		fi
 		printf "    original_title: |-\n      %s\n" "$english_title" >> "$METADATA"
 	fi
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - %s:\n" "$anime_title" >> "$LOG"
+	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - %s:\n" "$romaji_title" >> "$LOG"
 	anime_tags=$(get-tags)
 	printf "    genre.sync: Anime,%s\n" "$anime_tags"  >> "$METADATA"
 	printf "%s\t\ttags : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$anime_tags" >> "$LOG"

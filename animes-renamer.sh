@@ -39,7 +39,8 @@ download-anime-id-mapping
 # export animes list from plex
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
 
-# create ID/animes.tsv from the clean list ( tvdb_id	mal_id	anime_title	plex_title )
+# create ID/animes.tsv
+tail -n +2 "$SCRIPT_FOLDER/override-ID-animes.tsv" > "$SCRIPT_FOLDER/tmp/override-ID-animes.tsv"
 while IFS=$'\t' read -r tvdb_id anilist_id anime_title studio ignore_seasons					# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -w "$tvdb_id"
@@ -51,13 +52,8 @@ do
 			asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $3}')
 			last_season=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $4}')
 			total_seasons=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $5}')
-			if [[ -z "$anime_title" ]]
-			then
-				get-anilist-infos
-				anime_title=$(get-romaji-title)
-			fi
-			printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$anime_title" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $anime_title / $plex_title" >> "$LOG"
+			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for tvdb : $tvdb_id / $plex_title" >> "$LOG"
 		fi
 	fi
 done < "$SCRIPT_FOLDER/override-ID-animes.tsv"
@@ -71,10 +67,8 @@ do
 		then
 			echo "invalid Anilist ID for tvdb : $tvdb_id / $plex_title" >> "$MATCH_LOG"
 		else
-			get-anilist-infos
-			anime_title=$(get-romaji-title)
-			printf "%s\t%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$anime_title" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $anime_title / $plex_title added to ID/animes.tsv" >> "$LOG"
+			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
+			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - tvdb : $tvdb_id / $plex_title added to ID/animes.tsv" >> "$LOG"
 		fi
 	fi
 done < "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv"
@@ -127,7 +121,7 @@ done < "$SCRIPT_FOLDER/tmp/ongoing.tsv"
 
 # write PMM metadata file from ID/animes.tsv and jikan API
 echo "metadata:" > "$METADATA"
-while IFS=$'\t' read -r tvdb_id anilist_id anime_title plex_title asset_name last_season total_seasons
+while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name last_season total_seasons
 do
 	write-metadata
 done < "$SCRIPT_FOLDER/ID/animes.tsv"
