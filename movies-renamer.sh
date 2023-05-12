@@ -27,7 +27,7 @@ if [ ! -d "$LOG_FOLDER" ]
 then
 	mkdir "$LOG_FOLDER"
 fi
-:> $SCRIPT_FOLDER/ID/movies.tsv
+:> "$SCRIPT_FOLDER/ID/movies.tsv"
 :> "$MATCH_LOG"
 
 # Download anime mapping json data
