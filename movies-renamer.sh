@@ -13,7 +13,7 @@ if [ ! -d "$SCRIPT_FOLDER/data" ]                                               
 then
 	mkdir "$SCRIPT_FOLDER/data"
 else
-	find "$SCRIPT_FOLDER/data/*" -mtime +"$MAL_CACHE_TIME" -exec rm {} \;        #delete json data if older than 2 days
+	find "$SCRIPT_FOLDER/data/*" -mtime +"$DATA_CACHE_TIME" -exec rm {} \;        #delete json data if older than 2 days
 fi
 if [ ! -d "$SCRIPT_FOLDER/tmp" ]										#check if exist and create folder for json data
 then
@@ -43,7 +43,7 @@ python3 "$SCRIPT_FOLDER/plex_movies_export.py"
 # create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )
 if [ -f "$SCRIPT_FOLDER/override-ID-movies.tsv" ]
 then
-	while IFS=$'\t' read -r imdb_id mal_id anilist_id anime_title studio                                                                       # First add the override animes to the ID file
+	while IFS=$'\t' read -r imdb_id anilist_id anime_title studio                                                                       # First add the override animes to the ID file
 	do
 		if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -w  "$imdb_id"
 		then

@@ -31,7 +31,7 @@ do
 		tvdb_epoffset=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_epoffset' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
 		if [[ "$tvdb_season" -eq 1 ]] && [[ "$tvdb_epoffset" -eq 0 ]]
 		then
-			printf "$tvdb_id\n" >> $SCRIPT_FOLDER/data/seasonal.tsv
+			printf "%s\n" "$tvdb_id" >> $SCRIPT_FOLDER/data/seasonal.tsv
 		fi
 	fi
 done < $SCRIPT_FOLDER/tmp/seasonal-anilist.tsv
@@ -41,7 +41,7 @@ echo "$tvdb_list"
 
 echo "collections:" > $DOWNLOAD_ANIMES_COLLECTION
 printf "  seasonal animes download:\n" >> $DOWNLOAD_ANIMES_COLLECTION
-printf "    tvdb_show: $tvdb_list\n" >> $DOWNLOAD_ANIMES_COLLECTION
+printf "    tvdb_show: %s\n" "$tvdb_list" >> $DOWNLOAD_ANIMES_COLLECTION
 printf "    sync_mode: sync\n" >> $DOWNLOAD_ANIMES_COLLECTION
 printf "    sonarr_add_missing: true\n" >> $DOWNLOAD_ANIMES_COLLECTION
 printf "    build_collection: false\n" >> $DOWNLOAD_ANIMES_COLLECTION
