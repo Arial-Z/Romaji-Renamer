@@ -14,9 +14,9 @@ echo "Current season : $current_season"
 curl 'https://graphql.anilist.co/' \
 -X POST \
 -H 'content-type: application/json' \
---data '{ "query": "{ Page(page: 1, perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, season: '$current_season', format: TV, status_in: RELEASING, sort: POPULARITY_DESC) { idMal } } }" }' | jq '.data.Page.media[] | select( .idMal != null ) | .idMal' > $SCRIPT_FOLDER/tmp/seasonal-anilist.tsv
+--data '{ "query": "{ Page(page: 1, perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, season: '"$current_season"', format: TV, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' | jq '.data.Page.media[] | select( .idMal != null ) | .idMal' > $SCRIPT_FOLDER/tmp/seasonal-anilist.tsv
 
-while read -r mal_id
+while read -r anilist_id
 do
 	tvdb_id=a
 	tvdb_season=-a
@@ -24,11 +24,11 @@ do
 	tvdb_id=$(get-tvdb-id)
 	if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]
 	then
-		echo "Seasonal invalid TVDB ID for MAL : $mal_id"
+		echo "Seasonal invalid TVDB ID for Anilist : $anilist_id"
 		continue
 	else
-		tvdb_season=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
-		tvdb_epoffset=$(jq --arg mal_id "$mal_id" '.[] | select( .mal_id == $mal_id ) | .tvdb_epoffset' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
+		tvdb_season=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
+		tvdb_epoffset=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_epoffset' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
 		if [[ "$tvdb_season" -eq 1 ]] && [[ "$tvdb_epoffset" -eq 0 ]]
 		then
 			printf "%s\n" "$tvdb_id" >> $SCRIPT_FOLDER/data/seasonal.tsv
