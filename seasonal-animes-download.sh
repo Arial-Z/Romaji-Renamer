@@ -24,7 +24,7 @@ do
 	tvdb_id=$(get-tvdb-id)
 	if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]
 	then
-		echo "Seasonal invalid TVDB ID for Anilist : $anilist_id"
+		printf "Seasonal invalid TVDB ID for Anilist : %s\n" "$anilist_id"
 		continue
 	else
 		tvdb_season=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
