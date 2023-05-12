@@ -14,7 +14,7 @@ echo "Current season : $current_season"
 curl 'https://graphql.anilist.co/' \
 -X POST \
 -H 'content-type: application/json' \
---data '{ "query": "{ Page(page: 1, perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, season: '"$current_season"', format: TV, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' | jq '.data.Page.media[] | .id' > $SCRIPT_FOLDER/tmp/seasonal-anilist.tsv
+--data '{ "query": "{ Page(page: 1, perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, seasonYear: '"$(date +%Y)"' season: '"$current_season"', format: TV, sort: POPULARITY_DESC) { id } } }" }' | jq '.data.Page.media[] | .id' > $SCRIPT_FOLDER/tmp/seasonal-anilist.tsv
 
 while read -r anilist_id
 do
