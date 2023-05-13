@@ -186,9 +186,17 @@ function get-studios() {
 		if [[ -z "$studio" ]]
 		then
 			studio=$(jq '.data.Media.studios.edges[].node | select( .isAnimationStudio == true ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | head -n 1)
+			if [[ -z "$studio" ]]
+			then
+				studio=$(jq '.data.Media.studios.edges[].node | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | head -n 1)
+			fi
 		fi
 	else
-	studio=$(jq '.data.Media.studios.edges[].node | select( .isAnimationStudio == true ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | head -n 1)
+		studio=$(jq '.data.Media.studios.edges[].node | select( .isAnimationStudio == true ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | head -n 1)
+		if [[ -z "$studio" ]]
+		then
+			studio=$(jq '.data.Media.studios.edges[].node | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | head -n 1)
+		fi
 	fi
 }
 function get-poster () {
