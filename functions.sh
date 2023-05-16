@@ -61,7 +61,7 @@ function get-anilist-infos () {
 		curl 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji, english  }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false)  }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
 		rate_limit=0
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
