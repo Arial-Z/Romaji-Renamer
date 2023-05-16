@@ -2,7 +2,7 @@
 
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 echo "$SCRIPT_FOLDER"
-media_type=movies
+media_type="movies"
 source "$SCRIPT_FOLDER/.env"
 source "$SCRIPT_FOLDER/functions.sh"
 METADATA=$METADATA_MOVIES
