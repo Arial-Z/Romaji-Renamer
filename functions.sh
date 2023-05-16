@@ -86,58 +86,58 @@ function get-mal-infos () {
 	fi
 }
 function get-romaji-title () {
-	romaji_title="null"
-	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
-	then
-		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
-		title_tmp=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
-		if [[ -z "$title_tmp" ]]
-		then
-			romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-			if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
-			then
-				romaji_title=$(echo "$romaji_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
-			fi
-		else
-			romaji_title="$title_tmp"
-			if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
-			then
-				romaji_title=$(echo "$romaji_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
-			fi
-		fi
-	else
-		romaji_title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-		if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
-		then
-			romaji_title=$(echo "$romaji_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
-		fi
-	fi
-}
-function get-english-title () {
-	english_title="null"
+	title="null"
+	title_tmp="null"
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -q -w "$anilist_id"
 	then
 		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
 		title_tmp=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
 		if [[ -z "$title_tmp" ]]
 		then
-			english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-			if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
-			then
-				english_title=$(echo "$english_title" | tr '[:upper:] [:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
-			fi
+			title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+			less-caps-title
+			echo "$title"
 		else
-			english_title="$title_tmp"
-			if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
-			then
-				english_title=$(echo "$english_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
-			fi
+			title="$title_tmp"
+			less-caps-title
+			echo "$title"
 		fi
 	else
-		english_title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
-		if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
+		title=$(jq '.data.Media.title.romaji' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		less-caps-title
+		echo "$title"
+	fi
+}
+function get-english-title () {
+	title="null"
+	title_tmp="null"
+	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -q -w "$anilist_id"
+	then
+		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
+		title_tmp=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $3}')
+		if [[ -z "$title_tmp" ]]
 		then
-			english_title=$(echo "$english_title" | tr '[:upper:]' '[:lower:]' | sed -e "s/\b\(.\)/\u\1/g")
+			title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+			less-caps-title
+			echo "$title"
+		else
+			title="$title_tmp"
+			less-caps-title
+			echo "$title"
+		fi
+	else
+		title=$(jq '.data.Media.title.english' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		less-caps-title
+		echo "$title"
+	fi
+}
+function less-caps-title () {
+	if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
+	then
+		upper_check=$(echo "$title" | sed -e "s/[^ a-zA-Z]//g" -e 's/ //g')
+		if [[ "$upper_check" =~ ^[A-Z]+$ ]]
+		then
+			title=$(echo "$title" | tr '[:upper:]' '[:lower:]' | sed "s/\( \|^\)\(.\)/\1\u\2/g")
 		fi
 	fi
 }
@@ -327,8 +327,8 @@ function get-season-infos () {
 				if [[ -n "$anilist_id" ]]
 				then
 					get-anilist-infos
-					get-romaji-title
-					get-english-title
+					romaji_title=$(get-romaji-title)
+					english_title=$(get-english-title)
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
 					then
 						english_title=$romaji_title
@@ -374,8 +374,8 @@ function write-metadata () {
 	else
 		printf "  %s:\n" "$imdb_id" >> "$METADATA"
 	fi
-	get-romaji-title
-	get-english-title
+	romaji_title=$(get-romaji-title)
+	english_title=$(get-english-title)
 		if [ "$english_title" == "null" ]
 	then
 		english_title=$romaji_title
