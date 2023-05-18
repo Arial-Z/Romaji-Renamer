@@ -10,8 +10,8 @@ media_type=animes
 :> "$SCRIPT_FOLDER/data/seasonal.tsv"
 download-anime-id-mapping
 wget -O "$SCRIPT_FOLDER/tmp/this-season.html" "https://myanimelist.net/anime/season"
-current_season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $1}')
-current_year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $2}')
+current_season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $1}' | sed -e "s/[^ a-zA-Z]//g" -e 's/ //g')
+current_year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $2}' | sed -e "s/[^ 0-9]//g" -e 's/ //g')
 printf "Current season : %s %s\n" "$current_season" "$current_year"
 curl 'https://graphql.anilist.co/' \
 -X POST \
