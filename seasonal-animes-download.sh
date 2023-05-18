@@ -10,11 +10,11 @@ media_type=animes
 #SCRIPT
 :> "$SCRIPT_FOLDER/data/seasonal.tsv"
 download-anime-id-mapping
-curl "https://myanimelist.net/anime/season" > "$SCRIPT_FOLDER/tmp/this-season.html"
+curl -s "https://myanimelist.net/anime/season" > "$SCRIPT_FOLDER/tmp/this-season.html"
 season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | tr -d \\n | awk '{print $1}'| tr '[:lower:]' '[:upper:]')
 year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | tr -d \\n | awk '{print $2}')
-printf "Current season : %s %s\n" "$season" "$year"
-curl 'https://graphql.anilist.co/' \
+printf "\nCurrent season : %s %s\n\n" "$season" "$year"
+curl -s 'https://graphql.anilist.co/' \
 -X POST \
 -H 'content-type: application/json' \
 --data '{ "query": "{ Page(page: 1, perPage: 100) { pageInfo { hasNextPage } media(type: ANIME, seasonYear: '"$year"' season: '"$season"', format: TV, sort: POPULARITY_DESC) { id } } }" }' | jq '.data.Page.media[] | .id' > "$SCRIPT_FOLDER/tmp/seasonal-anilist.tsv"
