@@ -10,13 +10,13 @@ media_type=animes
 :> "$SCRIPT_FOLDER/data/seasonal.tsv"
 download-anime-id-mapping
 wget -O "$SCRIPT_FOLDER/tmp/this-season.html" "https://www.livechart.me/"
-current_season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $1}')
-current_year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $2}')
-printf "Current season : %s %s\n" "$current_season" "$current_year"
+season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $1}'| tr '[:lower:]' '[:upper:]')
+year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $2}')
+printf "Current season : %s %s\n" "$season" "$year"
 curl 'https://graphql.anilist.co/' \
 -X POST \
 -H 'content-type: application/json' \
---data '{ "query": "{ Page(page: 1, perPage: 100) { pageInfo { hasNextPage } media(type: ANIME, seasonYear: '"$current_year"' season: '"$current_season"', format: TV, sort: POPULARITY_DESC) { id } } }" }' | jq '.data.Page.media[] | .id' > "$SCRIPT_FOLDER/tmp/seasonal-anilist.tsv"
+--data '{ "query": "{ Page(page: 1, perPage: 100) { pageInfo { hasNextPage } media(type: ANIME, seasonYear: '"$year"' season: '"$season"', format: TV, sort: POPULARITY_DESC) { id } } }" }' | jq '.data.Page.media[] | .id' > "$SCRIPT_FOLDER/tmp/seasonal-anilist.tsv"
 
 while read -r anilist_id
 do
