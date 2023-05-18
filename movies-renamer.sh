@@ -66,7 +66,7 @@ do
 		fi
 		get-anilist-infos
 		anime_title=$(get-romaji-title)
-		printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$anime_title" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/ID/movies.tsv"
+		printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/ID/movies.tsv"
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $anime_title / $plex_title added to ID/movies.tsv" >> "$LOG"
 	fi
 done < "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv"
