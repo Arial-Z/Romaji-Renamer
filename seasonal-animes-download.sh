@@ -1,6 +1,7 @@
 #!/bin/bash
 
 # SCRIPT VARIABLES
+export LC_ALL=en_US.UTF-8
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 source "$SCRIPT_FOLDER/.env"
 source "$SCRIPT_FOLDER/functions.sh"
@@ -9,7 +10,7 @@ media_type=animes
 #SCRIPT
 :> "$SCRIPT_FOLDER/data/seasonal.tsv"
 download-anime-id-mapping
-wget -O "$SCRIPT_FOLDER/tmp/this-season.html" "https://www.livechart.me/"
+curl "https://www.livechart.me/" > "$SCRIPT_FOLDER/tmp/this-season.html" 
 season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $1}'| tr '[:lower:]' '[:upper:]')
 year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $2}')
 printf "Current season : %s %s\n" "$season" "$year"

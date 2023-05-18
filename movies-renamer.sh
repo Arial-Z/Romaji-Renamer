@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export LC_ALL=en_US.UTF-8
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 echo "$SCRIPT_FOLDER"
 media_type="movies"
