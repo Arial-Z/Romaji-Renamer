@@ -14,7 +14,7 @@ if [ ! -d "$SCRIPT_FOLDER/data" ]										#check if exist and create folder for
 then
 	mkdir "$SCRIPT_FOLDER/data"
 else
-	find "$SCRIPT_FOLDER/data/*" -mtime +"$DATA_CACHE_TIME" -exec rm {} \;					#delete json data if older than 2 days
+	find "$SCRIPT_FOLDER/data/" -type f -mtime +"$DATA_CACHE_TIME" -exec rm {} \;					#delete json data if older than 2 days
 fi
 if [ ! -d "$SCRIPT_FOLDER/tmp" ]										#check if exist and create folder for json data
 then
