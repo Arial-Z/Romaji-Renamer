@@ -47,9 +47,9 @@ create-override
 printf "%s\t - Sorting Plex anime library\n" "$(date +%H:%M:%S)"
 while IFS=$'\t' read -r imdb_id anilist_id title_override studio                                                                       # First add the override animes to the ID file
 do
-	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -w  "$imdb_id"
+	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -q -w  "$imdb_id"
 	then
-		if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -w  "$imdb_id"
+		if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -q -w  "$imdb_id"
 		then
 			line=$(awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -w -n "$imdb_id" | cut -d : -f 1)
 			plex_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $2}')
@@ -62,7 +62,7 @@ do
 done < "$SCRIPT_FOLDER/override-ID-movies.tsv"
 while IFS=$'\t' read -r imdb_id plex_title asset_name                                                                                      # then get the other ID from the ID mapping and download json data
 do
-	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -w  "$imdb_id"
+	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -q -w  "$imdb_id"
 		then
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
@@ -71,8 +71,6 @@ do
 			echo "invalid Anilist ID for imdb : $imdb_id / $plex_title" >> "$MATCH_LOG"
 			continue
 		fi
-		get-anilist-infos
-		anime_title=$(get-romaji-title)
 		printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/ID/movies.tsv"
 		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $anime_title / $plex_title added to ID/movies.tsv" >> "$LOG"
 	fi
