@@ -35,7 +35,9 @@ fi
 download-anime-id-mapping
 
 # export animes list from plex
+exporting "plex anime list\n"
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
+printf "done\n"
 
 # create ID/animes.tsv
 create-override

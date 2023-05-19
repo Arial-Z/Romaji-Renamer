@@ -27,7 +27,6 @@ with open(path.join(basedir, "tmp/plex_movies_export.tsv"), "w") as export_plex,
 			folder = str(path.parent.name)
 			export=(imdb + "\t" + title + "\t" + folder + "\n")
 			export_plex.write(export)
-			print(export)
 		else :
 			export=(title + " no id found" + ids + "\n")
 			export_fail.write(export)
