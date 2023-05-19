@@ -76,7 +76,8 @@ done < "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv"
 ongoingpage=1
 while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 do
-	curl 'https://graphql.anilist.co/' \
+	printf "dwonloading anilist airing list page : %s\n" "$ongoingpage"
+	curl -s 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
 	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/tmp/ongoing-anilist.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
@@ -88,6 +89,7 @@ do
 		sleep 30
 	else
 		sleep 0.7
+		printf "done\n"
 	fi
 	jq '.data.Page.media[].id' -r "$SCRIPT_FOLDER/tmp/ongoing-anilist.json" >> "$SCRIPT_FOLDER/tmp/ongoing-tmp.tsv"		# store the mal ID of the ongoing show
 	if grep -w ":false}" "$SCRIPT_FOLDER/tmp/ongoing-anilist.json"														# stop if page is empty
