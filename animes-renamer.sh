@@ -103,7 +103,7 @@ while read -r anilist_id
 do
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -q -w  "$anilist_id"
 	then
-		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -q -w -n "$anilist_id" | cut -d : -f 1)
+		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -w -n "$anilist_id" | cut -d : -f 1)
 		tvdb_id=$(sed -n "${line}p" "$SCRIPT_FOLDER/ID/animes.tsv" | awk -F"\t" '{print $1}')
 		printf "%s\n" "$tvdb_id" >> "$SCRIPT_FOLDER/data/ongoing.tsv"
 	else
