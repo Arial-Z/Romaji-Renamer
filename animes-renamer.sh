@@ -78,7 +78,7 @@ done < "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv"
 ongoingpage=1
 while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 do
-	printf "dwonloading anilist airing list page : %s\n" "$ongoingpage"
+	printf "downloading anilist airing list page : %s\n" "$ongoingpage"
 	curl -s 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \

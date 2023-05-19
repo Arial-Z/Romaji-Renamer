@@ -15,7 +15,7 @@ function download-anime-id-mapping () {
 	wait_time=0
 	while [ $wait_time -lt 4 ];
 	do
-		printf "dwonloading anime mapping\n"
+		printf "downloading anime mapping\n"
 		if [[ $media_type == "animes" ]]
 		then
 			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > "$SCRIPT_FOLDER/tmp/list-animes-id.json"
@@ -60,7 +60,7 @@ function get-tvdb-id () {
 function get-anilist-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" ]
 	then
-		printf "dwonloading data for anilist id : %s\n" "$anilist_id"
+		printf "downloading data for anilist id : %s\n" "$anilist_id"
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
@@ -81,7 +81,7 @@ function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/MAL-$mal_id.json" ]
 	then
 		curl -s -o "$SCRIPT_FOLDER/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
-		if  grep -w "429" "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
+		if  grep -q -w "429" "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		then
 			sleep 10
 			curl -s -o "$SCRIPT_FOLDER/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
@@ -183,7 +183,7 @@ function get-tags () {
 	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.tags | .[] | select( .rank >= 70 ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -s -d, -
 	}
 function get-studios() {
-	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w "$anilist_id"
+	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -q -w "$anilist_id"
 	then
 		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
 		studio=$(sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $4}')
@@ -216,13 +216,13 @@ function get-poster () {
 			then
 				get-mal-id
 				get-mal-infos
-				printf "dwonloading poster for MAL id : %s\n" "$mal_id"
+				printf "downloading poster for MAL id : %s\n" "$mal_id"
 				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 				curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 1.5
 				printf "done\n"
 			else
-				printf "dwonloading poster for anilist id : %s\n" "$anilist_id"
+				printf "downloading poster for anilist id : %s\n" "$anilist_id"
 				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 				curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 0.5
@@ -241,12 +241,12 @@ function get-poster () {
 				then
 					get-mal-id
 					get-mal-infos
-					printf "dwonloading poster for MAL id : %s\n" "$mal_id"
+					printf "downloading poster for MAL id : %s\n" "$mal_id"
 					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 					curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 					sleep 1.5
 				else
-					printf "dwonloading poster for anilist id : %s\n" "$anilist_id"
+					printf "downloading poster for anilist id : %s\n" "$anilist_id"
 					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 					curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 					sleep 0.5
@@ -275,13 +275,13 @@ function get-season-poster () {
 			then
 				get-mal-id
 				get-mal-infos
-				printf "dwonloading poster for MAL id : %s\n" "$mal_id"
+				printf "downloading poster for MAL id : %s\n" "$mal_id"
 				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 				curl -s "$poster_url" -o "$assets_filepath"
 				sleep 1.5
 				printf "done\n"
 			else
-				printf "dwonloading poster for anilist id : %s\n" "$anilist_id"
+				printf "downloading poster for anilist id : %s\n" "$anilist_id"
 				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 				curl -s "$poster_url" -o "$assets_filepath"
 				sleep 0.5
@@ -300,13 +300,13 @@ function get-season-poster () {
 				then
 					get-mal-id
 					get-mal-infos
-					printf "dwonloading poster for MAL id : %s\n" "$mal_id"
+					printf "downloading poster for MAL id : %s\n" "$mal_id"
 					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 					curl -s "$poster_url" -o "$assets_filepath"
 					sleep 1.5
 					printf "done\n"
 				else
-					printf "dwonloading poster for anilist id : %s\n" "$anilist_id"
+					printf "downloading poster for anilist id : %s\n" "$anilist_id"
 					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 					curl -s "$poster_url" -o "$assets_filepath"
 					sleep 0.5
@@ -418,7 +418,7 @@ function write-metadata () {
 	printf "%s\t\ttags : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$anime_tags" >> "$LOG"
 	if [[ $media_type == "animes" ]]
 	then
-		if awk -F"\t" '{print "\""$1"\":"}' "$SCRIPT_FOLDER/data/ongoing.tsv" | grep -w "$tvdb_id"
+		if awk -F"\t" '{print "\""$1"\":"}' "$SCRIPT_FOLDER/data/ongoing.tsv" | grep -q -w "$tvdb_id"
 		then
 			printf "    label: Ongoing\n" >> "$METADATA"
 			printf "%s\t\tLabel add Ongoing\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
@@ -433,10 +433,10 @@ function write-metadata () {
 	get-poster
 	if [[ $media_type == "animes" ]] && [[ $IGNORE_SEASONS != "Yes" ]]
 	then
-		if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w  "$anilist_id"
+		if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -q -w  "$anilist_id"
 		then
 			line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
-			if sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $5}' | grep -i -w "Yes"
+			if sed -n "${line}p" "$SCRIPT_FOLDER/$OVERRIDE" | awk -F"\t" '{print $5}' | grep -q -i -w "Yes"
 			then
 				if [[ $RATING_SOURCE == "ANILIST" ]]
 				then
