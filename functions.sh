@@ -27,6 +27,7 @@ function download-anime-id-mapping () {
 			((wait_time++))
 		if [[ $size -gt 1000 ]]
 		then
+			printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 			break
 		fi
 		if [[ $wait_time == 4 ]]
@@ -36,7 +37,6 @@ function download-anime-id-mapping () {
 			exit 1
 		fi
 		sleep 30
-	printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 	done
 }
 function get-anilist-id () {
