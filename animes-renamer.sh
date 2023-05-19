@@ -2,7 +2,6 @@
 
 export LC_ALL=en_US.UTF-8
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-echo "$SCRIPT_FOLDER"
 media_type="animes"
 source "$SCRIPT_FOLDER/.env"
 source "$SCRIPT_FOLDER/functions.sh"
@@ -30,6 +29,7 @@ then
 fi
 :> "$SCRIPT_FOLDER/ID/animes.tsv"
 :> "$MATCH_LOG"
+printf "%s - Starting script\n\n" "$(date +%H:%M:%S)"
 
 # Download anime mapping json data
 download-anime-id-mapping
@@ -37,10 +37,11 @@ download-anime-id-mapping
 # export animes list from plex
 printf "%s - Exporting Plex animes library\n" "$(date +%H:%M:%S)"
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
-printf "%s - Done\n" "$(date +%H:%M:%S)"
+printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 
 # create ID/animes.tsv
 create-override
+printf "%s - Sorting plex anime list " "$(date +%H:%M:%S)"
 while IFS=$'\t' read -r tvdb_id anilist_id title_override studio ignore_seasons					# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -q -w "$tvdb_id"
@@ -73,6 +74,7 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv"
+printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
 printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
@@ -81,7 +83,7 @@ printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
 ongoingpage=1
 while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 do
-	printf "%s - Downloading anilist airing list page : %s\n" "$ongoingpage" "$(date +%H:%M:%S)"
+	printf "%s - Downloading anilist airing list page : %s\n" "$(date +%H:%M:%S)" "$ongoingpage"
 	curl -s 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
@@ -123,6 +125,7 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/tmp/ongoing.tsv"
+printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 
 # write PMM metadata file from ID/animes.tsv and jikan API
 printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)"
@@ -132,5 +135,5 @@ do
 	printf "%s - Writing metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
 	write-metadata
 done < "$SCRIPT_FOLDER/ID/animes.tsv"
-printf "%s - run complete" "$(date +%H:%M:%S)"
+printf "%s - Run finished\n" "$(date +%H:%M:%S)"
 exit 0
