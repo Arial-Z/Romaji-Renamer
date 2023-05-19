@@ -35,7 +35,7 @@ printf "%s - Starting script\n\n" "$(date +%H:%M:%S)"
 download-anime-id-mapping
 
 # export animes list from plex
-printf "%s - Creating anime list" "$(date +%H:%M:%S)"
+printf "%s - Creating anime list\n" "$(date +%H:%M:%S)"
 printf "%s\t - Exporting Plex anime library\n" "$(date +%H:%M:%S)"
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
 printf "%s\t - Done\n" "$(date +%H:%M:%S)"
