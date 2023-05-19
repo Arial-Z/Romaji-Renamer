@@ -35,13 +35,13 @@ printf "%s - Starting script\n\n" "$(date +%H:%M:%S)"
 download-anime-id-mapping
 
 # export animes list from plex
-printf "%s - Exporting Plex animes library\n" "$(date +%H:%M:%S)"
+printf "%s - Exporting Plex anime library\n" "$(date +%H:%M:%S)"
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 
 # create ID/animes.tsv
 create-override
-printf "%s - Sorting plex anime list\n" "$(date +%H:%M:%S)"
+printf "%s - Sorting Plex anime library\n" "$(date +%H:%M:%S)"
 while IFS=$'\t' read -r tvdb_id anilist_id title_override studio ignore_seasons					# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -q -w "$tvdb_id"
@@ -53,7 +53,7 @@ do
 			asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $3}')
 			last_season=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $4}')
 			total_seasons=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $5}')
-			printf "%s - Found override for tvdb id : %s / anilist id : %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
+			printf "%s - \tFound override for tvdb id : %s / anilist id : %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
 			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for tvdb : $tvdb_id / $plex_title" >> "$LOG"
 		fi
@@ -83,7 +83,7 @@ printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
 ongoingpage=1
 while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 do
-	printf "%s - Downloading anilist airing list page : %s\n" "$(date +%H:%M:%S)" "$ongoingpage"
+	printf "%s - \tDownloading anilist airing list page : %s\n" "$(date +%H:%M:%S)" "$ongoingpage"
 	curl -s 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
@@ -96,7 +96,7 @@ do
 		sleep 30
 	else
 		sleep 0.7
-		printf "%s - done\n" "$(date +%H:%M:%S)"
+		printf "%s - \tdone\n" "$(date +%H:%M:%S)"
 	fi
 	jq '.data.Page.media[].id' -r "$SCRIPT_FOLDER/tmp/ongoing-anilist.json" >> "$SCRIPT_FOLDER/tmp/ongoing-tmp.tsv"		# store the mal ID of the ongoing show
 	if grep -q -w ":false}" "$SCRIPT_FOLDER/tmp/ongoing-anilist.json"														# stop if page is empty
@@ -105,7 +105,7 @@ do
 	fi
 	((ongoingpage++))
 done
-	printf "%s - Sorting anilist airing list \n" "$(date +%H:%M:%S)"
+	printf "%s - \tSorting anilist airing list \n" "$(date +%H:%M:%S)"
 sort -n "$SCRIPT_FOLDER/tmp/ongoing-tmp.tsv" | uniq > "$SCRIPT_FOLDER/tmp/ongoing.tsv"
 while read -r anilist_id
 do
@@ -132,7 +132,7 @@ printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)"
 printf "metadata:\n" > "$METADATA"
 while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name last_season total_seasons
 do
-	printf "%s - Writing metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
+	printf "%s - \tWriting metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
 	write-metadata
 done < "$SCRIPT_FOLDER/ID/animes.tsv"
 printf "%s - Run finished\n" "$(date +%H:%M:%S)"
