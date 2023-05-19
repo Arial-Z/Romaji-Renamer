@@ -41,7 +41,7 @@ printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 
 # create ID/animes.tsv
 create-override
-printf "%s - Sorting plex anime list " "$(date +%H:%M:%S)"
+printf "%s - Sorting plex anime list\n" "$(date +%H:%M:%S)"
 while IFS=$'\t' read -r tvdb_id anilist_id title_override studio ignore_seasons					# First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -q -w "$tvdb_id"
@@ -92,7 +92,7 @@ do
 	rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 	if [[ rate_limit -lt 3 ]]
 	then
-		printf "%s - Anilist API limit reached watiting 30 sec" "$(date +%H:%M:%S)"
+		printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)"
 		sleep 30
 	else
 		sleep 0.7

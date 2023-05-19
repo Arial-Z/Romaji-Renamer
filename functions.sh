@@ -36,7 +36,7 @@ function download-anime-id-mapping () {
 			exit 1
 		fi
 		sleep 30
-	printf "%s - Done\n" "$(date +%H:%M:%S)"
+	printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 	done
 }
 function get-anilist-id () {
@@ -60,7 +60,7 @@ function get-tvdb-id () {
 function get-anilist-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" ]
 	then
-		printf "downloading data for anilist id : %s\n" "$anilist_id"
+		printf "%s - Downloading data for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
@@ -69,11 +69,11 @@ function get-anilist-infos () {
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
 		then
-			echo "Anilist API limit reached watiting"
+			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)"
 			sleep 30
 		else
 			sleep 0.7
-			printf "done\n"
+			printf "%s - done\n" "$(date +%H:%M:%S)"
 		fi
 	fi
 }
@@ -216,17 +216,17 @@ function get-poster () {
 			then
 				get-mal-id
 				get-mal-infos
-				printf "downloading poster for MAL id : %s\n" "$mal_id"
+				printf "%s - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id"
 				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 				curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 1.5
-				printf "done\n"
+				printf "%s - done\n" "$(date +%H:%M:%S)"
 			else
-				printf "downloading poster for anilist id : %s\n" "$anilist_id"
+				printf "%s - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
 				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 				curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 0.5
-				printf "done\n"
+				printf "%s - done\n" "$(date +%H:%M:%S)"
 			fi
 		else
 			postersize=$(du -b "$ASSET_FOLDER/$asset_name/poster.jpg" | awk '{ print $1 }')
@@ -241,16 +241,16 @@ function get-poster () {
 				then
 					get-mal-id
 					get-mal-infos
-					printf "downloading poster for MAL id : %s\n" "$mal_id"
+					printf "%s - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id"
 					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 					curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 					sleep 1.5
 				else
-					printf "downloading poster for anilist id : %s\n" "$anilist_id"
+					printf "%s - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
 					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 					curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 					sleep 0.5
-					printf "done\n"
+					printf "%s - done\n" "$(date +%H:%M:%S)"
 				fi
 			fi
 		fi
@@ -275,17 +275,17 @@ function get-season-poster () {
 			then
 				get-mal-id
 				get-mal-infos
-				printf "downloading poster for MAL id : %s\n" "$mal_id"
+				printf "%s - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id"
 				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 				curl -s "$poster_url" -o "$assets_filepath"
 				sleep 1.5
-				printf "done\n"
+				printf "%s - done\n" "$(date +%H:%M:%S)"
 			else
-				printf "downloading poster for anilist id : %s\n" "$anilist_id"
+				printf "%s - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
 				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 				curl -s "$poster_url" -o "$assets_filepath"
 				sleep 0.5
-				printf "done\n"
+				printf "%s - done\n" "$(date +%H:%M:%S)"
 			fi
 		else
 			postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
@@ -300,17 +300,17 @@ function get-season-poster () {
 				then
 					get-mal-id
 					get-mal-infos
-					printf "downloading poster for MAL id : %s\n" "$mal_id"
+					printf "%s - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id"
 					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 					curl -s "$poster_url" -o "$assets_filepath"
 					sleep 1.5
-					printf "done\n"
+					printf "%s - done\n" "$(date +%H:%M:%S)"
 				else
-					printf "downloading poster for anilist id : %s\n" "$anilist_id"
+					printf "%s - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
 					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 					curl -s "$poster_url" -o "$assets_filepath"
 					sleep 0.5
-					printf "done\n"
+					printf "%s - done\n" "$(date +%H:%M:%S)"
 				fi
 			fi
 		fi
