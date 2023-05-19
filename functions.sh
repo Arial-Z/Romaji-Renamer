@@ -73,7 +73,7 @@ function get-anilist-infos () {
 			sleep 30
 		else
 			sleep 0.7
-			printf "%s\t\t - done\n" "$(date +%H:%M:%S)"
+			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
 		fi
 	fi
 }
