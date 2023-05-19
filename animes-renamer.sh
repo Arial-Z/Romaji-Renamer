@@ -35,7 +35,7 @@ fi
 download-anime-id-mapping
 
 # export animes list from plex
-printf "%S - exporting Plex anile library\n" "$(date +%H:%M:%S)"
+printf "%s - exporting Plex anile library\n" "$(date +%H:%M:%S)"
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
 printf "%s - done\n" "$(date +%H:%M:%S)"
 
