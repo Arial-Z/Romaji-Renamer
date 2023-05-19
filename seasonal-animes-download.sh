@@ -10,7 +10,7 @@ media_type=animes
 #SCRIPT
 :> "$SCRIPT_FOLDER/data/seasonal.tsv"
 download-anime-id-mapping
-curl -L -A -s "Mozilla/5.0 (X11; Linux x86_64)" "https://livechart.me/" -o  "$SCRIPT_FOLDER/tmp/this-season.html"
+curl -s -L -A "Mozilla/5.0 (X11; Linux x86_64)" "https://livechart.me/" -o  "$SCRIPT_FOLDER/tmp/this-season.html"
 season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $1}'| tr '[:lower:]' '[:upper:]')
 year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $2}')
 printf "\nCurrent season : %s %s\n\n" "$season" "$year"
