@@ -35,9 +35,9 @@ fi
 download-anime-id-mapping
 
 # export animes list from plex
-printf "%s - exporting Plex anile library\n" "$(date +%H:%M:%S)"
+printf "%s - Exporting Plex animes library\n" "$(date +%H:%M:%S)"
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
-printf "%s - done\n" "$(date +%H:%M:%S)"
+printf "%s - Done\n" "$(date +%H:%M:%S)"
 
 # create ID/animes.tsv
 create-override
@@ -52,7 +52,7 @@ do
 			asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $3}')
 			last_season=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $4}')
 			total_seasons=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $5}')
-			printf "%s - found override for tvdb id : %s / anilist id : %s\n" "$tvdb_id" "$anilist_id" "$(date +%H:%M:%S)"
+			printf "%s - Found override for tvdb id : %s / anilist id : %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
 			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for tvdb : $tvdb_id / $plex_title" >> "$LOG"
 		fi
@@ -65,7 +65,7 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
-			printf "%s - invalid Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title"
+			printf "%s - Invalid Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title"
 			echo "invalid Anilist ID for tvdb : $tvdb_id / $plex_title" >> "$MATCH_LOG"
 		else
 			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
@@ -75,7 +75,7 @@ do
 done < "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv"
 
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
-printf "%s - Creating anilist airing list" "$(date +%H:%M:%S)"
+printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
 :> "$SCRIPT_FOLDER/data/ongoing.tsv"
 :> "$SCRIPT_FOLDER/tmp/ongoing-tmp.tsv"
 ongoingpage=1
@@ -129,7 +129,7 @@ printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)"
 printf "metadata:\n" > "$METADATA"
 while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name last_season total_seasons
 do
-	printf "%s - Wrinting metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
+	printf "%s - Writing metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
 	write-metadata
 done < "$SCRIPT_FOLDER/ID/animes.tsv"
 printf "%s - run complete" "$(date +%H:%M:%S)"

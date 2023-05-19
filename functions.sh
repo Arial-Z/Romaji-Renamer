@@ -15,7 +15,7 @@ function download-anime-id-mapping () {
 	wait_time=0
 	while [ $wait_time -lt 4 ];
 	do
-		printf "downloading anime mapping\n"
+		printf "%s - Downloading anime mapping\n" "$(date +%H:%M:%S)"
 		if [[ $media_type == "animes" ]]
 		then
 			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > "$SCRIPT_FOLDER/tmp/list-animes-id.json"
@@ -32,11 +32,11 @@ function download-anime-id-mapping () {
 		if [[ $wait_time == 4 ]]
 		then
 			printf "%s - error can't download anime ID mapping file, exiting\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
-			printf "error can't download anime ID mapping file, exiting\n"
+			printf "%s - Error can't download anime ID mapping file, exiting\n" "$(date +%H:%M:%S)"
 			exit 1
 		fi
 		sleep 30
-	printf "done\n"
+	printf "%s - Done\n" "$(date +%H:%M:%S)"
 	done
 }
 function get-anilist-id () {
