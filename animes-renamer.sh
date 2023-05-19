@@ -35,9 +35,9 @@ fi
 download-anime-id-mapping
 
 # export animes list from plex
-printf "exporting plex anime list\n"
+printf "%S - exporting Plex anile library\n" "$(date +%H:%M:%S)"
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
-printf "done\n"
+printf "%s - done\n" "$(date +%H:%M:%S)"
 
 # create ID/animes.tsv
 create-override
@@ -52,6 +52,7 @@ do
 			asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $3}')
 			last_season=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $4}')
 			total_seasons=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $5}')
+			printf "%s - found override for tvdb id : %s / anilist id : %s\n" "$tvdb_id" "$anilist_id" "$(date +%H:%M:%S)"
 			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
 			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for tvdb : $tvdb_id / $plex_title" >> "$LOG"
 		fi
@@ -64,6 +65,7 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
+			printf "%s - invalid Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title"
 			echo "invalid Anilist ID for tvdb : $tvdb_id / $plex_title" >> "$MATCH_LOG"
 		else
 			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
@@ -73,12 +75,13 @@ do
 done < "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv"
 
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
+printf "%s - Creating anilist airing list" "$(date +%H:%M:%S)"
 :> "$SCRIPT_FOLDER/data/ongoing.tsv"
 :> "$SCRIPT_FOLDER/tmp/ongoing-tmp.tsv"
 ongoingpage=1
 while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 do
-	printf "downloading anilist airing list page : %s\n" "$ongoingpage"
+	printf "%s - Downloading anilist airing list page : %s\n" "$ongoingpage" "$(date +%H:%M:%S)"
 	curl -s 'https://graphql.anilist.co/' \
 	-X POST \
 	-H 'content-type: application/json' \
@@ -87,11 +90,11 @@ do
 	rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 	if [[ rate_limit -lt 3 ]]
 	then
-		echo "Anilist API limit reached watiting"
+		printf "%s - Anilist API limit reached watiting 30 sec" "$(date +%H:%M:%S)"
 		sleep 30
 	else
 		sleep 0.7
-		printf "done\n"
+		printf "%s - done\n" "$(date +%H:%M:%S)"
 	fi
 	jq '.data.Page.media[].id' -r "$SCRIPT_FOLDER/tmp/ongoing-anilist.json" >> "$SCRIPT_FOLDER/tmp/ongoing-tmp.tsv"		# store the mal ID of the ongoing show
 	if grep -q -w ":false}" "$SCRIPT_FOLDER/tmp/ongoing-anilist.json"														# stop if page is empty
@@ -100,6 +103,7 @@ do
 	fi
 	((ongoingpage++))
 done
+	printf "%s - Sorting anilist airing list \n" "$(date +%H:%M:%S)"
 sort -n "$SCRIPT_FOLDER/tmp/ongoing-tmp.tsv" | uniq > "$SCRIPT_FOLDER/tmp/ongoing.tsv"
 while read -r anilist_id
 do
@@ -121,9 +125,12 @@ do
 done < "$SCRIPT_FOLDER/tmp/ongoing.tsv"
 
 # write PMM metadata file from ID/animes.tsv and jikan API
+printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)"
 printf "metadata:\n" > "$METADATA"
 while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name last_season total_seasons
 do
+	printf "%s - Wrinting metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id"
 	write-metadata
 done < "$SCRIPT_FOLDER/ID/animes.tsv"
+printf "%s - run complete" "$(date +%H:%M:%S)"
 exit 0
