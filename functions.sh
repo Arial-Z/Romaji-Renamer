@@ -15,7 +15,7 @@ function download-anime-id-mapping () {
 	wait_time=0
 	while [ $wait_time -lt 4 ];
 	do
-		printf "%s - Downloading anime mapping\n" "$(date +%H:%M:%S)"
+		printf "%s - Downloading anime mapping\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		if [[ $media_type == "animes" ]]
 		then
 			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > "$SCRIPT_FOLDER/tmp/list-animes-id.json"
@@ -27,13 +27,12 @@ function download-anime-id-mapping () {
 			((wait_time++))
 		if [[ $size -gt 1000 ]]
 		then
-			printf "%s - Done\n\n" "$(date +%H:%M:%S)"
+			printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			break
 		fi
 		if [[ $wait_time == 4 ]]
 		then
-			printf "%s - error can't download anime ID mapping file, exiting\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
-			printf "%s - Error can't download anime ID mapping file, exiting\n" "$(date +%H:%M:%S)"
+			printf "%s - Error can't download anime ID mapping file, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			exit 1
 		fi
 		sleep 30
@@ -51,7 +50,7 @@ function get-mal-id () {
 	jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 	if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]				# Ignore anime with no anilist id
 	then
-		echo "invalid MAL ID for Anilist ID : $anilist_id / $plex_title" >> "$MATCH_LOG"
+		printf "%s\t\t - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG" "$MATCH_LOG"
 	fi
 }
 function get-tvdb-id () {
@@ -60,7 +59,7 @@ function get-tvdb-id () {
 function get-anilist-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" ]
 	then
-		printf "%s\t\t - Downloading data for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
+		printf "%s\t\t - Downloading data for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
@@ -69,11 +68,11 @@ function get-anilist-infos () {
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
 		then
-			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)"
+			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 30
 		else
 			sleep 0.7
-			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		fi
 	fi
 }
@@ -216,17 +215,17 @@ function get-poster () {
 			then
 				get-mal-id
 				get-mal-infos
-				printf "%s\t\t - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id"
+				printf "%s\t\t - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
 				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 				curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 1.5
-				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			else
-				printf "%s\t\t - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
+				printf "%s\t\t - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 				curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 				sleep 0.5
-				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			fi
 		else
 			postersize=$(du -b "$ASSET_FOLDER/$asset_name/poster.jpg" | awk '{ print $1 }')
@@ -241,17 +240,17 @@ function get-poster () {
 				then
 					get-mal-id
 					get-mal-infos
-					printf "%s\t\t - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id"
+					printf "%s\t\t - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
 					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 					curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 					sleep 1.5
-					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				else
-					printf "%s\t\t - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
+					printf "%s\t\t - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 					curl -s "$poster_url" -o "$ASSET_FOLDER/$asset_name/poster.jpg"
 					sleep 0.5
-					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				fi
 			fi
 		fi
@@ -276,17 +275,17 @@ function get-season-poster () {
 			then
 				get-mal-id
 				get-mal-infos
-				printf "%s\t\t - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id"
+				printf "%s\t\t - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
 				poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 				curl -s "$poster_url" -o "$assets_filepath"
 				sleep 1.5
-				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			else
-				printf "%s\t\t - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
+				printf "%s\t\t - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 				poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 				curl -s "$poster_url" -o "$assets_filepath"
 				sleep 0.5
-				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			fi
 		else
 			postersize=$(du -b "$assets_filepath" | awk '{ print $1 }')
@@ -301,17 +300,17 @@ function get-season-poster () {
 				then
 					get-mal-id
 					get-mal-infos
-					printf "%s\t\t - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id"
+					printf "%s\t\t - Downloading poster for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
 					poster_url=$(jq '.data.images.jpg.large_image_url' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 					curl -s "$poster_url" -o "$assets_filepath"
 					sleep 1.5
-					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				else
-					printf "%s\t\t - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id"
+					printf "%s\t\t - Downloading poster for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 					poster_url=$(jq '.data.Media.coverImage.extraLarge' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 					curl -s "$poster_url" -o "$assets_filepath"
 					sleep 0.5
-					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)"
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				fi
 			fi
 		fi
@@ -413,24 +412,19 @@ function write-metadata () {
 		fi
 		printf "    original_title: |-\n      %s\n" "$english_title" >> "$METADATA"
 	fi
-	printf "$(date +%Y.%m.%d" - "%H:%M:%S) - %s:\n" "$romaji_title" >> "$LOG"
 	anime_tags=$(get-tags)
 	printf "    genre.sync: Anime,%s\n" "$anime_tags"  >> "$METADATA"
-	printf "%s\t\ttags : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$anime_tags" >> "$LOG"
 	if [[ $media_type == "animes" ]]
 	then
 		if awk -F"\t" '{print "\""$1"\":"}' "$SCRIPT_FOLDER/data/ongoing.tsv" | grep -q -w "$tvdb_id"
 		then
 			printf "    label: Ongoing\n" >> "$METADATA"
-			printf "%s\t\tLabel add Ongoing\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
 		else
 			printf "    label.remove: Ongoing\n" >> "$METADATA"
-			printf "%s\t\tLabel remove Ongoing\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
 		fi
 	fi
 	get-studios
 	printf "    studio: %s\n" "$studio"  >> "$METADATA"
-	printf "%s\t\tstudio : $studio\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" >> "$LOG"
 	get-poster
 	if [[ $media_type == "animes" ]] && [[ $IGNORE_SEASONS != "Yes" ]]
 	then
@@ -447,16 +441,13 @@ function write-metadata () {
 				fi
 				score=$(printf '%.*f\n' 1 "$score")
 				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
-				printf "%s\t\tseasons ignored\n%s\t\tscore : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$score" >> "$LOG"
 			else
 				get-season-infos
 				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
-				printf "%s\t\tscore : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$score" >> "$LOG"
 			fi
 		else
 			get-season-infos
 			printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
-			printf "%s\t\tscore : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$score" >> "$LOG"
 		fi
 	else
 		if [[ $RATING_SOURCE == "ANILIST" ]]
@@ -467,6 +458,5 @@ function write-metadata () {
 		fi
 		score=$(printf '%.*f\n' 1 "$score")
 		printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
-		printf "%s\t\tscore : %s\n" "$(date +%Y.%m.%d" - "%H:%M:%S)" "$score" >> "$LOG"
 	fi
 }
