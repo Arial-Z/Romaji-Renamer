@@ -66,7 +66,7 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
-			printf "%s\t\t - Invalid Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title"  | tee "$LOG" "$MATCH_LOG"
+			printf "%s\t\t - Missing Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title"  | tee "$LOG" "$MATCH_LOG"
 		else
 			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
 		fi
@@ -116,7 +116,7 @@ do
 		tvdb_id=$(get-tvdb-id)																	# convert the mal id to tvdb id (to get the main anime)
 		if [[ "$tvdb_id" == 'null' ]] || [[ "${#tvdb_id}" == '0' ]]										# Ignore anime with no mal to tvdb id conversion
 		then
-			printf "%s\t\t - Ongoing invalid TVDB ID for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee "$LOG"
+			printf "%s\t\t - Ongoing list missing TVDB ID for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee "$LOG"
 			continue
 		else
 			printf "%s\n" "$tvdb_id" >> "$SCRIPT_FOLDER/data/ongoing.tsv"
