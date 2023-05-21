@@ -30,21 +30,21 @@ then
 fi
 :> "$SCRIPT_FOLDER/ID/movies.tsv"
 :> "$MATCH_LOG"
-printf "%s - Starting script\n\n" "$(date +%H:%M:%S)"
+printf "%s - Starting script\n\n" "$(date +%H:%M:%S)" | tee "$LOG"
 
 # Download anime mapping json data
 download-anime-id-mapping
 
 
 # export movies list from plex
-printf "%s - Creating anime list\n" "$(date +%H:%M:%S)"
-printf "%s\t - Exporting Plex anime library\n" "$(date +%H:%M:%S)"
+printf "%s - Creating anime list\n" "$(date +%H:%M:%S)" | tee "$LOG"
+printf "%s\t - Exporting Plex anime library\n" "$(date +%H:%M:%S)" | tee "$LOG"
 python3 "$SCRIPT_FOLDER/plex_movies_export.py"
-printf "%s\t - Done\n" "$(date +%H:%M:%S)"
+printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee "$LOG"
 
 # create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )
 create-override
-printf "%s\t - Sorting Plex anime library\n" "$(date +%H:%M:%S)"
+printf "%s\t - Sorting Plex anime library\n" "$(date +%H:%M:%S)" | tee "$LOG"
 while IFS=$'\t' read -r imdb_id anilist_id title_override studio                                                                       # First add the override animes to the ID file
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -q -w  "$imdb_id"
@@ -54,9 +54,8 @@ do
 			line=$(awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -w -n "$imdb_id" | cut -d : -f 1)
 			plex_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $2}')
 			asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $3}')
-			printf "%s\t\t - Found override for imdb id : %s / anilist id : %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$anilist_id"
+			printf "%s\t\t - Found override for imdb id : %s / anilist id : %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$anilist_id" | tee "$LOG"
 			printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/ID/movies.tsv"
-			echo "$(date +%Y.%m.%d" - "%H:%M:%S) - override found for : $anime_title / $plex_title" >> "$LOG"
 		fi
 	fi
 done < "$SCRIPT_FOLDER/override-ID-movies.tsv"
@@ -67,24 +66,22 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
-			printf "%s\t\t - Invalid Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title"
-			echo "invalid Anilist ID for imdb : $imdb_id / $plex_title" >> "$MATCH_LOG"
+			printf "%s\t\t - Invalid Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" | tee "$LOG" "$MATCH_LOG"
 			continue
 		fi
 		printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/ID/movies.tsv"
-		echo "$(date +%Y.%m.%d" - "%H:%M:%S) - $anime_title / $plex_title added to ID/movies.tsv" >> "$LOG"
 	fi
 done < "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv"
-printf "%s - Done\n\n" "$(date +%H:%M:%S)"
+printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee "$LOG"
 
 # write PMM metadata file from ID/movies.tsv and jikan API
-printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)"
+printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)" | tee "$LOG"
 printf "metadata:\n" > "$METADATA"
 while IFS=$'\t' read -r imdb_id anilist_id plex_title asset_name
 do
-	printf "%s\t - Writing metadata for imdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$imdb_id" "$anilist_id"
+	printf "%s\t - Writing metadata for imdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$imdb_id" "$anilist_id" | tee "$LOG"
 	write-metadata
-	printf "%s\t - Done\n" "$(date +%H:%M:%S)"
+	printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee "$LOG"
 done < "$SCRIPT_FOLDER/ID/movies.tsv"
-printf "%s - Run finished\n" "$(date +%H:%M:%S)"
+printf "%s - Run finished\n\n" "$(date +%H:%M:%S)" | tee "$LOG"
 exit 0
