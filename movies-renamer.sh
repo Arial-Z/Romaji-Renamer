@@ -66,7 +66,8 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
-			printf "%s\t\t - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" | tee -a "$LOG" "$MATCH_LOG"
+			printf "%s\t\t - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" | tee -a "$LOG"
+			printf "%s - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" >> "$MATCH_LOG"
 			continue
 		fi
 		printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/ID/movies.tsv"
