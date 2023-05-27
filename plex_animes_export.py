@@ -30,7 +30,6 @@ with open(path.join(basedir, "tmp/plex_animes_export.tsv"), "w") as export_plex,
             last_season = re.search("(\d+)(?!.*\d)", seasons).group()
             export=(tvdb + "\t" + title + "\t" + folder + "\t" + last_season + "\t" +  total_seasons + "\n")
             export_plex.write(export)
-            print(export)
         else :
             export=(title + " no id found" + ids + "\n")
             export_fail.write(export)
