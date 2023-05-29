@@ -73,7 +73,7 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv"
-printf "%s - Done\n\n" "$(date +%H:%M:%S)"
+printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
 printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
