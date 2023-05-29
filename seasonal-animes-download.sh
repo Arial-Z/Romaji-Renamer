@@ -7,8 +7,19 @@ media_type=seasonal
 source "$SCRIPT_FOLDER/.env"
 source "$SCRIPT_FOLDER/functions.sh"
 
-#SCRIPT
+# check if files and folder exist
+if [ ! -d "$SCRIPT_FOLDER/data" ]										#check if exist and create folder for json data
+then
+	mkdir "$SCRIPT_FOLDER/data"
+fi
+if [ ! -d "$SCRIPT_FOLDER/tmp" ]										#check if exist and create folder for json data
+then
+	mkdir "$SCRIPT_FOLDER/tmp"
+fi
 :> "$SCRIPT_FOLDER/data/seasonal.tsv"
+
+#SCRIPT
+printf "%s - Starting script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 download-anime-id-mapping
 printf "%s - checking current season\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 curl -s -L -A "Mozilla/5.0 (X11; Linux x86_64)" "https://livechart.me/" -o  "$SCRIPT_FOLDER/tmp/this-season.html"
@@ -39,7 +50,7 @@ do
 		if [[ "$tvdb_season" -eq 1 ]] && [[ "$tvdb_epoffset" -eq 0 ]]
 		then
 			printf "%s\n" "$tvdb_id" >> "$SCRIPT_FOLDER/data/seasonal.tsv"
-			printf "%s\t\t - New seasonal anime gound adding to list : Anilist id : %s / tvdb id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$tvdb_id" | tee -a "$LOG"
+			printf "%s\t\t - New seasonal anime adding to list : Anilist id : %s / tvdb id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$tvdb_id" | tee -a "$LOG"
 		else
 			printf "%s\t\t - Sequel seasonal anime not adding to list : Anilist id : %s / tvdb id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$tvdb_id" >> "$LOG"
 		fi
@@ -50,4 +61,7 @@ printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 tvdb_list=$(head -"$DOWNLOAD_LIMIT" "$SCRIPT_FOLDER/data/seasonal.tsv" | awk '{printf("%s,",$0)}'  | sed 's/,\s*$//')
 printf "%s - Seasonal list : tvdb id to be added : %s\n" "$(date +%H:%M:%S)" "$tvdb_list"| tee -a "$LOG"
+printf "%s - Wrinting seasonal collection\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "collections:\n  seasonal animes download:\n    tvdb_show: %s\n    sync_mode: sync\n    sonarr_add_missing: true\n    build_collection: false\n" "$tvdb_list" > "$DOWNLOAD_ANIMES_COLLECTION"
+printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Run finished\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
