@@ -135,5 +135,5 @@ do
 	write-metadata
 	printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 done < "$SCRIPT_FOLDER/ID/animes.tsv"
-printf "%s - Run finished\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Run finished\n\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 exit 0
