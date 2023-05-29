@@ -1,37 +1,39 @@
 # Plex-Romaji-Renamer
 
-A Bash script to import MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMS) metadata file.<br/>
+A Bash script to import Anilist data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMS) metadata file.<br/>
 
 Here what will be imported for each of your animes :
 ```
 330692:                                                 # TVDB_ID for PMM to import
   title: "Yuru Camp△"                                   # Title : Either Anilist title or English title (in settings)
   sort_title: "Yuru Camp△"                              # Sort Title : Either Anilist title or English title (in settings)
-  original_title: "Laid-Back Camp"                      # English title from MAL
-  genre.sync: Anime,Slice of Life,CGDCT,Iyashikei       # All genre from MAL (genres, themes and demographics)
+  original_title: "Laid-Back Camp"                      # English title from Anilist
+  genre.sync: Anime,Slice of Life,CGDCT,Iyashikei       # Genre ands tags from Anilist (genres, and tag above > 65%)
   label.remove: Ongoing                                 # Airing status from Anilist (add or remove Ongoing label)
-  studio: C-Station                                     # Studio from MAL
+  studio: C-Station                                     # Studio from Anilist
   seasons:                                              # Season import
     0:                                                  # Season 0 import                 
       label.remove: score                               
     1:                                                  # Season 1 import
       title: "Yuru Camp△"                               # Title from Anilist                            
-      user_rating: 8.3                                  # Rating from MAL
+      user_rating: 8.3                                  # Rating from Anilist or MAL
       label: score                                      # Add label score to use PMM overlays
     2:                                                  # Season 2 import
       title: "Yuru Camp△ SEASON 2"                      # Title from Anilist
-      user_rating: 8.5                                  # Rating from MAL
+      user_rating: 8.5                                  # Rating from Anilist or MAL
       label: score                                      # Add label score to use PMM overlays
-  critic_rating: 8.4                                    # Show rating average rating of the seasons (Or MAL score if no seasons)
+  critic_rating: 8.4                                    # Show rating average rating of the seasons (Or Anilist/ MAL score if no seasons)
 ```
-MAL Posters for animes and seasons can also be downloaded and imported inside the PMM assets folder
+Anilist Posters for animes and seasons can also be downloaded and imported inside the PMM assets folder
+
+The seasonal-animes-download.sh can create a list of the new seasonal animes (New as not a sequel anime) and make a collection yml to add them to sonarr.
 
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is unsupported</b>
   
  ## How it works:
   - Plex-Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
   - Then it will then retrieve their MAL/Anilist IDs from my mapping list https://github.com/Arial-Z/Animes-ID
-  - Use the Jikan API to get metadata from MAL
+  - Use the Anilist API and Jikan API to get metadata from MAL
   - Use the anilist API to get the Romaji title
   - Create and update a PMM metadata file to import everything in to your Plex when PMM runs.
 
@@ -60,45 +62,49 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
 ```
 #Url of the Plex server (Needed)
 plex_url=http://127.0.0.1:32400
-
 #Plex token (Needed)
 plex_token=zadazdzadazdazdazdazdazd
 
-# PMM Asset Folder to import posters (Needed)
-ASSET_FOLDER=/path/to/PMM/config/assets
 
 # Plex animes library name need to be in a double quote (Needed for the animes script)
 ANIME_LIBRARY_NAME="Animes"
-
 # Plex movies animes library name need to be in a double quote (Needed for the movies script)
 MOVIE_LIBRARY_NAME="Animes Movies"
 
+
 # Path to the created animes metadata file (Needed for the animes script)
 METADATA_ANIMES=/path/to/PMM/config/animes-mal.yml
-
 # Path to the created movies metadata file (Needed for the movies script)
 METADATA_MOVIES=/path/to/PMM/config/movies-mal.yml
-
+# PMM Asset Folder to import posters (Needed)
+ASSET_FOLDER=/path/to/PMM/config/assets
 # Folder where the logs of script are kept (Default is okay change if you want)
 LOG_FOLDER=$SCRIPT_FOLDER/logs
 
-# Type of rating used in Plex (audience, critic or user) only user rating is avalaible for seasons
-WANTED_RATING=critic_rating
-
+# Type of rating used in Plex by Anilist (audience, critic, user / leave empty to disable)
+WANTED_RATING=audience
+# Source for RATING (MAL / ANILIST)
+RATING_SOURCE=ANILIST
 # Use the english name as title (and also sort_title) instead of the romaji one (Yes/No)
 MAIN_TITLE_ENG=No
-
 # Use the english name as sort_title instead of the romaji one (Yes/No)
 SORT_TITLE_ENG=No
-
-# Download MAL poster (Yes/No)
+# Download poster (Yes/No)
 POSTER_DOWNLOAD=Yes
-
-# Ignore seasons infos from MAL (rating, name and poster) (Yes/No)
+# Source for poster (MAL / ANILIST)
+POSTER_SOURCE=ANILIST
+# Ignore seasons rating and poster (Yes/No)
 IGNORE_SEASONS=No
-
+# Anilist have some full uppercase title, this settings will remove them "86 EIGHTY-SIX" > "86 Eighty-Six" (Yes/No)
+REDUCE_TITLE_CAPS=Yes
 # Mal Data cache time (in days min : 1)
-MAL_CACHE_TIME=3
+DATA_CACHE_TIME=3
+
+
+# Number of animes added to the sesonal animes auto-download collection (Needed for the seasonal-animes-download.sh script)
+DOWNLOAD_LIMIT=20
+# Path to the created seasonal-animes-download file (Needed for the seasonal-animes-download.sh script)
+DOWNLOAD_ANIMES_COLLECTION=/path/to/PMM/config/seasonal-animes-download.yml
 ```
 
 ### Step 4 - Configure PMM 
