@@ -27,7 +27,7 @@ season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print
 year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/tmp/this-season.html" | awk '{print $2}')
 printf "%s - Current season : %s %s\n\n" "$(date +%H:%M:%S)" "$season" "$year" | tee -a "$LOG"
 printf "%s - Creating seasonal list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-printf "%s\t - Downloading anilist season list" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s\t - Downloading anilist season list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 curl -s 'https://graphql.anilist.co/' \
 -X POST \
 -H 'content-type: application/json' \
