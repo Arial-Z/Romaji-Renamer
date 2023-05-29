@@ -5,7 +5,7 @@ export LC_ALL=en_US.UTF-8
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 source "$SCRIPT_FOLDER/.env"
 source "$SCRIPT_FOLDER/functions.sh"
-media_type=animes
+media_type=seasonal
 
 #SCRIPT
 :> "$SCRIPT_FOLDER/data/seasonal.tsv"
