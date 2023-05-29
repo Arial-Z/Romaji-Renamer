@@ -52,7 +52,7 @@ do
 			printf "%s\n" "$tvdb_id" >> "$SCRIPT_FOLDER/data/seasonal.tsv"
 			printf "%s\t\t - New seasonal anime adding to list : Anilist id : %s / tvdb id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$tvdb_id" | tee -a "$LOG"
 		else
-			printf "%s\t\t - Sequel seasonal anime not adding to list : Anilist id : %s / tvdb id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$tvdb_id" >> "$LOG"
+			printf "%s\t\t - Sequel seasonal anime not adding to list : Anilist id : %s / tvdb id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$tvdb_id" | tee -a "$LOG"
 		fi
 	fi
 done < "$SCRIPT_FOLDER/tmp/seasonal-anilist.tsv"
