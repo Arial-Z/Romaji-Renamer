@@ -62,6 +62,6 @@ printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 tvdb_list=$(head -"$DOWNLOAD_LIMIT" "$SCRIPT_FOLDER/data/seasonal.tsv" | awk '{printf("%s,",$0)}'  | sed 's/,\s*$//')
 printf "%s - Wrinting seasonal collection\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s - Seasonal list : tvdb id added : %s\n" "$(date +%H:%M:%S)" "$tvdb_list"| tee -a "$LOG"
-printf "collections:\n  seasonal animes download:\n    tvdb_show: %s\n    sync_mode: sync\n    sonarr_add_missing: true\n    build_collection: false\n" "$tvdb_list" > "$DOWNLOAD_ANIMES_COLLECTION"
+printf "collections:\n  seasonal animes download:\n    tvdb_show: %s\n    sonarr_add_missing: true\n    build_collection: false\n" "$tvdb_list" > "$DOWNLOAD_ANIMES_COLLECTION"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s - Run finished\n\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
