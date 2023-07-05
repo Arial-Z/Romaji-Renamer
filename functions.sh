@@ -383,7 +383,7 @@ function get-season-infos () {
 		anilist_id=$anilist_backup_id
 		anime_season=$(get-animes-season)
 		printf "    seasons:\n" >> "$METADATA"
-		printf "      1:\n        label.sync: %s,score\n" "$anime_season" >> "$METADATA"
+		printf "      1:\n        label.sync: %s\n" "$anime_season" >> "$METADATA"
 		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
 			score=$(get-score)
