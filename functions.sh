@@ -367,9 +367,9 @@ function get-season-infos () {
 					anime_season=$(get-animes-season)
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
 					then
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync:  %s,score\n" "$season_number" "$english_title" "$score_season" "$anime_season" >> "$METADATA"
+						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync: %s,score\n" "$season_number" "$english_title" "$score_season" "$anime_season" >> "$METADATA"
 					else
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync:  %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
+						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync: %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
 					fi
 					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
 					get-season-poster
