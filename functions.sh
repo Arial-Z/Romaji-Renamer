@@ -204,7 +204,7 @@ function get-studios() {
 	fi
 }
 function get-animes-season () {
-	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.tags | .[] | select( .rank >= 70 ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | paste -s -d" "  -
+	(jq '.data.Media.season' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.seasonYear' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | paste -s -d" "  -
 	}
 function get-poster () {
 	if [[ $POSTER_DOWNLOAD == "Yes" ]]
@@ -330,7 +330,7 @@ function get-season-infos () {
 		then
 			anilist_id=$anilist_backup_id
 			anime_season=$(get-animes-season)
-			printf "      0:\n        label.remove: score\n      1:\n        label.sync: $anime_season,score\n" >> "$METADATA"
+			printf "      0:\n        label.remove: score\n      1:\n        label.sync: %s,score\n" "$anime_season" >> "$METADATA"
 						if [[ $RATING_SOURCE == "ANILIST" ]]
 			then
 				score=$(get-score)
@@ -364,11 +364,12 @@ function get-season-infos () {
 						score_season=$(get-mal-score)
 					fi
 					score_season=$(printf '%.*f\n' 1 "$score_season")
+					anime_season=$(get-animes-season)
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
 					then
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync:  $anime_season,score\n" "$season_number" "$english_title" "$score_season" >> "$METADATA"
+						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync:  %s,score\n" "$season_number" "$english_title" "$score_season" "$anime_season" >> "$METADATA"
 					else
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync:  $anime_season,score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
+						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync:  %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
 					fi
 					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
 					get-season-poster
@@ -380,6 +381,9 @@ function get-season-infos () {
 		fi
 	else
 		anilist_id=$anilist_backup_id
+		anime_season=$(get-animes-season)
+		printf "    seasons:\n" >> "$METADATA"
+		printf "      1:\n        label.sync: %s,score\n" "$anime_season" >> "$METADATA"
 		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
 			score=$(get-score)
