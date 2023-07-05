@@ -64,7 +64,7 @@ function get-anilist-infos () {
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false)  }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false)  }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } },  season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
 		rate_limit=0
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
@@ -203,6 +203,9 @@ function get-studios() {
 		fi
 	fi
 }
+function get-animes-season () {
+	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.tags | .[] | select( .rank >= 70 ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | paste -s -d" "  -
+	}
 function get-poster () {
 	if [[ $POSTER_DOWNLOAD == "Yes" ]]
 	then
@@ -325,9 +328,10 @@ function get-season-infos () {
 		printf "    seasons:\n" >> "$METADATA"
 		if [[ $last_season -eq 1 ]] && [[ $total_seasons -eq 2 ]]
 		then
-			printf "      0:\n        label.remove: score\n      1:\n        label.remove: score\n" >> "$METADATA"
 			anilist_id=$anilist_backup_id
-			if [[ $RATING_SOURCE == "ANILIST" ]]
+			anime_season=$(get-animes-season)
+			printf "      0:\n        label.remove: score\n      1:\n        label.sync: $anime_season,score\n" >> "$METADATA"
+						if [[ $RATING_SOURCE == "ANILIST" ]]
 			then
 				score=$(get-score)
 			else
@@ -362,9 +366,9 @@ function get-season-infos () {
 					score_season=$(printf '%.*f\n' 1 "$score_season")
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
 					then
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$english_title" "$score_season" >> "$METADATA"
+						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync:  $anime_season,score\n" "$season_number" "$english_title" "$score_season" >> "$METADATA"
 					else
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
+						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync:  $anime_season,score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
 					fi
 					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
 					get-season-poster
