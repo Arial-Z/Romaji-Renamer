@@ -326,7 +326,7 @@ function get-season-infos () {
 	if [[ $season_check != -1 ]]
 	then
 		total_seasons=$(echo "$seasons_list" | awk -F "," '{print $NF}')
-		if echo "$seasons_list" grep -q -w "0"
+		if echo "$seasons_list" | grep -q -w "0"
 		then
 			total_seasons=$("$total_seasons"-1)
 		fi
