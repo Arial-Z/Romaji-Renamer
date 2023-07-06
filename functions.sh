@@ -327,7 +327,7 @@ function get-season-infos () {
 	then
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
-		for season_number in $seasonslist
+		for season_number in $seasons_list
 		do
 			if [ "$s" -eq 0 ]
 			then
