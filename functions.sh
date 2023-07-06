@@ -340,6 +340,13 @@ function get-season-infos () {
 					anilist_id=$anilist_backup_id
 					anime_season=$(get-animes-season-year)
 					printf "      1:\n        label.sync: %s\n" "$anime_season" >> "$METADATA"
+					if [[ $RATING_SOURCE == "ANILIST" ]]
+					then
+						score=$(get-score)
+					else
+						score=$(get-mal-score)
+					fi
+					score=$(printf '%.*f\n' 1 "$score")
 				else
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json" | head -n 1)
 					if [[ -n "$anilist_id" ]]
