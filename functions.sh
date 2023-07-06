@@ -325,7 +325,7 @@ function get-season-infos () {
 	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
 	if [[ $season_check != -1 ]]
 	then
-		total_seasons=1
+		total_seasons=$(echo "$seasons_list" | awk -F "," '{print $NF}')
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
