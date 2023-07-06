@@ -325,11 +325,12 @@ function get-season-infos () {
 	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
 	if [[ $season_check != -1 ]]
 	then
+		total_seasons=1
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
 		do
-			if [ "$s" -eq 0 ]
+			if [ "$season_number" -eq 0 ]
 			then
 				printf "      0:\n        label.remove: score\n" >> "$METADATA"
 			else
@@ -357,9 +358,14 @@ function get-season-infos () {
 					else
 						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync: %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
 					fi
+					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
+					get-season-poster
 				fi
+				((total_seasons++))
 			fi
 		done
+		score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2 }')
+		score=$(printf '%.*f\n' 1 "$score")
 	else
 		anilist_id=$anilist_backup_id
 		if [[ $RATING_SOURCE == "ANILIST" ]]
