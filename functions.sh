@@ -203,7 +203,7 @@ function get-studios() {
 		fi
 	fi
 }
-function get-animes-season () {
+function get-animes-season-year () {
 	(jq '.data.Media.season' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.seasonYear' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | paste -sd ' ' | tr '[:upper:]' '[:lower:]' | sed "s/\( \|^\)\(.\)/\1\u\2/g"
 	}
 function get-poster () {
@@ -323,30 +323,16 @@ function get-season-poster () {
 function get-season-infos () {
 	anilist_backup_id=$anilist_id
 	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
-	if [[ $season_check != -1 ]] && [[ $total_seasons -ge 2 ]]
+	if [[ $season_check != -1 ]]
 	then
 		printf "    seasons:\n" >> "$METADATA"
-		if [[ $last_season -eq 1 ]] && [[ $total_seasons -eq 2 ]]
-		then
-			anilist_id=$anilist_backup_id
-			anime_season=$(get-animes-season)
-			printf "      0:\n        label.remove: score\n      1:\n        label.sync: %s,score\n" "$anime_season" >> "$METADATA"
-						if [[ $RATING_SOURCE == "ANILIST" ]]
-			then
-				score=$(get-score)
-			else
-				score=$(get-mal-score)
-			fi
-			score=$(printf '%.*f\n' 1 "$score")
-		else
-			if [[ $last_season -ne $total_seasons ]]
+		IFS=","
+		for season_number in $seasonslist
+		do
+			if [ "$s" -eq 0 ]
 			then
 				printf "      0:\n        label.remove: score\n" >> "$METADATA"
-			fi
-			season_number=1
-			total_score=0
-			while [ $season_number -le "$last_season" ];
-			do
+			else
 				anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json" | head -n 1)
 				if [[ -n "$anilist_id" ]]
 				then
@@ -364,21 +350,16 @@ function get-season-infos () {
 						score_season=$(get-mal-score)
 					fi
 					score_season=$(printf '%.*f\n' 1 "$score_season")
-					anime_season=$(get-animes-season)
+					anime_season=$(get-animes-season-year)
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
 					then
 						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync: %s,score\n" "$season_number" "$english_title" "$score_season" "$anime_season" >> "$METADATA"
 					else
 						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync: %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
 					fi
-					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
-					get-season-poster
 				fi
-				((season_number++))
-			done
-			score=$(echo | awk -v v1="$total_score" -v v2="$last_season" '{print v1 / v2 }')
-			score=$(printf '%.*f\n' 1 "$score")
-		fi
+			fi
+		done
 	else
 		anilist_id=$anilist_backup_id
 		anime_season=$(get-animes-season)
@@ -391,7 +372,7 @@ function get-season-infos () {
 			score=$(get-mal-score)
 		fi
 		score=$(printf '%.*f\n' 1 "$score")
-	fi
+		fi
 	anilist_id=$anilist_backup_id
 }
 function write-metadata () {
