@@ -353,7 +353,7 @@ function get-season-infos () {
 						score_season=$(get-mal-score)
 					fi
 					score_season=$(printf '%.*f\n' 1 "$score_season")
-					anime_season=$(get-animes-season)
+					anime_season=$(get-animes-season-year)
 					if [[ $MAIN_TITLE_ENG == "Yes" ]]
 					then
 						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync: %s,score\n" "$season_number" "$english_title" "$score_season" "$anime_season" >> "$METADATA"
