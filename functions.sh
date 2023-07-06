@@ -330,6 +330,7 @@ function get-season-infos () {
 		then
 			((total_seasons--))
 		fi
+		total_score=0
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
