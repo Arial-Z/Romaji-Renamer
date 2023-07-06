@@ -328,7 +328,7 @@ function get-season-infos () {
 		total_seasons=$(echo "$seasons_list" | awk -F "," '{print $NF}')
 		if echo "$seasons_list" | grep -q -w "0"
 		then
-			total_seasons=$("$total_seasons"-1)
+			((total_seasons--))
 		fi
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
@@ -365,7 +365,6 @@ function get-season-infos () {
 					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
 					get-season-poster
 				fi
-				((total_seasons++))
 			fi
 		done
 		score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2 }')
