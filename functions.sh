@@ -323,7 +323,13 @@ function get-season-poster () {
 function get-season-infos () {
 	anilist_backup_id=$anilist_id
 	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
+	first_season=$(echo "$seasons_list" | awk -F "," '{print $1}')
 	last_season=$(echo "$seasons_list" | awk -F "," '{print $NF}')
+	total_seasons=$(echo "$seasons_list" | awk -F "," '{print NF}')
+	if [[ "$first_season" -eq 0 ]]
+	then
+		total_seasons=$((total_seasons - 1))
+	fi
 	if [[ $season_check != -1 ]]
 	then
 		total_score=0
@@ -397,7 +403,7 @@ function get-season-infos () {
 				fi
 			fi
 		done
-		score=$(echo | awk -v v1="$total_score" -v v2="$last_season" '{print v1 / v2 }')
+		score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2 }')
 		score=$(printf '%.*f\n' 1 "$score")
 	else
 		if [[ $RATING_SOURCE == "ANILIST" ]]
