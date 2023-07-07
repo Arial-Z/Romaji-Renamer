@@ -339,7 +339,6 @@ function get-season-infos () {
 				then
 					anilist_id=$anilist_backup_id
 					anime_season=$(get-animes-season-year)
-
 					if [[ $RATING_SOURCE == "ANILIST" ]]
 					then
 						score_season=$(get-score)
