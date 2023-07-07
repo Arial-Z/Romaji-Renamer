@@ -148,7 +148,7 @@ function less-caps-title () {
 function get-score () {
 	anime_score=0
 	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
-	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == '' ]]
+	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == '' ]] || [[ "$anime_score" == '0.0' ]]
 	then
 		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-anilist-infos
@@ -347,6 +347,7 @@ function get-season-infos () {
 						score=$(get-mal-score)
 					fi
 					score=$(printf '%.*f\n' 1 "$score")
+					get-season-poster
 				else
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json" | head -n 1)
 					if [[ -n "$anilist_id" ]]
