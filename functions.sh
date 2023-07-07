@@ -148,7 +148,7 @@ function less-caps-title () {
 function get-score () {
 	anime_score=0
 	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
-	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "0.0" ]]
+	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 	then
 		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-anilist-infos
