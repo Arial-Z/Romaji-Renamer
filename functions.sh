@@ -261,7 +261,7 @@ function get-poster () {
 	fi
 }
 function get-season-poster () {
-	if [[ $POSTER_DOWNLOAD == "Yes" ]]
+	if [[ $POSTER_SEASON_DOWNLOAD == "Yes" ]]
 	then
 		if [[ $season_number -lt 10 ]]
 		then
