@@ -147,18 +147,18 @@ function less-caps-title () {
 }
 function get-score () {
 	anime_score=0
-	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
+	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 	then
 		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-anilist-infos
-		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
+		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 		if [[ "$anime_score" == "null" ]]
 		then
 			echo 0
 		fi
 	else
-		echo "$anime_score"
+		echo "$anime_score" | awk '{print $1 / 10 }'
 	fi
 }
 function get-mal-score () {
