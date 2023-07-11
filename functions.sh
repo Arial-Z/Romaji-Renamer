@@ -329,6 +329,7 @@ function get-season-infos () {
 	if [[ $season_check != -1 ]]
 	then
 		total_score=0
+		score_season=0
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
