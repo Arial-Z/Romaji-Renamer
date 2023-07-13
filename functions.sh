@@ -41,9 +41,9 @@ function download-anime-id-mapping () {
 function get-anilist-id () {
 	if [[ $media_type == "animes" ]]
 	then
-		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json"
+		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1"  or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json" | head -n 1
 	else
-		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-movies-id.json"
+		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-movies-id.json" | head -n 1
 	fi
 }
 function get-mal-id () {
@@ -64,7 +64,7 @@ function get-anilist-infos () {
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false)  }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false)  }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } },  season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
 		rate_limit=0
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
@@ -148,15 +148,11 @@ function less-caps-title () {
 function get-score () {
 	anime_score=0
 	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
-	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == '' ]]
+	if [[ "$anime_score" == "0" ]]
 	then
 		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-anilist-infos
 		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
-		if [[ "$anime_score" == "null" ]]
-		then
-			echo 0
-		fi
 	else
 		echo "$anime_score"
 	fi
@@ -180,7 +176,7 @@ function get-mal-score () {
 	fi
 }
 function get-tags () {
-	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.tags | .[] | select( .rank >= 70 ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -s -d, -
+	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.tags | .[] | select( .rank >= 70 ) | .name' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -sd ','
 	}
 function get-studios() {
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/$OVERRIDE" | grep -q -w "$anilist_id"
@@ -203,6 +199,9 @@ function get-studios() {
 		fi
 	fi
 }
+function get-animes-season-year () {
+	(jq '.data.Media.season' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.seasonYear' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | paste -sd ' ' | tr '[:upper:]' '[:lower:]' | sed "s/\( \|^\)\(.\)/\1\u\2/g"
+	}
 function get-poster () {
 	if [[ $POSTER_DOWNLOAD == "Yes" ]]
 	then
@@ -258,7 +257,7 @@ function get-poster () {
 	fi
 }
 function get-season-poster () {
-	if [[ $POSTER_DOWNLOAD == "Yes" ]]
+	if [[ $POSTER_SEASON_DOWNLOAD == "Yes" ]]
 	then
 		if [[ $season_number -lt 10 ]]
 		then
@@ -320,39 +319,29 @@ function get-season-poster () {
 function get-season-infos () {
 	anilist_backup_id=$anilist_id
 	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
-	if [[ $season_check != -1 ]] && [[ $total_seasons -ge 2 ]]
+	first_season=$(echo "$seasons_list" | awk -F "," '{print $1}')
+	last_season=$(echo "$seasons_list" | awk -F "," '{print $NF}')
+	total_seasons=$(echo "$seasons_list" | awk -F "," '{print NF}')
+	if [[ "$first_season" -eq 0 ]]
 	then
+		total_seasons=$((total_seasons - 1))
+	fi
+	if [[ $season_check != -1 ]]
+	then
+		total_score=0
+		score_season=0
 		printf "    seasons:\n" >> "$METADATA"
-		if [[ $last_season -eq 1 ]] && [[ $total_seasons -eq 2 ]]
-		then
-			printf "      0:\n        label.remove: score\n      1:\n        label.remove: score\n" >> "$METADATA"
-			anilist_id=$anilist_backup_id
-			if [[ $RATING_SOURCE == "ANILIST" ]]
-			then
-				score=$(get-score)
-			else
-				score=$(get-mal-score)
-			fi
-			score=$(printf '%.*f\n' 1 "$score")
-		else
-			if [[ $last_season -ne $total_seasons ]]
+		IFS=","
+		for season_number in $seasons_list
+		do
+			if [[ $season_number -eq 0 ]]
 			then
 				printf "      0:\n        label.remove: score\n" >> "$METADATA"
-			fi
-			season_number=1
-			total_score=0
-			while [ $season_number -le "$last_season" ];
-			do
-				anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json")
-				if [[ -n "$anilist_id" ]]
+			else
+				if [[ $last_season -eq 1 ]]
 				then
-					get-anilist-infos
-					romaji_title=$(get-romaji-title)
-					english_title=$(get-english-title)
-					if [[ $MAIN_TITLE_ENG == "Yes" ]]
-					then
-						english_title=$romaji_title
-					fi
+					anilist_id=$anilist_backup_id
+					anime_season=$(get-animes-season-year)
 					if [[ $RATING_SOURCE == "ANILIST" ]]
 					then
 						score_season=$(get-score)
@@ -360,22 +349,60 @@ function get-season-infos () {
 						score_season=$(get-mal-score)
 					fi
 					score_season=$(printf '%.*f\n' 1 "$score_season")
-					if [[ $MAIN_TITLE_ENG == "Yes" ]]
+					if [[ $SEASON_YEAR == "Yes" ]]
 					then
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$english_title" "$score_season" >> "$METADATA"
+						anime_season=$(get-animes-season-year)
+						printf "      1:\n        label.sync: %s\n" "$anime_season" >> "$METADATA"
 					else
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
+						printf "      1:\n        label.remove: score\n" >> "$METADATA"
 					fi
 					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
-					get-season-poster
+				else
+					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json" | head -n 1)
+					if [[ -n "$anilist_id" ]]
+					then
+						get-anilist-infos
+						romaji_title=$(get-romaji-title)
+						english_title=$(get-english-title)
+						if [[ $MAIN_TITLE_ENG == "Yes" ]]
+						then
+							english_title=$romaji_title
+						fi
+						if [[ $RATING_SOURCE == "ANILIST" ]]
+						then
+							score_season=$(get-score)
+						else
+							score_season=$(get-mal-score)
+						fi
+						score_season=$(printf '%.*f\n' 1 "$score_season")
+						anime_season=$(get-animes-season-year)
+						if [[ $MAIN_TITLE_ENG == "Yes" ]]
+						then
+							if [[ $SEASON_YEAR == "Yes" ]]
+							then
+								anime_season=$(get-animes-season-year)
+								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync: %s,score\n" "$season_number" "$english_title" "$score_season" "$anime_season" >> "$METADATA"
+							else
+								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$english_title" "$score_season" >> "$METADATA"
+							fi
+						else
+							if [[ $SEASON_YEAR == "Yes" ]]
+							then
+								anime_season=$(get-animes-season-year)
+								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label.sync: %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
+							else
+								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
+							fi
+						fi
+						total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
+						get-season-poster
+					fi
 				fi
-				((season_number++))
-			done
-			score=$(echo | awk -v v1="$total_score" -v v2="$last_season" '{print v1 / v2 }')
-			score=$(printf '%.*f\n' 1 "$score")
-		fi
+			fi
+		done
+		score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2 }')
+		score=$(printf '%.*f\n' 1 "$score")
 	else
-		anilist_id=$anilist_backup_id
 		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
 			score=$(get-score)

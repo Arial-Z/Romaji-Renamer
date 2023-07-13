@@ -52,10 +52,9 @@ do
 			line=$(awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | grep -w -n "$tvdb_id" | cut -d : -f 1)
 			plex_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $2}')
 			asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $3}')
-			last_season=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $4}')
-			total_seasons=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $5}')
+			seasons_list=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $4}')
 			printf "%s\t\t - Found override for tvdb id : %s / anilist id : %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
-			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
+			printf "%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$seasons_list" >> "$SCRIPT_FOLDER/ID/animes.tsv"
 		fi
 	fi
 done < "$SCRIPT_FOLDER/override-ID-animes.tsv"
@@ -73,7 +72,7 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/tmp/plex_animes_export.tsv"
-printf "%s - Done\n\n" "$(date +%H:%M:%S)"
+printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # Create an ongoing list at $SCRIPT_FOLDER/data/ongoing.csv
 printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
@@ -129,11 +128,11 @@ printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 # write PMM metadata file from ID/animes.tsv and jikan API
 printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "metadata:\n" > "$METADATA"
-while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name last_season total_seasons
+while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name seasons_list
 do
 	printf "%s\t - Writing metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
 	write-metadata
 	printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 done < "$SCRIPT_FOLDER/ID/animes.tsv"
-printf "%s - Run finished\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Run finished\n\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 exit 0
