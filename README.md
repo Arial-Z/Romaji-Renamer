@@ -17,11 +17,11 @@ Here what will be imported for each of your animes :
     1:                                                  # Season 1 import
       title: "Yuru Camp△"                               # Title from Anilist                            
       user_rating: 8.3                                  # Rating from Anilist or MAL
-      label: score                                      # Add label score to use PMM overlays
+      label: Fall 2021, score                           # Add label score to use PMM overlays and also add the season label (optionnal)
     2:                                                  # Season 2 import
       title: "Yuru Camp△ SEASON 2"                      # Title from Anilist
       user_rating: 8.5                                  # Rating from Anilist or MAL
-      label: score                                      # Add label score to use PMM overlays
+      label: Fall 2022,score                            # Add label score to use PMM overlays and also add the season label (optionnal)
   critic_rating: 8.4                                    # Show rating average rating of the seasons (Or Anilist/ MAL score if no seasons)
 ```
 Anilist Posters for animes and seasons can also be downloaded and imported inside the PMM assets folder
@@ -91,12 +91,16 @@ MAIN_TITLE_ENG=No
 SORT_TITLE_ENG=No
 # Download poster (Yes/No)
 POSTER_DOWNLOAD=Yes
+# Download seasons poster (Yes/No)
+POSTER_SEASON_DOWNLOAD=Yes
 # Source for poster (MAL / ANILIST)
 POSTER_SOURCE=ANILIST
 # Ignore seasons rating and poster (Yes/No)
 IGNORE_SEASONS=No
 # Anilist have some full uppercase title, this settings will remove them "86 EIGHTY-SIX" > "86 Eighty-Six" (Yes/No)
 REDUCE_TITLE_CAPS=Yes
+#Add the anime season to the season label in plex (Fall  2022, Spring 2021, ...)
+SEASON_YEAR=No
 # Mal Data cache time (in days min : 1)
 DATA_CACHE_TIME=3
 
