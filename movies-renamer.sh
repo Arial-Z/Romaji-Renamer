@@ -45,7 +45,7 @@ printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 # create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )
 create-override
 printf "%s\t - Sorting Plex anime library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-while IFS=$'\t' read -r imdb_id anilist_id title_override studio                                                                       # First add the override animes to the ID file
+while IFS=$'\t' read -r imdb_id anilist_id title_override studio notes
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -q -w  "$imdb_id"
 	then
