@@ -155,25 +155,25 @@ function get-score () {
 		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 		if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 		then
-			echo 0
+			anime_score=0
 		fi
 	else
-		echo "$anime_score" | awk '{print $1 / 10 }'
+		anime_score=$(printf %s "$anime_score" | awk '{print $1 / 10 }')
 	fi
 }
 function get-mal-score () {
 	get-mal-id
 	get-mal-infos
-	mal_score=0
-	mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
-	if [[ "$mal_score" == "null" ]]
+	anime_score=0
+	anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 	then
 		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-mal-infos
-		mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
-		if [[ "$mal_score" == "null" ]]
+		anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+		if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 		then
-			echo 0
+			anime_score=0
 		fi
 	else
 		echo "$mal_score"
@@ -409,9 +409,11 @@ function get-season-infos () {
 	else
 		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
-			score=$(get-score)
+			get-score
+			score=$anime_score
 		else
-			score=$(get-mal-score)
+			get-mal-score
+			score=$anime_score
 		fi
 		score=$(printf '%.*f\n' 1 "$score")
 	fi
