@@ -348,9 +348,11 @@ function get-season-infos () {
 					anime_season=$(get-animes-season-year)
 					if [[ $RATING_SOURCE == "ANILIST" ]]
 					then
-						score_season=$(get-score)
+						get-score
+						score=$anime_score
 					else
-						score_season=$(get-mal-score)
+						get-mal-score
+						score=$anime_score
 					fi
 					score_season=$(printf '%.*f\n' 1 "$score_season")
 					if [[ $SEASON_YEAR == "Yes" ]]
@@ -374,9 +376,11 @@ function get-season-infos () {
 						fi
 						if [[ $RATING_SOURCE == "ANILIST" ]]
 						then
-							score_season=$(get-score)
+							get-score
+							score=$anime_score
 						else
-							score_season=$(get-mal-score)
+							get-mal-score
+							score=$anime_score
 						fi
 						score_season=$(printf '%.*f\n' 1 "$score_season")
 						anime_season=$(get-animes-season-year)
@@ -469,9 +473,11 @@ function write-metadata () {
 			then
 				if [[ $RATING_SOURCE == "ANILIST" ]]
 				then
-					score=$(get-score)
+					get-score
+					score=$anime_score
 				else
-					score=$(get-mal-score)
+					get-mal-score
+					score=$anime_score
 				fi
 				score=$(printf '%.*f\n' 1 "$score")
 				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
@@ -486,9 +492,11 @@ function write-metadata () {
 	else
 		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
-			score=$(get-score)
+			get-score
+			score=$anime_score
 		else
-			score=$(get-mal-score)
+			get-mal-score
+			score=$anime_score
 		fi
 		score=$(printf '%.*f\n' 1 "$score")
 		printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
