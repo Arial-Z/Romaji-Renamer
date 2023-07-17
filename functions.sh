@@ -349,10 +349,10 @@ function get-season-infos () {
 					if [[ $RATING_SOURCE == "ANILIST" ]]
 					then
 						get-score
-						score=$anime_score
+						score_season=$anime_score
 					else
 						get-mal-score
-						score=$anime_score
+						score_season=$anime_score
 					fi
 					score_season=$(printf '%.*f\n' 1 "$score_season")
 					if [[ $SEASON_YEAR == "Yes" ]]
@@ -377,10 +377,10 @@ function get-season-infos () {
 						if [[ $RATING_SOURCE == "ANILIST" ]]
 						then
 							get-score
-							score=$anime_score
+							score_season=$anime_score
 						else
 							get-mal-score
-							score=$anime_score
+							score_season=$anime_score
 						fi
 						score_season=$(printf '%.*f\n' 1 "$score_season")
 						anime_season=$(get-animes-season-year)
