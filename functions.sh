@@ -482,7 +482,7 @@ function write-metadata () {
 					get-mal-score
 					score=$anime_score
 				fi
-				if [[ "$score" -ne 0 ]]
+				if [[ "$score" == 0 ]]
 				then
 					printf "%s\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 				else
@@ -506,7 +506,7 @@ function write-metadata () {
 			get-mal-score
 			score=$anime_score
 		fi
-		if [[ "$score" -eq 0 ]]
+		if [[ "$score" == 0 ]]
 		then
 			printf "%s\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 		else
