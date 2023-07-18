@@ -419,7 +419,10 @@ function get-season-infos () {
 			get-mal-score
 			score=$anime_score
 		fi
-		score=$(printf '%.*f\n' 1 "$score")
+		if [[ "$score" -ne 0 ]]
+		then
+			score=$(printf '%.*f\n' 1 "$score")
+		fi
 	fi
 	anilist_id=$anilist_backup_id
 }
@@ -479,8 +482,13 @@ function write-metadata () {
 					get-mal-score
 					score=$anime_score
 				fi
-				score=$(printf '%.*f\n' 1 "$score")
-				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+				if [[ "$score" -ne 0 ]]
+				then
+					printf "%s\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+				else
+					score=$(printf '%.*f\n' 1 "$score")
+					printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+				fi
 			else
 				get-season-infos
 				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
@@ -498,7 +506,12 @@ function write-metadata () {
 			get-mal-score
 			score=$anime_score
 		fi
-		score=$(printf '%.*f\n' 1 "$score")
-		printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+		if [[ "$score" -eq 0 ]]
+		then
+			printf "%s\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+		else
+			score=$(printf '%.*f\n' 1 "$score")
+			printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+		fi
 	fi
 }
