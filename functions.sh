@@ -484,7 +484,7 @@ function write-metadata () {
 				fi
 				if [[ "$score" == 0 ]]
 				then
-					printf "%s\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+					printf "%s\t\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 				else
 					score=$(printf '%.*f\n' 1 "$score")
 					printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
@@ -508,7 +508,7 @@ function write-metadata () {
 		fi
 		if [[ "$score" == 0 ]]
 		then
-			printf "%s\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+			printf "%s\t\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 		else
 			score=$(printf '%.*f\n' 1 "$score")
 			printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
