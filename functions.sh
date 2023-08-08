@@ -504,11 +504,12 @@ function write-metadata () {
 				fi
 			fi
 		else
+			get-season-infos
 			if [[ "$score" == 0 ]]
 			then
 				printf "%s\t\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 			else
-				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+			printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
 			fi
 		fi
 	else
