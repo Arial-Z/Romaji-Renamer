@@ -160,6 +160,7 @@ function get-score () {
 			anime_score=0
 		fi
 	else
+		echo "$anime_score"
 		anime_score=$(printf %s "$anime_score" | awk '{print $1 / 10 }')
 	fi
 }
