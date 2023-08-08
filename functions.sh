@@ -419,7 +419,7 @@ function get-season-infos () {
 			get-mal-score
 			score=$anime_score
 		fi
-		if [[ "$score" -ne 0 ]]
+		if [[ "$score" != 0 ]]
 		then
 			score=$(printf '%.*f\n' 1 "$score")
 		fi
