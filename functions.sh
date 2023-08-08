@@ -150,17 +150,14 @@ function get-score () {
 	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 	then
-		echo "1"
 		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-anilist-infos
 		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
 		if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 		then
-			echo "2"
 			anime_score=0
 		fi
 	else
-		echo "$anime_score"
 		anime_score=$(printf %s "$anime_score" | awk '{print $1 / 10 }')
 	fi
 }
@@ -411,8 +408,13 @@ function get-season-infos () {
 				fi
 			fi
 		done
-		score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2 }')
-		score=$(printf '%.*f\n' 1 "$score")
+		if [[ "$total_score" != "0" ]]
+		then
+			score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2 }')
+			score=$(printf '%.*f\n' 1 "$score")
+		else
+			score=0
+		fi
 	else
 		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
