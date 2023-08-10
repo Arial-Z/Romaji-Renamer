@@ -1,6 +1,8 @@
 #!/bin/bash
 
 #General variables
+export LC_ALL=en_US.UTF-8
+locale -a
 LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
 MATCH_LOG=$LOG_FOLDER/${media_type}-missing-id.log
 
