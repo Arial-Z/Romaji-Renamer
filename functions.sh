@@ -209,7 +209,7 @@ function get-poster () {
 	then
 		if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]
 		then
-			if [ ! -d "$ASSET_FOLDER/$asset_name" ]
+			if [[ $ASSET_BASE_FOLDER == "No" && ! -d "$ASSET_FOLDER/$asset_name" ]]
 			then
 				mkdir "$ASSET_FOLDER/$asset_name"
 			fi
@@ -258,7 +258,7 @@ function get-poster () {
 		fi
 		if [[ $ASSET_BASE_FOLDER == "Yes" ]]
 		then
-			cleaned_asset_name=$(echo "$asset_name" | awk '{sub(/ *\{imdb-[^}]*\} */, ""); print}')
+			cleaned_asset_name=$(echo "$asset_name" | awk '{sub(/ *(\{|\[)imdb-[^}\]]*(\}|\]) */, ""); print}')
 			mv "$ASSET_FOLDER/$asset_name/poster.jpg" "$ASSET_FOLDER/$cleaned_asset_name.jpg"
 		fi
 	fi
@@ -324,7 +324,7 @@ function get-season-poster () {
 		if [[ $ASSET_BASE_FOLDER == "Yes" ]]
 		then
 			# Removing the {imdb-} part from asset_name
-			cleaned_asset_name=$(echo "$asset_name" | awk '{sub(/ *\{imdb-[^}]*\} */, ""); print}')
+			cleaned_asset_name=$(echo "$asset_name" | awk '{sub(/ *(\{|\[)imdb-[^}\]]*(\}|\]) */, ""); print}')
 
 			# Determining the season name based on season number
 			if [[ $season_number -eq 0 ]]
