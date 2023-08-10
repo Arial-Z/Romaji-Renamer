@@ -209,7 +209,7 @@ function get-poster () {
 	then
 		if [ ! -f "$ASSET_FOLDER/$asset_name/poster.jpg" ]
 		then
-			if [[ $ASSET_BASE_FOLDER == "No" && ! -d "$ASSET_FOLDER/$asset_name" ]]
+			if [ ! -d "$ASSET_FOLDER/$asset_name" ]
 			then
 				mkdir "$ASSET_FOLDER/$asset_name"
 			fi
@@ -260,6 +260,7 @@ function get-poster () {
 		then
 			cleaned_asset_name=$(echo "$asset_name" | awk '{sub(/ *(\{|\[)imdb-[^}\]]*(\}|\]) */, ""); print}')
 			mv "$ASSET_FOLDER/$asset_name/poster.jpg" "$ASSET_FOLDER/$cleaned_asset_name.jpg"
+   			rmdir "$ASSET_FOLDER/$asset_name"
 		fi
 	fi
 }
@@ -339,6 +340,7 @@ function get-season-poster () {
 
 			# Rename the file to the cleaned name
 			mv "$assets_filepath" "$ASSET_FOLDER/$cleaned_asset_name - $season_name.jpg"
+   			rmdir "$ASSET_FOLDER/$asset_name"
 		fi
 	fi
 }
