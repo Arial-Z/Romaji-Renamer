@@ -334,6 +334,7 @@ function get-season-infos () {
 	then
 		total_score=0
 		score_season=0
+		no_rating_seasons=0
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
@@ -362,7 +363,7 @@ function get-season-infos () {
 					else
 						printf "      1:\n        label.remove: score\n" >> "$METADATA"
 					fi
-					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
+					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2}')
 				else
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json" | head -n 1)
 					if [[ -n "$anilist_id" ]]
@@ -383,6 +384,10 @@ function get-season-infos () {
 							score_season=$anime_score
 						fi
 						score_season=$(printf '%.*f\n' 1 "$score_season")
+						if [[ "$score_season" == 0.0 ]]
+						then
+							((no_rating_seasons++))
+						fi
 						anime_season=$(get-animes-season-year)
 						if [[ $MAIN_TITLE_ENG == "Yes" ]]
 						then
@@ -402,7 +407,7 @@ function get-season-infos () {
 								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
 							fi
 						fi
-						total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
+						total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2}')
 						get-season-poster
 					fi
 				fi
@@ -410,7 +415,8 @@ function get-season-infos () {
 		done
 		if [[ "$total_score" != "0" ]]
 		then
-			score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2 }')
+			total_seasons=$((total_seasons - no_rating_seasons))
+			score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2}')
 			score=$(printf '%.*f\n' 1 "$score")
 		else
 			score=0
