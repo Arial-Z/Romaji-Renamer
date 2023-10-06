@@ -86,7 +86,8 @@ function get-mal-infos () {
 		curl -s -o "$SCRIPT_FOLDER/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		if  grep -q -w "429" "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		then
-			sleep 10
+			printf "%s - Jikan API limit reached watiting 15s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			sleep 15
 			curl -s -o "$SCRIPT_FOLDER/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		fi
 		sleep 1.1
