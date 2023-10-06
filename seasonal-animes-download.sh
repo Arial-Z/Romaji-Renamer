@@ -31,7 +31,7 @@ printf "%s\t - Downloading anilist season list\n" "$(date +%H:%M:%S)" | tee -a "
 curl -s 'https://graphql.anilist.co/' \
 -X POST \
 -H 'content-type: application/json' \
---data '{ "query": "{ Page(page: 1, perPage: 100) { pageInfo { hasNextPage } media(type: ANIME, seasonYear: '"$year"' season: '"$season"', format: TV, sort: POPULARITY_DESC) { id } } }" }' | jq '.data.Page.media[] | .id' > "$SCRIPT_FOLDER/tmp/seasonal-anilist.tsv"
+--data '{ "query": "{ Page(page: 1, perPage: '"$DOWNLOAD_LIMIT"') { pageInfo { hasNextPage } media(type: ANIME, seasonYear: '"$year"' season: '"$season"', format: TV, sort: POPULARITY_DESC) { id } } }" }' | jq '.data.Page.media[] | .id' > "$SCRIPT_FOLDER/tmp/seasonal-anilist.tsv"
 printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s\t - Sorting seasonal list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 while read -r anilist_id
@@ -59,7 +59,7 @@ done < "$SCRIPT_FOLDER/tmp/seasonal-anilist.tsv"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 
-tvdb_list=$(head -"$DOWNLOAD_LIMIT" "$SCRIPT_FOLDER/data/seasonal.tsv" | awk '{printf("%s,",$0)}'  | sed 's/,\s*$//')
+tvdb_list=$(awk '{printf("%s,",$0)}' "$SCRIPT_FOLDER/data/seasonal.tsv" | sed 's/,\s*$//')
 printf "%s - Wrinting seasonal collection\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s - Seasonal list : tvdb id added : %s\n" "$(date +%H:%M:%S)" "$tvdb_list"| tee -a "$LOG"
 printf "collections:\n  seasonal animes download:\n    tvdb_show: %s\n    sync_mode: append\n    sonarr_add_missing: true\n    build_collection: false\n" "$tvdb_list" > "$DOWNLOAD_ANIMES_COLLECTION"

@@ -47,11 +47,13 @@ function get-anilist-id () {
 	fi
 }
 function get-mal-id () {
-	jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-	if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]				# Ignore anime with no anilist id
+	invalid_mal_id=0
+	mal_id=$(jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+	if [[ "$mal_id" == 'null' ]] || [[ "$mal_id" == 0 ]]				# Ignore anime with no anilist id
 	then
 		printf "%s\t\t - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
 		printf "%s - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
+		invalid_mal_id=1
 	fi
 }
 function get-tvdb-id () {
@@ -80,13 +82,16 @@ function get-anilist-infos () {
 function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/data/MAL-$mal_id.json" ]
 	then
+		printf "%s\t\t - Downloading data for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
 		curl -s -o "$SCRIPT_FOLDER/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		if  grep -q -w "429" "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		then
-			sleep 10
+			printf "%s - Jikan API limit reached watiting 15s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			sleep 15
 			curl -s -o "$SCRIPT_FOLDER/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/tmp/jikan-limit-rate.txt"
 		fi
 		sleep 1.1
+			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 	fi
 }
 function get-romaji-title () {
@@ -147,32 +152,39 @@ function less-caps-title () {
 }
 function get-score () {
 	anime_score=0
-	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
-	if [[ "$anime_score" == "0" ]]
+	anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 	then
 		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
 		get-anilist-infos
-		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | awk '{print $1 / 10 }')
+		anime_score=$(jq '.data.Media.averageScore' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+		if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
+		then
+			anime_score=0
+		fi
 	else
-		echo "$anime_score"
+		anime_score=$(printf %s "$anime_score" | awk '{print $1 / 10}')
 	fi
 }
 function get-mal-score () {
 	get-mal-id
-	get-mal-infos
-	mal_score=0
-	mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
-	if [[ "$mal_score" == "null" ]]
+	if [[ $invalid_mal_id == 1 ]]
 	then
-		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-		get-mal-infos
-		mal_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
-		if [[ "$mal_score" == "null" ]]
-		then
-			echo 0
-		fi
+		anime_score=0
 	else
-		echo "$mal_score"
+		get-mal-infos
+		anime_score=0
+		anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+		if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
+		then
+			rm "$SCRIPT_FOLDER/data/MAL-$mal_id.json"
+			get-mal-infos
+			anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+			if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
+			then
+				anime_score=0
+			fi
+		fi
 	fi
 }
 function get-tags () {
@@ -330,6 +342,7 @@ function get-season-infos () {
 	then
 		total_score=0
 		score_season=0
+		no_rating_seasons=0
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
@@ -344,9 +357,11 @@ function get-season-infos () {
 					anime_season=$(get-animes-season-year)
 					if [[ $RATING_SOURCE == "ANILIST" ]]
 					then
-						score_season=$(get-score)
+						get-score
+						score_season=$anime_score
 					else
-						score_season=$(get-mal-score)
+						get-mal-score
+						score_season=$anime_score
 					fi
 					score_season=$(printf '%.*f\n' 1 "$score_season")
 					if [[ $SEASON_YEAR == "Yes" ]]
@@ -356,7 +371,7 @@ function get-season-infos () {
 					else
 						printf "      1:\n        label.remove: score\n" >> "$METADATA"
 					fi
-					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
+					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2}')
 				else
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/tmp/list-animes-id.json" | head -n 1)
 					if [[ -n "$anilist_id" ]]
@@ -370,11 +385,17 @@ function get-season-infos () {
 						fi
 						if [[ $RATING_SOURCE == "ANILIST" ]]
 						then
-							score_season=$(get-score)
+							get-score
+							score_season=$anime_score
 						else
-							score_season=$(get-mal-score)
+							get-mal-score
+							score_season=$anime_score
 						fi
 						score_season=$(printf '%.*f\n' 1 "$score_season")
+						if [[ "$score_season" == 0.0 ]]
+						then
+							((no_rating_seasons++))
+						fi
 						anime_season=$(get-animes-season-year)
 						if [[ $MAIN_TITLE_ENG == "Yes" ]]
 						then
@@ -394,22 +415,33 @@ function get-season-infos () {
 								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
 							fi
 						fi
-						total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2 }')
+						total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2}')
 						get-season-poster
 					fi
 				fi
 			fi
 		done
-		score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2 }')
-		score=$(printf '%.*f\n' 1 "$score")
+		if [[ "$total_score" != "0" ]]
+		then
+			total_seasons=$((total_seasons - no_rating_seasons))
+			score=$(echo | awk -v v1="$total_score" -v v2="$total_seasons" '{print v1 / v2}')
+			score=$(printf '%.*f\n' 1 "$score")
+		else
+			score=0
+		fi
 	else
 		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
-			score=$(get-score)
+			get-score
+			score=$anime_score
 		else
-			score=$(get-mal-score)
+			get-mal-score
+			score=$anime_score
 		fi
-		score=$(printf '%.*f\n' 1 "$score")
+		if [[ "$score" != 0 ]]
+		then
+			score=$(printf '%.*f\n' 1 "$score")
+		fi
 	fi
 	anilist_id=$anilist_backup_id
 }
@@ -463,28 +495,52 @@ function write-metadata () {
 			then
 				if [[ $RATING_SOURCE == "ANILIST" ]]
 				then
-					score=$(get-score)
+					get-score
+					score=$anime_score
 				else
-					score=$(get-mal-score)
+					get-mal-score
+					score=$anime_score
 				fi
-				score=$(printf '%.*f\n' 1 "$score")
-				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+				if [[ "$score" == 0 ]]
+				then
+					printf "%s\t\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+				else
+					score=$(printf '%.*f\n' 1 "$score")
+					printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+				fi
 			else
 				get-season-infos
-				printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+				if [[ "$score" == 0 ]]
+				then
+					printf "%s\t\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+				else
+					printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+				fi
 			fi
 		else
 			get-season-infos
+			if [[ "$score" == 0 ]]
+			then
+				printf "%s\t\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+			else
 			printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+			fi
 		fi
 	else
 		if [[ $RATING_SOURCE == "ANILIST" ]]
 		then
-			score=$(get-score)
+			get-score
+			score=$anime_score
 		else
-			score=$(get-mal-score)
+			get-mal-score
+			score=$anime_score
 		fi
-		score=$(printf '%.*f\n' 1 "$score")
-		printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+		if [[ "$score" == 0 ]]
+		then
+			printf "%s\t\t - invalid rating for  Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+		else
+			score=$(printf '%.*f\n' 1 "$score")
+			printf "    %s_rating: %s\n" "$WANTED_RATING" "$score" >> "$METADATA"
+		fi
 	fi
 }
