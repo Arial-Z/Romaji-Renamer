@@ -47,11 +47,13 @@ function get-anilist-id () {
 	fi
 }
 function get-mal-id () {
-	jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
-	if [[ "$mal_id" == 'null' ]] || [[ "${#mal_id}" == '0' ]]				# Ignore anime with no anilist id
+	invalid_mal_id=0
+	mal_id=$(jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+	if [[ "$mal_id" == 'null' ]] || [[ "$mal_id" == 0 ]]				# Ignore anime with no anilist id
 	then
 		printf "%s\t\t - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
 		printf "%s - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
+		invalid_mal_id=1
 	fi
 }
 function get-tvdb-id () {
@@ -163,20 +165,25 @@ function get-score () {
 }
 function get-mal-score () {
 	get-mal-id
-	get-mal-infos
-	anime_score=0
-	anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
-	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
+	if [[ $invalid_mal_id == 1 ]]
 	then
-		rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+		anime_score=0
+	else
 		get-mal-infos
+		anime_score=0
 		anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
 		if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 		then
-			anime_score=0
+			rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+			get-mal-infos
+			anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json")
+			if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
+			then
+				anime_score=0
+			fi
+		else
+			echo "$mal_score"
 		fi
-	else
-		echo "$mal_score"
 	fi
 }
 function get-tags () {
