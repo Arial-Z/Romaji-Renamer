@@ -1,30 +1,49 @@
 # Plex-Romaji-Renamer
 
-A Bash script to import Anilist data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMS) metadata file.<br/>
+A Bash script to import Anilist and MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMM) metadata file.<br/>
 
 Here what will be imported for each of your animes :
+```yml
+# TVDB_ID for PMM to import
+330692:
+  # Title : either Romaji title or English title (in settings) (from Anilist)
+  title: "Yuru Camp△"
+  # Sort Title : either Romaji title or English title (in settings) (from Anilist)
+  sort_title: "Yuru Camp△"
+  # original_title : English title (from Anilist)
+  original_title: "Laid-Back Camp"
+  # Genre ands tags from Anilist (genres, and tag above > 65%)
+  genre.sync: Anime,Slice of Life,CGDCT,Iyashikei
+  # Airing status from Anilist (Sync the Ongoing label)
+  label.remove: Ongoing
+  # Studio from Anilist                               
+  studio: C-Station
+  # Season import
+  seasons:
+    # Season 0 import
+    0:
+      label.remove: score
+    # Season 1 import
+    1:
+      # Title from Anilist (Romaji or English from the title setting)
+      title: "Yuru Camp△"
+      # Rating from Anilist or MAL (in settings)
+      user_rating: 8.3
+      # Add label score to use with PMM overlays and also add the season label (optionnal)
+      label: Fall 2021, score
+    # Season 2 import
+    2:
+      # Title from Anilist (Romaji or English from the title setting)
+      title: "Yuru Camp△ SEASON 2"
+      # Rating from Anilist or MAL (in settings)
+      user_rating: 8.5
+      # Add label score to use PMM overlays and also add the season label (optionnal)
+      label: Fall 2022,score
+  # Anime rating : average rating of the seasons (Or Anilist / MAL score if no seasons)
+  critic_rating: 8.4
+
 ```
-330692:                                                 # TVDB_ID for PMM to import
-  title: "Yuru Camp△"                                   # Title : Either Anilist title or English title (in settings)
-  sort_title: "Yuru Camp△"                              # Sort Title : Either Anilist title or English title (in settings)
-  original_title: "Laid-Back Camp"                      # English title from Anilist
-  genre.sync: Anime,Slice of Life,CGDCT,Iyashikei       # Genre ands tags from Anilist (genres, and tag above > 65%)
-  label.remove: Ongoing                                 # Airing status from Anilist (add or remove Ongoing label)
-  studio: C-Station                                     # Studio from Anilist
-  seasons:                                              # Season import
-    0:                                                  # Season 0 import                 
-      label.remove: score                               
-    1:                                                  # Season 1 import
-      title: "Yuru Camp△"                               # Title from Anilist                            
-      user_rating: 8.3                                  # Rating from Anilist or MAL
-      label: Fall 2021, score                           # Add label score to use PMM overlays and also add the season label (optionnal)
-    2:                                                  # Season 2 import
-      title: "Yuru Camp△ SEASON 2"                      # Title from Anilist
-      user_rating: 8.5                                  # Rating from Anilist or MAL
-      label: Fall 2022,score                            # Add label score to use PMM overlays and also add the season label (optionnal)
-  critic_rating: 8.4                                    # Show rating average rating of the seasons (Or Anilist/ MAL score if no seasons)
-```
-Anilist Posters for animes and seasons can also be downloaded and imported inside the PMM assets folder
+Anilist Posters for animes and seasons can also be downloaded and imported to plex with the PMM assets folder
 
 The seasonal-animes-download.sh can create a list of the new seasonal animes (New as not a sequel anime) and make a collection yml to add them to sonarr.
 
@@ -33,15 +52,14 @@ Designed for Plex TV agent / Plex Movie Agent, <b>Hama is unsupported</b>
  ## How it works:
   - Plex-Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
   - Then it will then retrieve their MAL/Anilist IDs from my mapping list https://github.com/Arial-Z/Animes-ID
-  - Use the Anilist API and Jikan API to get metadata from MAL
-  - Use the anilist API to get the Romaji title
+  - Use the Anilist API and Jikan API to get metadata from Anilist and MAL
   - Create and update a PMM metadata file to import everything in to your Plex when PMM runs.
 
 ### Step 1 - Prerequisites
 First you need a GNU/Linux OS to run bash script<br/>
-  Requirements: PMS, PMM, Python and JQ<br/>
+  Requirements: Plex Media Server, Plex-Meta-Manager, Python and JQ<br/>
   - Install and configure Plex-Meta-Manager: https://github.com/meisnate12/Plex-Meta-Manager<br/>
-  - Install JQ which is a json parser see: https://stedolan.github.io/jq/ (Present by default on unRAID 6.10.0 and later.)<br/>
+  - Install JQ is a json parser see: https://stedolan.github.io/jq/ (Present by default on unRAID 6.10.0 and later.)<br/>
   - install python plexapi
   ```
   pip install plexapi
@@ -59,7 +77,7 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
   - Navigate to its location.<br/>
   - Copy default.env to .env<br/>
   - Edit .env and fill out the variables.<br/>
-```
+```env
 #Url of the Plex server (Needed)
 plex_url=http://127.0.0.1:32400
 #Plex token (Needed)
@@ -73,13 +91,14 @@ MOVIE_LIBRARY_NAME="Animes Movies"
 
 
 # Path to the created animes metadata file (Needed for the animes script)
-METADATA_ANIMES=/path/to/PMM/config/animes-mal.yml
+METADATA_ANIMES=/path/to/PMM/config/animes.yml
 # Path to the created movies metadata file (Needed for the movies script)
-METADATA_MOVIES=/path/to/PMM/config/movies-mal.yml
+METADATA_MOVIES=/path/to/PMM/config/animes-movies.yml
 # PMM Asset Folder to import posters (Needed)
 ASSET_FOLDER=/path/to/PMM/config/assets
 # Folder where the logs of script are kept (Default is okay change if you want)
 LOG_FOLDER=$SCRIPT_FOLDER/logs
+
 
 # Type of rating used in Plex by Anilist (audience, critic, user / leave empty to disable)
 WANTED_RATING=audience
@@ -116,7 +135,7 @@ DOWNLOAD_ANIMES_COLLECTION=/path/to/PMM/config/seasonal-animes-download.yml
 ```
   Animes:
     metadata_path:
-    - file: config/animes-mal.yml
+    - file: config/animes.yml
 ```
 Configuration finished.
 ### Running the bash script manually or via CRON.
