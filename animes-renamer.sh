@@ -65,8 +65,8 @@ do
 		anilist_id=$(get-anilist-id)
 		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
-			printf "%s\t\t - Missing Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title"  | tee -a "$LOG"
-			printf "%s - Missing Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title"  >> "$MATCH_LOG"
+			printf "%s\t\t - Missing Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title" | tee -a "$LOG"
+			printf "%s - Missing Anilist ID for tvdb : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$plex_title" >> "$MATCH_LOG"
 		else
 			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$last_season" "$total_seasons" >> "$SCRIPT_FOLDER/ID/animes.tsv"
 		fi
@@ -107,7 +107,7 @@ done
 sort -n "$SCRIPT_FOLDER/tmp/ongoing-tmp.tsv" | uniq > "$SCRIPT_FOLDER/tmp/ongoing.tsv"
 while read -r anilist_id
 do
-	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -q -w  "$anilist_id"
+	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -q -w "$anilist_id"
 	then
 		line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/ID/animes.tsv" | grep -w -n "$anilist_id" | cut -d : -f 1)
 		tvdb_id=$(sed -n "${line}p" "$SCRIPT_FOLDER/ID/animes.tsv" | awk -F"\t" '{print $1}')

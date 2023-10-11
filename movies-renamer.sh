@@ -10,17 +10,17 @@ METADATA=$METADATA_MOVIES
 OVERRIDE=override-ID-$media_type.tsv
 
 # check if files and folder exist
-if [ ! -d "$SCRIPT_FOLDER/data" ]                                                                                 #check if exist and create folder for json data
+if [ ! -d "$SCRIPT_FOLDER/data" ]														#check if exist and create folder for json data
 then
 	mkdir "$SCRIPT_FOLDER/data"
 else
-	find "$SCRIPT_FOLDER/data/" -type f -mtime +"$DATA_CACHE_TIME" -exec rm {} \;        #delete json data if older than 2 days
+	find "$SCRIPT_FOLDER/data/" -type f -mtime +"$DATA_CACHE_TIME" -exec rm {} \;		#delete json data if older than 2 days
 fi
-if [ ! -d "$SCRIPT_FOLDER/tmp" ]										#check if exist and create folder for json data
+if [ ! -d "$SCRIPT_FOLDER/tmp" ]														#check if exist and create folder for json data
 then
 	mkdir "$SCRIPT_FOLDER/tmp"
 fi
-if [ ! -d "$SCRIPT_FOLDER/ID" ]											#check if exist and create folder and file for ID
+if [ ! -d "$SCRIPT_FOLDER/ID" ]															#check if exist and create folder and file for ID
 then
 	mkdir "$SCRIPT_FOLDER/ID"
 fi
@@ -47,9 +47,9 @@ create-override
 printf "%s\t - Sorting Plex anime library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 while IFS=$'\t' read -r imdb_id anilist_id title_override studio notes
 do
-	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -q -w  "$imdb_id"
+	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -q -w "$imdb_id"
 	then
-		if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -q -w  "$imdb_id"
+		if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -q -w "$imdb_id"
 		then
 			line=$(awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | grep -w -n "$imdb_id" | cut -d : -f 1)
 			plex_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $2}')
@@ -59,12 +59,12 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/override-ID-movies.tsv"
-while IFS=$'\t' read -r imdb_id plex_title asset_name                                                                                      # then get the other ID from the ID mapping and download json data
+while IFS=$'\t' read -r imdb_id plex_title asset_name													# then get the other ID from the ID mapping and download json data
 do
-	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -q -w  "$imdb_id"
+	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/ID/movies.tsv" | grep -q -w "$imdb_id"
 		then
 		anilist_id=$(get-anilist-id)
-		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]                               # Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]								# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
 		then
 			printf "%s\t\t - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" | tee -a "$LOG"
 			printf "%s - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" >> "$MATCH_LOG"
