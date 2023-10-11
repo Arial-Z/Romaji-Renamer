@@ -132,7 +132,7 @@ DOWNLOAD_ANIMES_COLLECTION=/path/to/PMM/config/seasonal-animes-download.yml
 
 ### Step 4 - Configure PMM 
   - Within your (PMM) config.yml add the following metadata_path, it should look like this with the default filepath:
-```
+```yml
   Animes:
     metadata_path:
     - file: config/animes.yml
@@ -153,7 +153,7 @@ Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 #### Animes
 to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
 you can also use the override file, copy `override-ID-animes.tsv.example` to `override-ID-animes.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title, studio and ignore_seasons are optional and can be used to force corresponding string)
-```
+```tsv
 tvdb-id	anilist-id	Title	Studio	ignore_seasons	notes
 114801	6702		A-1 Pictures	yes	Fairy Tail
 79685	263	Hajime no Ippo		
@@ -163,7 +163,7 @@ create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
 to fix movies ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
 you can also use the override file, copy `override-ID-movies.tsv.example` to `override-ID-movies.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title and studio are optional and can be used to force corresponding string)
-```
+```tsv
 imdb-id	anilist-id	Title	Studio	notes
 tt0110008	1030		Studio Ghibli	Pompoko
 ```
