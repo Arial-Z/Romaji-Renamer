@@ -120,7 +120,7 @@ IGNORE_SEASONS=No
 REDUCE_TITLE_CAPS=Yes
 #Add the anime season to the season label in plex (Fall  2022, Spring 2021, ...)
 SEASON_YEAR=No
-# Mal Data cache time (in days min : 1)
+# Anime metadata cache time (in days min : 1)
 DATA_CACHE_TIME=3
 
 
