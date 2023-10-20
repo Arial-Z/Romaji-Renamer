@@ -214,6 +214,66 @@ function get-studios() {
 function get-animes-season-year () {
 	(jq '.data.Media.season' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" && jq '.data.Media.seasonYear' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json") | paste -sd ' ' | tr '[:upper:]' '[:lower:]' | sed "s/\( \|^\)\(.\)/\1\u\2/g"
 	}
+function get-airing-status () {
+	anilist_backup_id=$anilist_id
+	airing_status="Ended"
+	last_sequel_found=0
+		printf "%s\t\t - Writing airing status for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
+	while [ $last_sequel_found -lt 15 ];
+	do
+		if [ ! -f "$SCRIPT_FOLDER/data/relations-$anilist_id.json" ]
+		then
+			printf "%s\t\t\t - Downloading airing info for Anilist : %s (loop : %s)\n" "$(date +%H:%M:%S)" "$anilist_id" "$last_sequel_found" | tee -a "$LOG"
+			curl -s 'https://graphql.anilist.co/' \
+			-X POST \
+			-H 'content-type: application/json' \
+			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
+			rate_limit=0
+			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
+			if [[ rate_limit -lt 3 ]]
+			then
+				printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 30
+			else
+				sleep 0.7
+				printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			fi
+		fi
+		if grep -q -w "SEQUEL" "$SCRIPT_FOLDER/data/relations-$anilist_id.json"
+		then
+			if jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" )' -r "$SCRIPT_FOLDER/data/relations-$anilist_id.json" | grep -q -w "TV\|ONA"
+			then
+				jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" ) ' -r "$SCRIPT_FOLDER/data/relations-$anilist_id.json" > "$SCRIPT_FOLDER/data/sequel_$anilist_id.json"
+				if grep -q -w "NOT_YET_RELEASED" "$SCRIPT_FOLDER/data/sequel_$anilist_id.json"
+				then
+					airing_status="Planned"
+					anilist_id=$anilist_backup_id
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+					break
+				else
+					anilist_id=$(jq '.id ' -r "$SCRIPT_FOLDER/data/sequel_$anilist_id.json")
+					((last_sequel_found++))
+				fi
+			else
+				airing_status="Ended"
+				anilist_id=$anilist_backup_id
+				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				break
+			fi
+		else
+			airing_status="Ended"
+			anilist_id=$anilist_backup_id
+			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			break
+		fi
+	done
+	anilist_id=$anilist_backup_id
+	if [[ $last_sequel_found -ge 15 ]]
+	then
+		airing_status="Ended"
+		printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+	fi
+}
 function get-poster () {
 	if [[ $POSTER_DOWNLOAD == "Yes" ]]
 	then
@@ -479,9 +539,10 @@ function write-metadata () {
 	then
 		if awk -F"\t" '{print "\""$1"\":"}' "$SCRIPT_FOLDER/data/ongoing.tsv" | grep -q -w "$tvdb_id"
 		then
-			printf "    label: Ongoing\n" >> "$METADATA"
+			printf "    label.sync: Airing\n" >> "$METADATA"
 		else
-			printf "    label.remove: Ongoing\n" >> "$METADATA"
+			get-airing-status
+			printf "    label.sync: %s\n" "$airing_status">> "$METADATA"
 		fi
 	fi
 	get-studios
