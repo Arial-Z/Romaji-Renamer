@@ -539,10 +539,18 @@ function write-metadata () {
 	then
 		if awk -F"\t" '{print "\""$1"\":"}' "$SCRIPT_FOLDER/data/ongoing.tsv" | grep -q -w "$tvdb_id"
 		then
-			printf "    label.sync: Airing\n" >> "$METADATA"
+			printf "    label: Airing\n" >> "$METADATA"
+			printf "    label.remove: Planned,Ended\n" >> "$METADATA"
 		else
 			get-airing-status
-			printf "    label.sync: %s\n" "$airing_status">> "$METADATA"
+			if [[ $airing_status == Planned ]]
+			then
+				printf "    label: Planned\n" >> "$METADATA"
+				printf "    label.remove: Airing,Ended\n" >> "$METADATA"
+			else
+				printf "    label: Ended\n" >> "$METADATA"
+				printf "    label.remove: Planned,Airing\n" >> "$METADATA"
+			fi
 		fi
 	fi
 	get-studios
