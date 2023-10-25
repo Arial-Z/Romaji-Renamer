@@ -218,44 +218,111 @@ function get-airing-status () {
 	anilist_backup_id=$anilist_id
 	airing_status="Ended"
 	last_sequel_found=0
+	sequel_multi_check=0
 	printf "%s\t\t - Writing airing status for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
 	while [ $last_sequel_found -lt 30 ];
 	do
-		if [ ! -f "$SCRIPT_FOLDER/data/relations-$anilist_id.json" ]
+		if [[ $sequel_multi_check -gt 0 ]]
 		then
-			printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
-			curl -s 'https://graphql.anilist.co/' \
-			-X POST \
-			-H 'content-type: application/json' \
-			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
-			rate_limit=0
-			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
-			if [[ rate_limit -lt 3 ]]
+			printf "multi_sequel found\n"
+			anilist_multi_id_backup=$anilist_id
+			:> "$SCRIPT_FOLDER/tmp/airing_sequel_tmp.json"
+			while IFS=$'\n' read -r anilist_id
+			do
+				printf "%s" "$anilist_id"
+				if [ ! -f "$SCRIPT_FOLDER/data/relations-$anilist_id.json" ]
+				then
+					printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+					curl -s 'https://graphql.anilist.co/' \
+					-X POST \
+					-H 'content-type: application/json' \
+					--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
+					rate_limit=0
+					rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
+					if [[ rate_limit -lt 3 ]]
+					then
+						printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+						sleep 30
+					else
+						sleep 0.7
+						printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+					fi
+				fi
+				cat "$SCRIPT_FOLDER/data/relations-$anilist_id.json" >> "$SCRIPT_FOLDER/tmp/airing_sequel_tmp.json"
+			done < "$SCRIPT_FOLDER/tmp/airing_sequel_tmp.txt"
+			anilist_id=$anilist_multi_id_backup
+			sequel_check=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA"  )' -r "$SCRIPT_FOLDER/tmp/airing_sequel_tmp.json")
+			if [ -z "$sequel_check" ]
 			then
-				printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				sleep 30
-			else
-				sleep 0.7
-				printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			fi
-		fi
-		sequel_check=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" )' -r "$SCRIPT_FOLDER/data/relations-$anilist_id.json")
-		if [ -z "$sequel_check" ]
-		then
-			airing_status="Ended"
-			anilist_id=$anilist_backup_id
-			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			break
-		else
-			if echo "$sequel_check" | grep -q -w "NOT_YET_RELEASED"
-			then
-				airing_status="Planned"
+				airing_status="Ended"
 				anilist_id=$anilist_backup_id
 				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				break
 			else
-				anilist_id=$(jq '.id ' -r "$SCRIPT_FOLDER/data/sequel_$anilist_id.json" | head -n 1)
-				((last_sequel_found++))
+				if echo "$sequel_check" | grep -q -w "NOT_YET_RELEASED"
+				then
+					airing_status="Planned"
+					anilist_id=$anilist_backup_id
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+					break
+				else
+					anilist_id=$(jq '.id ' -r "$SCRIPT_FOLDER/tmp/airing_sequel_tmp.json")
+					sequel_multi_check=$(printf %s "$anilist_id" | wc -l)
+					if [[ $sequel_multi_check -gt 0 ]]
+					then
+						printf "%s" "$anilist_id" > "$SCRIPT_FOLDER/tmp/airing_sequel_tmp.txt"
+						anilist_id=$( printf "%s" "$anilist_id" | head -n 1)
+						((last_sequel_found++))
+					else
+						((last_sequel_found++))
+					fi
+				fi
+			fi
+		else
+			if [ ! -f "$SCRIPT_FOLDER/data/relations-$anilist_id.json" ]
+			then
+				printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+				curl -s 'https://graphql.anilist.co/' \
+				-X POST \
+				-H 'content-type: application/json' \
+				--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
+				rate_limit=0
+				rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
+				if [[ rate_limit -lt 3 ]]
+				then
+					printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+					sleep 30
+				else
+					sleep 0.7
+					printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				fi
+			fi
+			sequel_check=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" )' -r "$SCRIPT_FOLDER/data/relations-$anilist_id.json")
+			if [ -z "$sequel_check" ]
+			then
+				airing_status="Ended"
+				anilist_id=$anilist_backup_id
+				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				break
+			else
+				if echo "$sequel_check" | grep -q -w "NOT_YET_RELEASED"
+				then
+					airing_status="Planned"
+					anilist_id=$anilist_backup_id
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+					break
+				else
+					anilist_id=$(printf "%s" "$sequel_check" | jq '.id')
+					sequel_multi_check=$(printf %s "$anilist_id" | wc -l)
+					if [[ $sequel_multi_check -gt 0 ]]
+					then
+						printf "%s\n" "$anilist_id" > "$SCRIPT_FOLDER/tmp/airing_sequel_tmp.txt"
+						anilist_id=$( printf "%s" "$anilist_id" | head -n 1)
+						((last_sequel_found++))
+					else
+						((last_sequel_found++))
+					fi
+				fi
 			fi
 		fi
 	done
