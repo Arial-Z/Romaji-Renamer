@@ -66,7 +66,7 @@ function get-anilist-infos () {
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt"
 		rate_limit=0
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
@@ -74,7 +74,7 @@ function get-anilist-infos () {
 			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 30
 		else
-			sleep 0.7
+			sleep 0.5
 			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		fi
 	fi
@@ -139,6 +139,10 @@ function get-english-title () {
 		less-caps-title
 		echo "$title"
 	fi
+}
+function get-native-title () {
+	title=$(jq '.data.Media.title.native' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json")
+	echo "$title"
 }
 function less-caps-title () {
 	if [[ $REDUCE_TITLE_CAPS == "Yes" ]]
@@ -229,7 +233,7 @@ function download-airing-info () {
 			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 30
 		else
-			sleep 0.7
+			sleep 0.5
 			printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		fi
 	fi
@@ -555,13 +559,19 @@ function write-metadata () {
 	fi
 	romaji_title=$(get-romaji-title)
 	english_title=$(get-english-title)
+	native_title=$(get-native-title)
 		if [ "$english_title" == "null" ]
 	then
 		english_title=$romaji_title
 	fi
 	if [[ $MAIN_TITLE_ENG == "Yes" ]]
 	then
-		printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$romaji_title" >> "$METADATA"
+		if [[ $ORIGINAL_TITLE_NATIVE == "Yes" ]]
+		then
+			printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$native_title" >> "$METADATA"
+		else
+			printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$romaji_title" >> "$METADATA"
+		fi
 	else
 		printf "    title: |-\n      %s\n" "$romaji_title" >> "$METADATA"
 		if [[ $SORT_TITLE_ENG == "Yes" ]]
@@ -570,7 +580,12 @@ function write-metadata () {
 		else
 			printf "    sort_title: |-\n      %s\n" "$romaji_title" >> "$METADATA"
 		fi
-		printf "    original_title: |-\n      %s\n" "$english_title" >> "$METADATA"
+		if [[ $ORIGINAL_TITLE_NATIVE == "Yes" ]]
+		then
+			printf "    original_title: |-\n      %s\n" "$native_title" >> "$METADATA"
+		else
+			printf "    original_title: |-\n      %s\n" "$english_title" >> "$METADATA"
+		fi
 	fi
 	anime_tags=$(get-tags)
 	printf "    genre.sync: Anime,%s\n" "$anime_tags" >> "$METADATA"
