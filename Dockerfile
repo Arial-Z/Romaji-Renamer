@@ -2,13 +2,14 @@ FROM python:3.11-slim-buster
 ARG BRANCH_NAME=master
 ENV BRANCH_NAME ${BRANCH_NAME}
 ENV TINI_VERSION v0.19.0
-ENV PMM_DOCKER True
-COPY . /
+
+RUN mkdir -p Plex-Romaji-Renamer
+COPY . /Plex-Romaji-Renamer
 RUN echo "**** install system packages ****" \
  && apt-get update \
  && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y tzdata --no-install-recommends \
- && apt-get install -y gcc g++ libxml2-dev libxslt-dev libz-dev libjpeg62-turbo-dev zlib1g-dev wget curl awk jq \
+ && apt-get install -y gcc g++ libxml2-dev libxslt-dev libz-dev libjpeg62-turbo-dev zlib1g-dev wget curl jq \
  && wget -O /tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-"$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
  && chmod +x /tini \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \

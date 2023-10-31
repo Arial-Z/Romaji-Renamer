@@ -4,6 +4,7 @@
 **/__pycache__
 /.vscode
 **/log
+.env
 README.md
 LICENSE
 .gitignore
