@@ -6,7 +6,7 @@ import pathlib
 
 # Find .env file
 basedir = path.abspath(path.dirname(__file__))
-load_dotenv(path.join(basedir, '.env'))
+load_dotenv(path.join(basedir, "config/.env"))
 
 # General Config
 url = environ.get('plex_url')
