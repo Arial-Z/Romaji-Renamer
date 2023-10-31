@@ -1,0 +1,16 @@
+**/dist
+**/build
+*.spec
+**/__pycache__
+/.vscode
+**/log
+README.md
+LICENSE
+.gitignore
+.dockerignore
+.git
+.github
+*.psd
+Dockerfile
+**/data
+**/tmp
