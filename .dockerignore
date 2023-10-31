@@ -4,10 +4,6 @@
 **/__pycache__
 /.vscode
 **/log
-config/tmp
-config/data
-config/Logs
-config/.env
 README.md
 LICENSE
 .gitignore
@@ -16,3 +12,9 @@ LICENSE
 .github
 *.psd
 Dockerfile
+venv
+.env
+tmp
+data
+ID
+config/.env
