@@ -3,7 +3,7 @@
 export LC_ALL=C.UTF-8
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 media_type="animes"
-source "$SCRIPT_FOLDER/.env"
+source "$SCRIPT_FOLDER/config/.env"
 source "$SCRIPT_FOLDER/functions.sh"
 METADATA=$METADATA_ANIMES
 OVERRIDE=override-ID-$media_type.tsv

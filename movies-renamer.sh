@@ -4,7 +4,7 @@ export LC_ALL=C.UTF-8
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 echo "$SCRIPT_FOLDER"
 media_type="movies"
-source "$SCRIPT_FOLDER/.env"
+source "$SCRIPT_FOLDER/config/.env"
 source "$SCRIPT_FOLDER/functions.sh"
 METADATA=$METADATA_MOVIES
 OVERRIDE=override-ID-$media_type.tsv
