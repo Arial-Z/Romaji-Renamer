@@ -18,11 +18,11 @@ function download-anime-id-mapping () {
 		printf "%s - Downloading anime mapping\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		if [[ $media_type == "animes" ]]
 		then
-			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > "$SCRIPT_FOLDER/config/tmplist-animes-id.json"
-			size=$(du -b "$SCRIPT_FOLDER/config/tmplist-animes-id.json" | awk '{ print $1 }')
+			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > "$SCRIPT_FOLDER/config/tmp/list-animes-id.json"
+			size=$(du -b "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | awk '{ print $1 }')
 		else
-			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json" > "$SCRIPT_FOLDER/config/tmplist-movies-id.json"
-			size=$(du -b "$SCRIPT_FOLDER/config/tmplist-movies-id.json" | awk '{ print $1 }')
+			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json" > "$SCRIPT_FOLDER/config/tmp/list-movies-id.json"
+			size=$(du -b "$SCRIPT_FOLDER/config/tmp/list-movies-id.json" | awk '{ print $1 }')
 		fi
 			((wait_time++))
 		if [[ $size -gt 1000 ]]
@@ -41,9 +41,9 @@ function download-anime-id-mapping () {
 function get-anilist-id () {
 	if [[ $media_type == "animes" ]]
 	then
-		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1" or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmplist-animes-id.json" | head -n 1
+		jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == "1" or .tvdb_season == "-1" ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | head -n 1
 	else
-		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmplist-movies-id.json" | head -n 1
+		jq --arg imdb_id "$imdb_id" '.[] | select( .imdb_id == $imdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-movies-id.json" | head -n 1
 	fi
 }
 function get-mal-id () {
@@ -57,7 +57,7 @@ function get-mal-id () {
 	fi
 }
 function get-tvdb-id () {
-	jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_id' -r "$SCRIPT_FOLDER/config/tmplist-animes-id.json"
+	jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json"
 }
 function get-anilist-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" ]
@@ -66,9 +66,9 @@ function get-anilist-infos () {
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmpanilist-limit-rate.txt"
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 		rate_limit=0
-		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmpanilist-limit-rate.txt")
+		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
 		then
 			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -83,12 +83,12 @@ function get-mal-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" ]
 	then
 		printf "%s\t\t - Downloading data for MAL id : %s\n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
-		curl -s -o "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/config/tmpjikan-limit-rate.txt"
-		if grep -q -w "429" "$SCRIPT_FOLDER/config/tmpjikan-limit-rate.txt"
+		curl -s -o "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/config/tmp/jikan-limit-rate.txt"
+		if grep -q -w "429" "$SCRIPT_FOLDER/config/tmp/jikan-limit-rate.txt"
 		then
 			printf "%s - Jikan API limit reached watiting 15s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 15
-			curl -s -o "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/config/tmpjikan-limit-rate.txt"
+			curl -s -o "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/config/tmp/jikan-limit-rate.txt"
 		fi
 		sleep 1.1
 			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -225,9 +225,9 @@ function download-airing-info () {
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmpanilist-limit-rate.txt"
+		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 		rate_limit=0
-		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmpanilist-limit-rate.txt")
+		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 		if [[ rate_limit -lt 3 ]]
 		then
 			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -248,14 +248,14 @@ function get-airing-status () {
 		if [[ $sequel_multi_check -gt 0 ]]
 		then
 			anilist_multi_id_backup=$anilist_id
-			:> "$SCRIPT_FOLDER/config/tmpairing_sequel_tmp.json"
+			:> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
 			while IFS=$'\n' read -r anilist_id
 			do
 				download-airing-info
-				cat "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" >> "$SCRIPT_FOLDER/config/tmpairing_sequel_tmp.json"
-			done < "$SCRIPT_FOLDER/config/tmpairing_sequel_tmp.txt"
+				cat "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" >> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
+			done < "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
 			anilist_id=$anilist_multi_id_backup
-			sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/tmpairing_sequel_tmp.json")
+			sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json")
 			if [ -z "$sequel_data" ]
 			then
 				airing_status="Ended"
@@ -273,7 +273,7 @@ function get-airing-status () {
 					sequel_multi_check=$(printf %s "$anilist_id" | wc -l)
 					if [[ $sequel_multi_check -gt 0 ]]
 					then
-						printf "%s" "$anilist_id" > "$SCRIPT_FOLDER/config/tmpairing_sequel_tmp.txt"
+						printf "%s" "$anilist_id" > "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
 						anilist_id=$( printf "%s" "$anilist_id" | head -n 1)
 						((last_sequel_found++))
 					else
@@ -301,7 +301,7 @@ function get-airing-status () {
 					sequel_multi_check=$(printf %s "$anilist_id" | wc -l)
 					if [[ $sequel_multi_check -gt 0 ]]
 					then
-						printf "%s\n" "$anilist_id" > "$SCRIPT_FOLDER/config/tmpairing_sequel_tmp.txt"
+						printf "%s\n" "$anilist_id" > "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
 						anilist_id=$( printf "%s" "$anilist_id" | head -n 1)
 						((last_sequel_found++))
 					else
@@ -433,7 +433,7 @@ function get-season-poster () {
 }
 function get-season-infos () {
 	anilist_backup_id=$anilist_id
-	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/config/tmplist-animes-id.json")
+	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json")
 	first_season=$(echo "$seasons_list" | awk -F "," '{print $1}')
 	last_season=$(echo "$seasons_list" | awk -F "," '{print $NF}')
 	total_seasons=$(echo "$seasons_list" | awk -F "," '{print NF}')
@@ -475,7 +475,7 @@ function get-season-infos () {
 					fi
 					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2}')
 				else
-					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmplist-animes-id.json" | head -n 1)
+					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | head -n 1)
 					if [[ -n "$anilist_id" ]]
 					then
 						get-anilist-infos
