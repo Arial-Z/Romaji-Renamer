@@ -4,9 +4,10 @@
 **/__pycache__
 /.vscode
 **/log
-/config/tmp
-/config/data
-/config/Logs
+config/tmp
+config/data
+config/Logs
+config/.env
 README.md
 LICENSE
 .gitignore
