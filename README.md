@@ -10,12 +10,13 @@ Here what will be imported for each of your animes :
   title: "Yuru Camp△"
   # Sort Title : either Romaji title or English title (in settings) (from Anilist)
   sort_title: "Yuru Camp△"
-  # original_title : English title (from Anilist)
-  original_title: "Laid-Back Camp"
+  # original_title : English title or Native Title (from Anilist)
+  original_title: "ゆるキャン△"
   # Genre ands tags from Anilist (genres, and tag above > 65%)
   genre.sync: Anime,Slice of Life,CGDCT,Iyashikei
-  # Airing status from Anilist (Sync the Ongoing label)
-  label.remove: Ongoing
+  # Airing status add as a label : Planned, Airing or Ended (from Anilist)
+  label: Planned
+  label.remove: Airing,Ended
   # Studio from Anilist                               
   studio: C-Station
   # Season import
@@ -75,8 +76,8 @@ Git clone the **main** branch or get lastest release : https://github.com/Arial-
 ### Step 3 - Configure the script
   - Extract the script on a desired location.<br/>
   - Navigate to its location.<br/>
-  - Copy default.env to .env<br/>
-  - Edit .env and fill out the variables.<br/>
+  - Copy default.env to config/.env<br/>
+  - cd into the config folder and edit .env to fill out the variables.<br/>
 ```env
 #Url of the Plex server (Needed)
 plex_url=http://127.0.0.1:32400
@@ -84,30 +85,45 @@ plex_url=http://127.0.0.1:32400
 plex_token=zadazdzadazdazdazdazdazd
 
 
+# Run the animes script (Yes/No)
+RUN_ANIMES_SCRIPTS=Yes
 # Plex animes library name need to be in a double quote (Needed for the animes script)
 ANIME_LIBRARY_NAME="Animes"
+# Path to the created animes metadata file (Needed for the animes script)
+METADATA_ANIMES=$SCRIPT_FOLDER/pmm/metadata-animes.yml
+
+
+# Run the movies script (Yes/No)
+RUN_MOVIES_SCRIPTS=No
 # Plex movies animes library name need to be in a double quote (Needed for the movies script)
 MOVIE_LIBRARY_NAME="Animes Movies"
-
-
-# Path to the created animes metadata file (Needed for the animes script)
-METADATA_ANIMES=/path/to/PMM/config/animes.yml
 # Path to the created movies metadata file (Needed for the movies script)
-METADATA_MOVIES=/path/to/PMM/config/animes-movies.yml
+METADATA_MOVIES=$SCRIPT_FOLDER/pmm/metadata-animes-movies.yml
+
+# Run the seasonal download script (Yes/No)
+RUN_SEASONAL_SCRIPTS=No
+# Number of animes added to the sesonal animes auto-download collection (Needed for the seasonal-animes-download.sh script)
+DOWNLOAD_LIMIT=20
+# Path to the created seasonal-animes-download file (Needed for the seasonal-animes-download.sh script)
+DOWNLOAD_ANIMES_COLLECTION=$SCRIPT_FOLDER/pmm/seasonal-animes-download.yml
+
+
 # PMM Asset Folder to import posters (Needed)
-ASSET_FOLDER=/path/to/PMM/config/assets
+ASSET_FOLDER=$SCRIPT_FOLDER/pmm/assets
 # Folder where the logs of script are kept (Default is okay change if you want)
-LOG_FOLDER=$SCRIPT_FOLDER/logs
+LOG_FOLDER=$SCRIPT_FOLDER/config/logs
 
 
 # Type of rating used in Plex by Anilist (audience, critic, user / leave empty to disable)
 WANTED_RATING=audience
 # Source for RATING (MAL / ANILIST)
 RATING_SOURCE=ANILIST
-# Use the english name as title (and also sort_title) instead of the romaji one (Yes/No)
+# Use the english name as title (and also sort_title) instead of the romaji one, the romaji title will be set as original title (Yes/No)
 MAIN_TITLE_ENG=No
 # Use the english name as sort_title instead of the romaji one (Yes/No)
 SORT_TITLE_ENG=No
+# Use the native name as original_title instead of the romaji/english one (Yes/No)
+ORIGINAL_TITLE_NATIVE=Yes
 # Download poster (Yes/No)
 POSTER_DOWNLOAD=Yes
 # Download seasons poster (Yes/No)
@@ -122,12 +138,6 @@ REDUCE_TITLE_CAPS=Yes
 SEASON_YEAR=No
 # Anime metadata cache time (in days min : 1)
 DATA_CACHE_TIME=3
-
-
-# Number of animes added to the sesonal animes auto-download collection (Needed for the seasonal-animes-download.sh script)
-DOWNLOAD_LIMIT=20
-# Path to the created seasonal-animes-download file (Needed for the seasonal-animes-download.sh script)
-DOWNLOAD_ANIMES_COLLECTION=/path/to/PMM/config/seasonal-animes-download.yml
 ```
 
 ### Step 4 - Configure PMM 
@@ -135,15 +145,14 @@ DOWNLOAD_ANIMES_COLLECTION=/path/to/PMM/config/seasonal-animes-download.yml
 ```yml
   Animes:
     metadata_path:
-    - file: config/animes.yml
+    - file: config/metadata-animes.yml
 ```
 Configuration finished.
 ### Running the bash script manually or via CRON.
 
 Run the script with bash:<br/>
 ```
-bash path/to/animes-renamer.sh
-bash path/to/movies-renamer.sh
+bash path/to/plex-romaji-renamer.sh
 ```
 You can also add it to CRON and make sure to run it before PMM (be careful it take a little time to run due to API limit rate)
 
@@ -152,7 +161,7 @@ Some animes won't be matched and the metadata will be missing, you can see them 
 Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 #### Animes
 to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
-you can also use the override file, copy `override-ID-animes.tsv.example` to `override-ID-animes.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title, studio and ignore_seasons are optional and can be used to force corresponding string)
+you can also use the override file, in the config folder copy `override-ID-animes.tsv.example` to `override-ID-animes.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title, studio and ignore_seasons are optional and can be used to force corresponding string)
 ```tsv
 tvdb-id	anilist-id	Title	Studio	ignore_seasons	notes
 114801	6702		A-1 Pictures	yes	Fairy Tail
@@ -162,7 +171,7 @@ tvdb-id	anilist-id	Title	Studio	ignore_seasons	notes
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
 to fix movies ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
-you can also use the override file, copy `override-ID-movies.tsv.example` to `override-ID-movies.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title and studio are optional and can be used to force corresponding string)
+you can also use the override file, in the config folder copy `override-ID-movies.tsv.example` to `override-ID-movies.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title and studio are optional and can be used to force corresponding string)
 ```tsv
 imdb-id	anilist-id	Title	Studio	notes
 tt0110008	1030		Studio Ghibli	Pompoko

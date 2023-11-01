@@ -1,0 +1,14 @@
+---
+version: "2.1"
+services:
+  plex-romaji-renamer:
+    image: plex-romaji-renamer
+    container_name: plex-romaji-renamer
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Europe/Paris
+    volumes:
+      - /path/to/script/config:/config:rw
+      - /path/to/pmm/config:/pmm:rw
+    restart: no
