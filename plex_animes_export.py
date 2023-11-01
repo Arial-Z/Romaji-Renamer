@@ -6,7 +6,7 @@ import pathlib
 
 # Find .env file
 basedir = path.abspath(path.dirname(__file__))
-load_dotenv(path.join(basedir, '.env'))
+load_dotenv(path.join(basedir, "config/.env"))
 
 # General Config
 url = environ.get('plex_url')
@@ -15,7 +15,7 @@ ANIME_LIBRARY_NAME=environ.get('ANIME_LIBRARY_NAME')
 
 plex = PlexServer(url, token, timeout=300)
 animes = plex.library.section(ANIME_LIBRARY_NAME)
-with open(path.join(basedir, "tmp/plex_animes_export.tsv"), "w") as export_plex, open(path.join(basedir, "tmp/plex_failed_animes.tsv"), "w") as export_fail:
+with open(path.join(basedir, "config/tmp/plex_animes_export.tsv"), "w") as export_plex, open(path.join(basedir, "config/tmp/plex_failed_animes.tsv"), "w") as export_fail:
 	for video in animes.search():
 		title = str(video.title)
 		ids = str(video.guids)
