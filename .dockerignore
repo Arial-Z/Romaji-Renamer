@@ -18,3 +18,5 @@ tmp
 data
 ID
 config/.env
+config/override-ID-animes.tsv
+config/override-ID-movies.tsv

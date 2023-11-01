@@ -58,7 +58,7 @@ do
 			printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/config/ID/movies.tsv"
 		fi
 	fi
-done < "$SCRIPT_FOLDER/override-ID-movies.tsv"
+done < "$SCRIPT_FOLDER/config/override-ID-movies.tsv"
 while IFS=$'\t' read -r imdb_id plex_title asset_name													# then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/movies.tsv" | grep -q -w "$imdb_id"

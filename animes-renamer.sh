@@ -57,7 +57,7 @@ do
 			printf "%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$seasons_list" >> "$SCRIPT_FOLDER/config/ID/animes.tsv"
 		fi
 	fi
-done < "$SCRIPT_FOLDER/override-ID-animes.tsv"
+done < "$SCRIPT_FOLDER/config/override-ID-animes.tsv"
 while IFS=$'\t' read -r tvdb_id plex_title asset_name last_season total_seasons 		# then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/animes.tsv" | grep -q -w "$tvdb_id"
