@@ -10,8 +10,8 @@ LICENSE
 .dockerignore
 .git
 .github
-*.psd
 Dockerfile
+docker-compose.yml
 venv
 .env
 tmp
