@@ -56,6 +56,9 @@ Designed for Plex TV agent / Plex Movie Agent, <b>Hama is unsupported</b>
   - Use the Anilist API and Jikan API to get metadata from Anilist and MAL
   - Create and update a PMM metadata file to import everything in to your Plex when PMM runs.
 
+### Docker container avalaible here
+https://hub.docker.com/r/arialz/plex-romaji-renamer
+
 ### Step 1 - Prerequisites
 First you need a GNU/Linux OS to run bash script<br/>
   Requirements: Plex Media Server, Plex-Meta-Manager, Python and JQ<br/>
