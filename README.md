@@ -12,7 +12,7 @@ Here what will be imported for each of your animes :
   sort_title: "Yuru Camp△"
   # original_title : English title or Native Title (from Anilist)
   original_title: "ゆるキャン△"
-  # Genre ands tags from Anilist (genres, and tag above > 65%)
+  # Genre ands tags from Anilist (genres, and tag above > 70% can be changed in settings)
   genre.sync: Anime,Slice of Life,CGDCT,Iyashikei
   # Airing status add as a label : Planned, Airing or Ended (from Anilist)
   label: Planned
@@ -86,7 +86,7 @@ plex_token=zadazdzadazdazdazdazdazd
 
 
 # Run the animes script (Yes/No)
-RUN_ANIMES_SCRIPTS=Yes
+RUN_ANIMES_SCRIPT=Yes
 # Plex animes library name need to be in a double quote (Needed for the animes script)
 ANIME_LIBRARY_NAME="Animes"
 # Path to the created animes metadata file (Needed for the animes script)
@@ -94,14 +94,14 @@ METADATA_ANIMES=$SCRIPT_FOLDER/pmm/metadata-animes.yml
 
 
 # Run the movies script (Yes/No)
-RUN_MOVIES_SCRIPTS=No
+RUN_MOVIES_SCRIPT=No
 # Plex movies animes library name need to be in a double quote (Needed for the movies script)
 MOVIE_LIBRARY_NAME="Animes Movies"
 # Path to the created movies metadata file (Needed for the movies script)
 METADATA_MOVIES=$SCRIPT_FOLDER/pmm/metadata-animes-movies.yml
 
 # Run the seasonal download script (Yes/No)
-RUN_SEASONAL_SCRIPTS=No
+RUN_SEASONAL_SCRIPT=No
 # Number of animes added to the sesonal animes auto-download collection (Needed for the seasonal-animes-download.sh script)
 DOWNLOAD_LIMIT=20
 # Path to the created seasonal-animes-download file (Needed for the seasonal-animes-download.sh script)
@@ -124,6 +124,8 @@ MAIN_TITLE_ENG=No
 SORT_TITLE_ENG=No
 # Use the native name as original_title instead of the romaji/english one (Yes/No)
 ORIGINAL_TITLE_NATIVE=Yes
+#Grab anilist tags higher or equal than percentage (0-100)
+ANILIST_TAGS_P=70
 # Download poster (Yes/No)
 POSTER_DOWNLOAD=Yes
 # Download seasons poster (Yes/No)
