@@ -192,7 +192,7 @@ function get-mal-score () {
 	fi
 }
 function get-tags () {
-	(jq --arg anilist_tags_p "$ANILIST_TAGS_P" '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq '.data.Media.tags | .[] | select( .rank >= "$anilist_tags_p" ) | .name' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -sd ','
+	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq --argjson anilist_tags_p "$ANILIST_TAGS_P" '.data.Media.tags | .[] | select( .rank >= $anilist_tags_p ) | .name' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -sd ','
 }
 function get-studios() {
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/config/$OVERRIDE" | grep -q -w "$anilist_id"
