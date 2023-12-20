@@ -78,12 +78,12 @@ function get-anilist-infos () {
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 		else
-			if [[ rate_limit -lt 3 ]]
+			if [[ rate_limit -lt 2 ]]
 			then
 				printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 30
 			else
-				sleep 0.5
+				sleep 0.75
 				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			fi
 		fi
@@ -247,12 +247,12 @@ function download-airing-info () {
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 		else
-			if [[ rate_limit -lt 3 ]]
+			if [[ rate_limit -lt 2 ]]
 			then
 				printf "%s - Anilist API limit rate left %s watiting 30s\n" "$(date +%H:%M:%S)" "$rate_limit" | tee -a "$LOG"
 				sleep 30
 			else
-				sleep 0.5
+				sleep 0.75
 				printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			fi
 		fi
