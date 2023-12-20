@@ -77,6 +77,8 @@ function get-anilist-infos () {
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+			sleep 0.75
+			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		else
 			if [[ rate_limit -lt 2 ]]
 			then
@@ -246,6 +248,8 @@ function download-airing-info () {
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+			sleep 0.75
+			printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		else
 			if [[ rate_limit -lt 2 ]]
 			then
