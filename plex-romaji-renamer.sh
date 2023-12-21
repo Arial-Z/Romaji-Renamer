@@ -3,7 +3,7 @@
 RUN_ANIMES_SCRIPT=0
 RUN_MOVIES_SCRIPT=0
 RUN_SEASONAL_SCRIPT=0
-locale=$(locale -a | grep -w -i "utf" | head -n 1)
+locale=$(locale -a | grep -i "utf" | head -n 1)
 if [ -z "$locale" ]
 then
 	printf "%s - Error no utf8 locale installed\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
