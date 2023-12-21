@@ -3,7 +3,14 @@
 RUN_ANIMES_SCRIPT=0
 RUN_MOVIES_SCRIPT=0
 RUN_SEASONAL_SCRIPT=0
-export LC_ALL=C.UTF-8
+locale=$(locale -a | grep -w "utf8" | head -n 1)
+if [ -z "$locale" ]
+then
+	printf "%s - Error no utf8 locale installed\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+	exit 1
+else
+	export LC_ALL="$locale"
+fi
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
 if [ ! -d "$SCRIPT_FOLDER/config" ]
