@@ -614,8 +614,11 @@ function write-metadata () {
 			fi
 		fi
 	fi
-	anime_tags=$(get-tags)
-	printf "    genre.sync: Anime,%s\n" "$anime_tags" >> "$METADATA"
+	if [[ $DISABLE_TAGS != "Yes" ]]
+	then
+		anime_tags=$(get-tags)
+		printf "    genre.sync: Anime,%s\n" "$anime_tags" >> "$METADATA"
+	fi
 	if [[ $media_type == "animes" ]]
 	then
 		printf "%s\t\t - Writing airing status for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
