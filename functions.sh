@@ -478,7 +478,7 @@ function get-season-infos () {
 			then
 				printf "      0:\n        label.remove: score\n" >> "$METADATA"
 			else
-				if [[ $last_season -eq 1 ]]
+				if [[ $last_season -eq 1 && $IGNORE_S1 == "Yes" ]]
 				then
 					anilist_id=$anilist_backup_id
 					if [[ $RATING_SOURCE == "ANILIST" ]]
@@ -498,6 +498,7 @@ function get-season-infos () {
 						printf "      1:\n        label.remove: score\n" >> "$METADATA"
 					fi
 					total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2}')
+					get-season-poster
 				else
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | head -n 1)
 					if [[ -n "$anilist_id" ]]
@@ -522,22 +523,21 @@ function get-season-infos () {
 						then
 							((no_rating_seasons++))
 						fi
-						if [[ $MAIN_TITLE_ENG == "Yes" ]]
+						if [[ $SEASON_YEAR == "Yes" ]]
 						then
-							if [[ $SEASON_YEAR == "Yes" ]]
+							anime_season=$(get-animes-season-year)
+							if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
 							then
-								anime_season=$(get-animes-season-year)
-								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: %s,score\n" "$season_number" "$english_title" "$score_season" "$anime_season" >> "$METADATA"
-							else
-								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$english_title" "$score_season" >> "$METADATA"
-							fi
-						else
-							if [[ $SEASON_YEAR == "Yes" ]]
-							then
-								anime_season=$(get-animes-season-year)
 								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
 							else
+								printf "      %s:\n        user_rating: %s\n        label: %s,score\n" "$season_number" "$score_season" "$anime_season" >> "$METADATA"
+							fi
+						else
+							if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
+							then
 								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_season" >> "$METADATA"
+							else
+								printf "      %s:\n        user_rating: %s\n        label: score\n" "$season_number" "$score_season" >> "$METADATA"
 							fi
 						fi
 						total_score=$(echo | awk -v v1="$score_season" -v v2="$total_score" '{print v1 + v2}')
@@ -588,27 +588,30 @@ function write-metadata () {
 	then
 		english_title=$romaji_title
 	fi
-	if [[ $MAIN_TITLE_ENG == "Yes" ]]
+	if [[ $ALLOW_RENAMING == "Yes" ]]
 	then
-		if [[ $ORIGINAL_TITLE_NATIVE == "Yes" ]]
+		if [[ $MAIN_TITLE_ENG == "Yes" ]]
 		then
-			printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$native_title" >> "$METADATA"
+			if [[ $ORIGINAL_TITLE_NATIVE == "Yes" ]]
+			then
+				printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$native_title" >> "$METADATA"
+			else
+				printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$romaji_title" >> "$METADATA"
+			fi
 		else
-			printf "    title: |-\n      %s\n    sort_title: |-\n      %s\n    original_title: |-\n      %s\n" "$english_title" "$english_title" "$romaji_title" >> "$METADATA"
-		fi
-	else
-		printf "    title: |-\n      %s\n" "$romaji_title" >> "$METADATA"
-		if [[ $SORT_TITLE_ENG == "Yes" ]]
-		then
-			printf "    sort_title: |-\n      %s\n" "$english_title" >> "$METADATA"
-		else
-			printf "    sort_title: |-\n      %s\n" "$romaji_title" >> "$METADATA"
-		fi
-		if [[ $ORIGINAL_TITLE_NATIVE == "Yes" ]]
-		then
-			printf "    original_title: |-\n      %s\n" "$native_title" >> "$METADATA"
-		else
-			printf "    original_title: |-\n      %s\n" "$english_title" >> "$METADATA"
+			printf "    title: |-\n      %s\n" "$romaji_title" >> "$METADATA"
+			if [[ $SORT_TITLE_ENG == "Yes" ]]
+			then
+				printf "    sort_title: |-\n      %s\n" "$english_title" >> "$METADATA"
+			else
+				printf "    sort_title: |-\n      %s\n" "$romaji_title" >> "$METADATA"
+			fi
+			if [[ $ORIGINAL_TITLE_NATIVE == "Yes" ]]
+			then
+				printf "    original_title: |-\n      %s\n" "$native_title" >> "$METADATA"
+			else
+				printf "    original_title: |-\n      %s\n" "$english_title" >> "$METADATA"
+			fi
 		fi
 	fi
 	anime_tags=$(get-tags)
