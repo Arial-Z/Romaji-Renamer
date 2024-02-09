@@ -89,7 +89,7 @@ do
 	rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 	if [[ rate_limit -lt 3 ]]
 	then
-		printf "%s\t - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+		printf "%s\t - Anilist API limit reached watiting 30s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		sleep 30
 	else
 		sleep 0.7
