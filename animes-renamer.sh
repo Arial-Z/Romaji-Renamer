@@ -87,7 +87,15 @@ do
 	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 	rate_limit=0
 	rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
-	if [[ rate_limit -lt 3 ]]
+	if [[ -z $rate_limit ]]
+	then
+		printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+		sleep 61
+		curl -s 'https://graphql.anilist.co/' \
+		-X POST \
+		-H 'content-type: application/json' \
+		--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+	elif [[ $rate_limit -lt 3 ]]
 	then
 		printf "%s\t - Anilist API limit reached watiting 30s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		sleep 30
