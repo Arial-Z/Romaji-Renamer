@@ -13,9 +13,9 @@ function create-override () {
 }
 function download-anime-id-mapping () {
 	wait_time=0
-	while [ $wait_time -lt 4 ];
+	while [ $wait_time -lt 5 ];
 	do
-		printf "%s - Downloading anime mapping\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+		printf "%s - Downloading animes mapping\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		if [[ $media_type == "animes" ]]
 		then
 			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-animes-id.json" > "$SCRIPT_FOLDER/config/tmp/list-animes-id.json"
@@ -32,7 +32,7 @@ function download-anime-id-mapping () {
 		fi
 		if [[ $wait_time == 4 ]]
 		then
-			printf "%s - Error can't download anime ID mapping file, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			printf "%s - Error can't download animes mapping file stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			exit 1
 		fi
 		sleep 30
@@ -62,31 +62,37 @@ function get-tvdb-id () {
 function get-anilist-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" ]
 	then
-		printf "%s\t\t - Downloading data for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
-		curl -s 'https://graphql.anilist.co/' \
-		-X POST \
-		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-		rate_limit=0
-		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
-		if [[ -z $rate_limit ]]
-		then
-			printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			sleep 61
+		wait_time=0
+		while [ $wait_time -lt 5 ];
+		do
+			printf "%s\t\t - Downloading data for anilist id : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 			curl -s 'https://graphql.anilist.co/' \
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-			sleep 0.75
-			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-		elif [[ $rate_limit -lt 3 ]]
-		then
-			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			sleep 30
-		else
-			sleep 0.75
-			printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-		fi
+			rate_limit=0
+			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
+				((wait_time++))
+			if [[ $rate_limit -ge 3 ]]
+			then
+				sleep 0.75
+				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				break
+			elif [[ $rate_limit -lt 3 ]]
+			then
+				printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 30
+				break
+			elif [[ -z $rate_limit ]]
+			then
+				printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 61
+			elif [[ $wait_time == 4 ]]
+			then
+				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			fi
+		done
 	fi
 }
 function get-mal-infos () {
@@ -231,31 +237,37 @@ function get-animes-season-year () {
 function download-airing-info () {
 	if [ ! -f "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" ]
 	then
+		wait_time=0
+		while [ $wait_time -lt 5 ];
+		do
 		printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-		rate_limit=0
-		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
-		if [[ -z $rate_limit ]]
-		then
-			printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			sleep 61
-			curl -s 'https://graphql.anilist.co/' \
-			-X POST \
-			-H 'content-type: application/json' \
-			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-			sleep 0.75
-			printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-		elif [[ $rate_limit -lt 3 ]]
-		then
-			printf "%s - Anilist API limit rate left %s watiting 30s\n" "$(date +%H:%M:%S)" "$rate_limit" | tee -a "$LOG"
-			sleep 30
-		else
-			sleep 0.75
-			printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-		fi
+			rate_limit=0
+			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
+				((wait_time++))
+			if [[ $rate_limit -ge 3 ]]
+			then
+				sleep 0.75
+				printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				break
+			elif [[ $rate_limit -lt 3 ]]
+			then
+				printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 30
+				break
+			elif [[ -z $rate_limit ]]
+			then
+				printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 61
+			elif [[ $wait_time == 4 ]]
+			then
+				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			fi
+		done
 	fi
 }
 function get-airing-status () {

@@ -35,14 +35,14 @@ download-anime-id-mapping
 
 
 # export movies list from plex
-printf "%s - Creating anime list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-printf "%s\t - Exporting Plex anime library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Creating animes list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s\t - Exporting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 python3 "$SCRIPT_FOLDER/plex_movies_export.py"
 printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )
 create-override
-printf "%s\t - Sorting Plex anime library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s\t - Sorting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 while IFS=$'\t' read -r imdb_id anilist_id title_override studio notes
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/movies.tsv" | grep -q -w "$imdb_id"

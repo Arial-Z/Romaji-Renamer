@@ -80,29 +80,36 @@ printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
 ongoingpage=1
 while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 do
-	printf "%s\t - Downloading anilist airing list page : %s\n" "$(date +%H:%M:%S)" "$ongoingpage" | tee -a "$LOG"
-	curl -s 'https://graphql.anilist.co/' \
-	-X POST \
-	-H 'content-type: application/json' \
-	--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-	rate_limit=0
-	rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
-	if [[ -z $rate_limit ]]
-	then
-		printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-		sleep 61
+	wait_time=0
+	while [ $wait_time -lt 5 ];
+	do
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-	elif [[ $rate_limit -lt 3 ]]
-	then
-		printf "%s\t - Anilist API limit reached watiting 30s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-		sleep 30
-	else
-		sleep 0.7
-		printf "%s\t - done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-	fi
+		rate_limit=0
+		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
+		((wait_time++))
+		if [[ $rate_limit -ge 3 ]]
+		then
+			sleep 0.75
+			printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			break
+		elif [[ $rate_limit -lt 3 ]]
+		then
+			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			sleep 30
+			break
+		elif [[ -z $rate_limit ]]
+		then
+			printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			sleep 61
+		elif [[ $wait_time == 4 ]]
+		then
+			printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			exit 1
+		fi
+	done
 	jq '.data.Page.media[].id' -r "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" >> "$SCRIPT_FOLDER/config/tmp/ongoing-tmp.tsv"		# store the mal ID of the ongoing show
 	if grep -q -w ":false}" "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json"														# stop if page is empty
 	then
