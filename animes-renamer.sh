@@ -94,7 +94,7 @@ do
 		((wait_time++))
 		if [[ -z $rate_limit ]]
 		then
-			printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			printf "%s\t - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 61
 		elif [[ $rate_limit -ge 3 ]]
 		then
@@ -103,7 +103,7 @@ do
 			break
 		elif [[ $rate_limit -lt 3 ]]
 		then
-			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			printf "%s\t - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 30
 			break
 		elif [[ $wait_time == 4 ]]
