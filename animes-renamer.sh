@@ -80,6 +80,7 @@ printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
 ongoingpage=1
 while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
 do
+	printf "%s\t - Downloading anilist airing list page : %s\n" "$(date +%H:%M:%S)" "$ongoingpage" | tee -a "$LOG"
 	wait_time=0
 	while [ $wait_time -lt 5 ];
 	do
@@ -93,7 +94,7 @@ do
 		if [[ $rate_limit -ge 3 ]]
 		then
 			sleep 0.75
-			printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			printf "%s\t - done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			break
 		elif [[ $rate_limit -lt 3 ]]
 		then
