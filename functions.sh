@@ -79,7 +79,7 @@ function get-anilist-infos () {
 				sleep 61
 			elif [[ $rate_limit -ge 3 ]]
 			then
-				sleep 0.75
+				sleep 0.8
 				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				break
 			elif [[ $rate_limit -lt 3 ]]
@@ -254,7 +254,7 @@ function download-airing-info () {
 				sleep 61
 			elif [[ $rate_limit -ge 3 ]]
 			then
-				sleep 0.75
+				sleep 0.8
 				printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				break
 			elif [[ $rate_limit -lt 3 ]]

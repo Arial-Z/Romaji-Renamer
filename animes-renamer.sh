@@ -98,7 +98,7 @@ do
 			sleep 61
 		elif [[ $rate_limit -ge 3 ]]
 		then
-			sleep 0.75
+			sleep 0.8
 			printf "%s\t - done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			break
 		elif [[ $rate_limit -lt 3 ]]
