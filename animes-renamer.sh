@@ -28,20 +28,20 @@ then
 fi
 :> "$SCRIPT_FOLDER/config/ID/animes.tsv"
 :> "$MATCH_LOG"
-printf "%s - Starting script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Starting animes script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # Download anime mapping json data
 download-anime-id-mapping
 
 # export animes list from plex
-printf "%s - Creating anime list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Creating animes list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s\t - Exporting Plex anime library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 python3 "$SCRIPT_FOLDER/plex_animes_export.py"
 printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # create ID/animes.tsv
 create-override
-printf "%s\t - Sorting Plex anime library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s\t - Sorting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 while IFS=$'\t' read -r tvdb_id anilist_id title_override studio ignore_seasons	notes
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/animes.tsv" | grep -q -w "$tvdb_id"
