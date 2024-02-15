@@ -71,6 +71,7 @@ do
 		printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/config/ID/movies.tsv"
 	fi
 done < "$SCRIPT_FOLDER/config/tmp/plex_movies_export.tsv"
+printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # write PMM metadata file from ID/movies.tsv and jikan API
