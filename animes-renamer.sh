@@ -71,6 +71,7 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/config/tmp/plex_animes_export.tsv"
+printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # Create an ongoing list at $SCRIPT_FOLDER/config/data/ongoing.csv
@@ -91,7 +92,11 @@ do
 		rate_limit=0
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 		((wait_time++))
-		if [[ $rate_limit -ge 3 ]]
+		if [[ -z $rate_limit ]]
+		then
+			printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			sleep 61
+		elif [[ $rate_limit -ge 3 ]]
 		then
 			sleep 0.75
 			printf "%s\t - done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -101,10 +106,6 @@ do
 			printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 30
 			break
-		elif [[ -z $rate_limit ]]
-		then
-			printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			sleep 61
 		elif [[ $wait_time == 4 ]]
 		then
 			printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"

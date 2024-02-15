@@ -73,7 +73,11 @@ function get-anilist-infos () {
 			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 				((wait_time++))
-			if [[ $rate_limit -ge 3 ]]
+			if [[ -z $rate_limit ]]
+			then
+				printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 61
+			elif [[ $rate_limit -ge 3 ]]
 			then
 				sleep 0.75
 				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -83,10 +87,6 @@ function get-anilist-infos () {
 				printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 30
 				break
-			elif [[ -z $rate_limit ]]
-			then
-				printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				sleep 61
 			elif [[ $wait_time == 4 ]]
 			then
 				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -248,7 +248,11 @@ function download-airing-info () {
 			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 				((wait_time++))
-			if [[ $rate_limit -ge 3 ]]
+			if [[ -z $rate_limit ]]
+			then
+				printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 61
+			elif [[ $rate_limit -ge 3 ]]
 			then
 				sleep 0.75
 				printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -258,10 +262,6 @@ function download-airing-info () {
 				printf "%s - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 30
 				break
-			elif [[ -z $rate_limit ]]
-			then
-				printf "%s - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				sleep 61
 			elif [[ $wait_time == 4 ]]
 			then
 				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
