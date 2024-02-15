@@ -1,7 +1,6 @@
 #!/bin/bash
 
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-echo "$SCRIPT_FOLDER"
 media_type="movies"
 source "$SCRIPT_FOLDER/config/.env"
 source "$SCRIPT_FOLDER/functions.sh"
@@ -29,7 +28,7 @@ then
 fi
 :> "$SCRIPT_FOLDER/config/ID/movies.tsv"
 :> "$MATCH_LOG"
-printf "%s - Starting script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Starting movies script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # Download anime mapping json data
 download-anime-id-mapping
