@@ -69,7 +69,7 @@ function get-anilist-infos () {
 			curl -s 'https://graphql.anilist.co/' \
 			-X POST \
 			-H 'content-type: application/json' \
-			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } }, season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } },startDate {year, month} season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 				((wait_time++))
@@ -232,7 +232,26 @@ function get-studios() {
 	fi
 }
 function get-animes-season-year () {
-	(jq '.data.Media.season' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq '.data.Media.seasonYear' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | paste -sd ' ' | tr '[:upper:]' '[:lower:]' | sed "s/\( \|^\)\(.\)/\1\u\2/g"
+	anime_season=$( (jq '.data.Media.season' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq '.data.Media.seasonYear' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | paste -sd ' ' | tr '[:upper:]' '[:lower:]' | sed "s/\( \|^\)\(.\)/\1\u\2/g")
+	if [ "$anime_season" == "Null null" ]
+		then
+		year_season=$(jq '.data.Media.startDate.year' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
+		month_season=$(jq '.data.Media.startDate.month' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
+		if [[ $month_season -le 3 ]]
+		then
+			name_season=Winter
+		elif [[ $month_season -ge 4 && $seasons_month -le 6 ]]
+		then
+			name_season=Spring
+		elif [[ $month_season -ge 7 && $seasons_month -le 9 ]]
+		then
+			name_season=Summer
+		elif [[ $month_season -ge 10 ]]
+		then
+			name_season=Fall
+		fi
+		anime_season=$(printf "%s %s" "$name_season" "$year_season")
+	fi
 }
 function download-airing-info () {
 	if [ ! -f "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" ]
@@ -500,11 +519,8 @@ function get-season-infos () {
 					score_season=$(printf '%.*f\n' 1 "$score_season")
 					if [[ $SEASON_YEAR == "Yes" ]]
 					then
-						anime_season=$(get-animes-season-year)
-						if [ "$anime_season" != "Null Null" ]
-						then
-							printf "      1:\n        label.sync: %s\n" "$anime_season" >> "$METADATA"
-						fi
+						get-animes-season-year
+						printf "      1:\n        label.sync: %s\n" "$anime_season" >> "$METADATA"
 					else
 						printf "      1:\n        label.remove: score\n" >> "$METADATA"
 					fi
@@ -536,8 +552,8 @@ function get-season-infos () {
 						fi
 						if [[ $SEASON_YEAR == "Yes" ]]
 						then
-							anime_season=$(get-animes-season-year)
-							if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" && $anime_season != "Null Null" ]]
+							get-animes-season-year
+							if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
 							then
 								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
 							else
