@@ -520,7 +520,7 @@ function get-season-infos () {
 					if [[ $SEASON_YEAR == "Yes" ]]
 					then
 						get-animes-season-year
-						printf "      1:\n        label.sync: %s\n" "$anime_season" >> "$METADATA"
+						printf "      1:\n        label: %s\n" "$anime_season" >> "$METADATA"
 					else
 						printf "      1:\n        label.remove: score\n" >> "$METADATA"
 					fi
