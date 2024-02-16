@@ -501,7 +501,10 @@ function get-season-infos () {
 					if [[ $SEASON_YEAR == "Yes" ]]
 					then
 						anime_season=$(get-animes-season-year)
-						printf "      1:\n        label.sync: %s\n" "$anime_season" >> "$METADATA"
+						if [ "$anime_season" != "Null Null" ]
+						then
+							printf "      1:\n        label.sync: %s\n" "$anime_season" >> "$METADATA"
+						fi
 					else
 						printf "      1:\n        label.remove: score\n" >> "$METADATA"
 					fi
@@ -534,7 +537,7 @@ function get-season-infos () {
 						if [[ $SEASON_YEAR == "Yes" ]]
 						then
 							anime_season=$(get-animes-season-year)
-							if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
+							if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" && $anime_season != "Null Null" ]]
 							then
 								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: %s,score\n" "$season_number" "$romaji_title" "$score_season" "$anime_season" >> "$METADATA"
 							else
@@ -595,6 +598,10 @@ function write-metadata () {
 		if [ "$english_title" == "null" ]
 	then
 		english_title=$romaji_title
+	fi
+		if [ "$native_title" == "null" ]
+	then
+		native_title=$romaji_title
 	fi
 	if [[ $ALLOW_RENAMING == "Yes" ]]
 	then
