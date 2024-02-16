@@ -240,10 +240,10 @@ function get-animes-season-year () {
 		if [[ $month_season -le 3 ]]
 		then
 			name_season=Winter
-		elif [[ $month_season -ge 4 && $seasons_month -le 6 ]]
+		elif [[ $month_season -ge 4 && $month_season -le 6 ]]
 		then
 			name_season=Spring
-		elif [[ $month_season -ge 7 && $seasons_month -le 9 ]]
+		elif [[ $month_season -ge 7 && $month_season -le 9 ]]
 		then
 			name_season=Summer
 		elif [[ $month_season -ge 10 ]]
