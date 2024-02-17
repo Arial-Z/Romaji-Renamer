@@ -2,6 +2,7 @@ from plexapi.server import PlexServer
 from dotenv import load_dotenv
 from os import environ, path
 from os.path import normpath, basename
+import os
 import re
 
 # Find .env file
