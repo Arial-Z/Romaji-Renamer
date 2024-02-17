@@ -1,8 +1,8 @@
 from plexapi.server import PlexServer
 from dotenv import load_dotenv
 from os import environ, path
+from os.path import normpath, basename
 import re
-import pathlib
 
 # Find .env file
 basedir = path.abspath(path.dirname(__file__))
@@ -23,8 +23,7 @@ with open(path.join(basedir, "config/tmp/plex_animes_export.tsv"), "w") as expor
 		if ( tvdbid ) :
 			tvdb = str(tvdbid.group(1))
 			location = str(video.locations)[2:-2]
-			path = pathlib.PurePath(location)
-			folder = str(path.name)
+			folder = str(basename(normpath(location)))
 			seasons = str(video.seasons())
 			seasonslist = re.findall("\-(\d*)\>", seasons)
 			cleanseasonslist = ',' .join(seasonslist)

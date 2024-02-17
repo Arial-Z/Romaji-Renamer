@@ -1,8 +1,8 @@
 from plexapi.server import PlexServer
 from dotenv import load_dotenv
 from os import environ, path
+from os.path import normpath, basename
 import re
-import pathlib
 
 # Find .env file
 basedir = path.abspath(path.dirname(__file__))
@@ -23,8 +23,7 @@ with open(path.join(basedir, "config/tmp/plex_movies_export.tsv"), "w") as expor
 		if ( imdbid ) :
 			imdb = str(imdbid.group(1))
 			location = str(video.locations)[2:-2]
-			path = pathlib.PurePath(location)
-			folder = str(path.parent.name)
+			folder = str(basename(normpath(location)))
 			export=(imdb + "\t" + title + "\t" + folder + "\n")
 			export_plex.write(export)
 		else :
