@@ -1,13 +1,13 @@
 from plexapi.server import PlexServer
 from dotenv import load_dotenv
-from os import environ, path
-from os.path import normpath, basename
-import os
+from os import environ
+from pathlib import Path, PurePath
 import re
 
+
 # Find .env file
-basedir = path.abspath(path.dirname(__file__))
-load_dotenv(path.join(basedir, "config/.env"))
+basedir = Path.cwd()
+load_dotenv(Path(basedir, "config/.env"))
 
 # General Config
 url = environ.get('plex_url')
@@ -16,7 +16,7 @@ ANIME_LIBRARY_NAME=environ.get('ANIME_LIBRARY_NAME')
 
 plex = PlexServer(url, token, timeout=300)
 animes = plex.library.section(ANIME_LIBRARY_NAME)
-with open(path.join(basedir, "config/tmp/plex_animes_export.tsv"), "w") as export_plex, open(path.join(basedir, "config/tmp/plex_failed_animes.tsv"), "w") as export_fail:
+with open(Path(basedir, "config/tmp/plex_animes_export.tsv"), "w") as export_plex, open(Path(basedir, "config/tmp/plex_failed_animes.tsv"), "w") as export_fail:
 	for video in animes.search():
 		title = str(video.title)
 		ids = str(video.guids)
@@ -24,7 +24,7 @@ with open(path.join(basedir, "config/tmp/plex_animes_export.tsv"), "w") as expor
 		if ( tvdbid ) :
 			tvdb = str(tvdbid.group(1))
 			location = str(video.locations)[2:-2]
-			folder = str(basename(normpath(location)))
+			folder = str(PurePath(location).name)
 			seasons = str(video.seasons())
 			seasonslist = re.findall("\-(\d*)\>", seasons)
 			cleanseasonslist = ',' .join(seasonslist)

@@ -1,13 +1,12 @@
 from plexapi.server import PlexServer
 from dotenv import load_dotenv
-from os import environ, path
-from os.path import normpath, basename
-import os
+from os import environ
+from pathlib import Path, PurePath
 import re
 
 # Find .env file
-basedir = path.abspath(path.dirname(__file__))
-load_dotenv(path.join(basedir, "config/.env"))
+basedir = Path.cwd()
+load_dotenv(Path(basedir, "config/.env"))
 
 # General Config
 url = environ.get('plex_url')
@@ -16,7 +15,7 @@ MOVIE_LIBRARY_NAME=environ.get('MOVIE_LIBRARY_NAME')
 
 plex = PlexServer(url, token, timeout=300)
 movies = plex.library.section(MOVIE_LIBRARY_NAME)
-with open(path.join(basedir, "config/tmp/plex_movies_export.tsv"), "w") as export_plex, open(path.join(basedir, "config/tmp/plex_failed_movies.tsv"), "w") as export_fail:
+with open(Path(basedir, "config/tmp/plex_movies_export.tsv"), "w") as export_plex, open(Path(basedir, "config/tmp/plex_failed_movies.tsv"), "w") as export_fail:
 	for video in movies.search():
 		title = str(video.title)
 		ids = str(video.guids)
@@ -24,7 +23,7 @@ with open(path.join(basedir, "config/tmp/plex_movies_export.tsv"), "w") as expor
 		if ( imdbid ) :
 			imdb = str(imdbid.group(1))
 			location = str(video.locations)[2:-2]
-			folder = str(os.path.basename(os.path.dirname(location)))
+			folder = str(PurePath(location).parent.name)
 			export=(imdb + "\t" + title + "\t" + folder + "\n")
 			export_plex.write(export)
 		else :
