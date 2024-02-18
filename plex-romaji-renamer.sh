@@ -3,7 +3,7 @@
 RUN_ANIMES_SCRIPT=0
 RUN_MOVIES_SCRIPT=0
 RUN_SEASONAL_SCRIPT=0
-
+printf "PRR v1.23+" | tee -a "$LOG"
 locale=$(locale -a | grep -i "utf" | head -n 1)
 if [ -z "$locale" ]
 then
