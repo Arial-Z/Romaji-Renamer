@@ -31,7 +31,7 @@ if [ ! -f "$SCRIPT_FOLDER/config/override-ID-movies.example.tsv" ]
 then
 curl -s "https://raw.githubusercontent.com/Arial-Z/Plex-Romaji-Renamer/dev/config/override-ID-movies.example.tsv" > "$SCRIPT_FOLDER/config/override-ID-movies.example.tsv"
 fi
-sleep infinity
+# sleep infinity
 if [ -f "$SCRIPT_FOLDER/config/.env" ]
 then
 	source "$SCRIPT_FOLDER/config/.env"
