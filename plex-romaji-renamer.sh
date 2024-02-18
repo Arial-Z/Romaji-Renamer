@@ -28,7 +28,7 @@ curl -s "https://raw.githubusercontent.com/Arial-Z/Plex-Romaji-Renamer/dev/confi
 fi
 if [ ! -f "$SCRIPT_FOLDER/config/override-ID-movies.example.tsv" ]
 then
-curl -s "https://raw.githubusercontent.com/Arial-Z/Plex-Romaji-Renamer/dev/config/override-ID-movies.example.tsv" "$SCRIPT_FOLDER/config/override-ID-movies.example.tsv"
+curl -s "https://raw.githubusercontent.com/Arial-Z/Plex-Romaji-Renamer/dev/config/override-ID-movies.example.tsv" > "$SCRIPT_FOLDER/config/override-ID-movies.example.tsv"
 fi
 if [ -f "$SCRIPT_FOLDER/config/.env" ]
 then
