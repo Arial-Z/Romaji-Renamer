@@ -3,6 +3,8 @@
 RUN_ANIMES_SCRIPT=0
 RUN_MOVIES_SCRIPT=0
 RUN_SEASONAL_SCRIPT=0
+SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
 printf "PRR v1.23+" | tee -a "$LOG"
 locale=$(locale -a | grep -i "utf" | head -n 1)
 if [ -z "$locale" ]
@@ -12,8 +14,6 @@ then
 else
 	export LC_ALL="$locale"
 fi
-SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
 if [ ! -d "$SCRIPT_FOLDER/config" ]
 then
 	printf "%s - Error config folder missing\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
