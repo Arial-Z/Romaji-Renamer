@@ -1,7 +1,6 @@
 #!/bin/bash
 
 # SCRIPT VARIABLES
-export LC_ALL=en_US.UTF-8
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 media_type=seasonal
 source "$SCRIPT_FOLDER/config/.env"
@@ -16,7 +15,7 @@ if [ ! -d "$SCRIPT_FOLDER/config/tmp" ]										#check if exist and create fold
 then
 	mkdir "$SCRIPT_FOLDER/config/tmp"
 fi
-:> "$SCRIPT_FOLDER/config/seasonal.tsv"
+:> "$SCRIPT_FOLDER/config/data/seasonal.tsv"
 
 #SCRIPT
 printf "%s - Starting script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
