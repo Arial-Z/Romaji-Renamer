@@ -5,7 +5,9 @@ RUN_MOVIES_SCRIPT=0
 RUN_SEASONAL_SCRIPT=0
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 source "$SCRIPT_FOLDER/config/.env"
-printf "PRR v1.23+\n" | tee -a "$LOG"
+source "$SCRIPT_FOLDER/VERSION"
+LOG=$LOG_FOLDER/PRR_$(date +%Y.%m.%d).log
+printf "Plex-Romaji-Renamer %s\n" "$version" | tee -a "$LOG"
 locale=$(locale -a | grep -i "utf" | head -n 1)
 if [ -z "$locale" ]
 then
