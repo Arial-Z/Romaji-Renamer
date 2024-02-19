@@ -1,7 +1,7 @@
 from plexapi.server import PlexServer
 from dotenv import load_dotenv
 from os import environ
-from pathlib import Path, PurePath
+from pathlib import Path, PureWindowsPath, PurePosixPath
 import re
 
 
@@ -24,7 +24,10 @@ with open(Path(basedir, "config/tmp/plex_animes_export.tsv"), "w") as export_ple
 		if ( tvdbid ) :
 			tvdb = str(tvdbid.group(1))
 			location = str(video.locations)[2:-2]
-			folder = str(PurePath(location).name)
+			if (re.match("^.*(\\\\.*)$", location)) :
+				folder = str(PureWindowsPath(location).name)
+			else :
+				folder = str(PurePosixPath(location).name)
 			seasons = str(video.seasons())
 			seasonslist = re.findall("\-(\d*)\>", seasons)
 			cleanseasonslist = ',' .join(seasonslist)
