@@ -75,7 +75,7 @@ printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # write PMM metadata file from ID/movies.tsv and jikan API
-printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Start writing the metadata file \n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "metadata:\n" > "$METADATA"
 imdb_id=""
 anilist_id=""
