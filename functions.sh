@@ -49,7 +49,7 @@ function get-anilist-id () {
 function get-mal-id () {
 	invalid_mal_id=0
 	mal_id=$(jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
-	if [[ "$mal_id" == 'null' ]] || [[ "$mal_id" == 0 ]] || [[ -z $mal_id ]]
+	if [[ $mal_id == 'null' ]] || [[ $mal_id == 0 ]] || [[ -z $mal_id ]]
 	then
 		if [[ $media_type == "animes" ]]
 		then
@@ -57,7 +57,7 @@ function get-mal-id () {
 		else
 			mal_id=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .mal_id' -r "$SCRIPT_FOLDER/config/tmp/list-movies-id.json" | head -n 1)
 		fi
-		if [[ "$mal_id" == 'null' ]] || [[ "$mal_id" == 0 ]] || [[ -z $mal_id ]]
+		if [[ $mal_id == 'null' ]] || [[ $mal_id == 0 ]] || [[ -z $mal_id ]]
 		then
 			printf "%s\t\t - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
 			printf "%s - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
@@ -553,8 +553,14 @@ function check-rating-1-valid () {
 			if [[ $RATING_1_SOURCE == "ANILIST" ]]
 			then
 				printf "%s\t\t - invalid rating for Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
-			else 
-				printf "%s\t\t - invalid rating for MAL id : %s skipping \n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
+			else
+				if [[ $mal_id == 'null' ]] || [[ $mal_id == 0 ]] || [[ -z $mal_id ]]
+				then
+					printf "%s\t\t - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
+					printf "%s - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
+				else
+					printf "%s\t\t - invalid rating for MAL id : %s skipping \n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
+				fi
 			fi
 		else
 			score_1=$(printf '%.*f\n' 1 "$score_1")
@@ -620,7 +626,13 @@ function check-rating-2-valid () {
 			then
 				printf "%s\t\t - invalid rating for Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 			else 
-				printf "%s\t\t - invalid rating for MAL id : %s skipping \n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
+				if [[ $mal_id == 'null' ]] || [[ $mal_id == 0 ]] || [[ -z $mal_id ]]
+				then
+					printf "%s\t\t - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
+					printf "%s - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
+				else
+					printf "%s\t\t - invalid rating for MAL id : %s skipping \n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
+				fi
 			fi
 		else
 			score_2=$(printf '%.*f\n' 1 "$score_2")
