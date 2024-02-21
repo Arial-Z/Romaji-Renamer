@@ -49,7 +49,7 @@ function get-anilist-id () {
 function get-mal-id () {
 	invalid_mal_id=0
 	mal_id=$(jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
-	if [[ "$mal_id" == 'null' ]] || [[ "$mal_id" == 0 ]]
+	if [[ "$mal_id" == 'null' ]] || [[ "$mal_id" == 0 ]] || [[ -z $mal_id ]]
 	then
 		if [[ $media_type == "animes" ]]
 		then
@@ -57,7 +57,7 @@ function get-mal-id () {
 		else
 			mal_id=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .mal_id' -r "$SCRIPT_FOLDER/config/tmp/list-movies-id.json" | head -n 1)
 		fi
-		if [[ "$mal_id" == 'null' ]] || [[ "$mal_id" == 0 ]]
+		if [[ "$mal_id" == 'null' ]] || [[ "$mal_id" == 0 ]] || [[ -z $mal_id ]]
 		then
 			printf "%s\t\t - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
 			printf "%s - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
