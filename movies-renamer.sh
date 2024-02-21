@@ -77,6 +77,9 @@ printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 # write PMM metadata file from ID/movies.tsv and jikan API
 printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "metadata:\n" > "$METADATA"
+imdb_id=""
+anilist_id=""
+mal_id=""
 while IFS=$'\t' read -r imdb_id anilist_id plex_title asset_name
 do
 	printf "%s\t - Writing metadata for imdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$imdb_id" "$anilist_id" | tee -a "$LOG"

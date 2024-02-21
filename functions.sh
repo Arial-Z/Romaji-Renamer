@@ -78,7 +78,7 @@ function get-anilist-infos () {
 			curl -s 'https://graphql.anilist.co/' \
 			-X POST \
 			-H 'content-type: application/json' \
-			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } },startDate {year, month} season, seasonYear, coverImage { extraLarge }, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } },startDate {year, month} season, seasonYear, coverImage { extraLarge }, status, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 				((wait_time++))
@@ -299,82 +299,87 @@ function download-airing-info () {
 	fi
 }
 function get-airing-status () {
-	anilist_backup_id=$anilist_id
-	airing_status="Ended"
-	last_sequel_found=0
-	sequel_multi_check=0
-	while [ $last_sequel_found -lt 50 ];
-	do
-		if [[ $sequel_multi_check -gt 0 ]]
-		then
-			anilist_multi_id_backup=$anilist_id
-			:> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
-			while IFS=$'\n' read -r anilist_id
-			do
-				download-airing-info
-				cat "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" >> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
-			done < "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
-			anilist_id=$anilist_multi_id_backup
-			sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json")
-			if [ -z "$sequel_data" ]
-			then
-				airing_status="Ended"
-				anilist_id=$anilist_backup_id
-				break
-			else
-				sequel_check=$(printf "%s" "$sequel_data" | jq 'select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" )')
-				if echo "$sequel_check" | grep -q -w "NOT_YET_RELEASED"
-				then
-					airing_status="Planned"
-					anilist_id=$anilist_backup_id
-					break
-				else
-					anilist_id=$(printf "%s" "$sequel_data" | jq '.id')
-					sequel_multi_check=$(printf %s "$anilist_id" | wc -l)
-					if [[ $sequel_multi_check -gt 0 ]]
-					then
-						printf "%s" "$anilist_id" > "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
-						anilist_id=$( printf "%s" "$anilist_id" | head -n 1)
-						((last_sequel_found++))
-					else
-						((last_sequel_found++))
-					fi
-				fi
-			fi
-		else
-			download-airing-info
-			sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json")
-			if [ -z "$sequel_data" ]
-			then
-				airing_status="Ended"
-				anilist_id=$anilist_backup_id
-				break
-			else
-				sequel_check=$(printf "%s" "$sequel_data" | jq 'select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" )')
-				if echo "$sequel_check" | grep -q -w "NOT_YET_RELEASED"
-				then
-					airing_status="Planned"
-					anilist_id=$anilist_backup_id
-					break
-				else
-					anilist_id=$(printf "%s" "$sequel_data" | jq '.id')
-					sequel_multi_check=$(printf %s "$anilist_id" | wc -l)
-					if [[ $sequel_multi_check -gt 0 ]]
-					then
-						printf "%s\n" "$anilist_id" > "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
-						anilist_id=$( printf "%s" "$anilist_id" | head -n 1)
-						((last_sequel_found++))
-					else
-						((last_sequel_found++))
-					fi
-				fi
-			fi
-		fi
-	done
-	anilist_id=$anilist_backup_id
-	if [[ $last_sequel_found -ge 50 ]]
+	if jq '.data.Media.status' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" | grep -q -w "NOT_YET_RELEASED"
 	then
+		airing_status="Planned"
+	else
+		anilist_backup_id=$anilist_id
 		airing_status="Ended"
+		last_sequel_found=0
+		sequel_multi_check=0
+		while [ $last_sequel_found -lt 50 ];
+		do
+			if [[ $sequel_multi_check -gt 0 ]]
+			then
+				anilist_multi_id_backup=$anilist_id
+				:> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
+				while IFS=$'\n' read -r anilist_id
+				do
+					download-airing-info
+					cat "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" >> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
+				done < "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
+				anilist_id=$anilist_multi_id_backup
+				sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json")
+				if [ -z "$sequel_data" ]
+				then
+					airing_status="Ended"
+					anilist_id=$anilist_backup_id
+					break
+				else
+					sequel_check=$(printf "%s" "$sequel_data" | jq 'select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" )')
+					if echo "$sequel_check" | grep -q -w "NOT_YET_RELEASED"
+					then
+						airing_status="Planned"
+						anilist_id=$anilist_backup_id
+						break
+					else
+						anilist_id=$(printf "%s" "$sequel_data" | jq '.id')
+						sequel_multi_check=$(printf %s "$anilist_id" | wc -l)
+						if [[ $sequel_multi_check -gt 0 ]]
+						then
+							printf "%s" "$anilist_id" > "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
+							anilist_id=$( printf "%s" "$anilist_id" | head -n 1)
+							((last_sequel_found++))
+						else
+							((last_sequel_found++))
+						fi
+					fi
+				fi
+			else
+				download-airing-info
+				sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json")
+				if [ -z "$sequel_data" ]
+				then
+					airing_status="Ended"
+					anilist_id=$anilist_backup_id
+					break
+				else
+					sequel_check=$(printf "%s" "$sequel_data" | jq 'select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" )')
+					if echo "$sequel_check" | grep -q -w "NOT_YET_RELEASED"
+					then
+						airing_status="Planned"
+						anilist_id=$anilist_backup_id
+						break
+					else
+						anilist_id=$(printf "%s" "$sequel_data" | jq '.id')
+						sequel_multi_check=$(printf %s "$anilist_id" | wc -l)
+						if [[ $sequel_multi_check -gt 0 ]]
+						then
+							printf "%s\n" "$anilist_id" > "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
+							anilist_id=$( printf "%s" "$anilist_id" | head -n 1)
+							((last_sequel_found++))
+						else
+							((last_sequel_found++))
+						fi
+					fi
+				fi
+			fi
+		done
+		anilist_id=$anilist_backup_id
+		if [[ $last_sequel_found -ge 50 ]]
+		then
+			airing_status="Ended"
+		fi
 	fi
 }
 function get-poster () {
