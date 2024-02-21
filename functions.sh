@@ -867,4 +867,8 @@ function write-metadata () {
 		get-rating-1
 		get-rating-2
 	fi
+	tvdb_id=""
+	imdb_id=""
+	anilist_id=""
+	mal_id=""
 }
