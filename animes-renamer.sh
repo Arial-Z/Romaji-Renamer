@@ -42,7 +42,7 @@ printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 # create ID/animes.tsv
 create-override
 printf "%s\t - Sorting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-while IFS=$'\t' read -r tvdb_id anilist_id title_override studio ignore_seasons	notes
+while IFS=$'\t' read -r tvdb_id anilist_id title_override studio override_seasons_ignore	notes
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/animes.tsv" | grep -q -w "$tvdb_id"
 	then
@@ -53,7 +53,7 @@ do
 			asset_name=$(sed -n "${line}p" "$SCRIPT_FOLDER/config/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $3}')
 			seasons_list=$(sed -n "${line}p" "$SCRIPT_FOLDER/config/tmp/plex_animes_export.tsv" | awk -F"\t" '{print $4}')
 			printf "%s\t\t - Found override for tvdb id : %s / anilist id : %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
-			printf "%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$seasons_list" >> "$SCRIPT_FOLDER/config/ID/animes.tsv"
+			printf "%s\t%s\t%s\t%s\t%s\t%s\n" "$tvdb_id" "$anilist_id" "$plex_title" "$asset_name" "$seasons_list" "$override_seasons_ignore" >> "$SCRIPT_FOLDER/config/ID/animes.tsv"
 		fi
 	fi
 done < "$SCRIPT_FOLDER/config/override-ID-animes.tsv"
@@ -148,7 +148,7 @@ printf "metadata:\n" > "$METADATA"
 tvdb_id=""
 anilist_id=""
 mal_id=""
-while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name seasons_list
+while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name seasons_list override_seasons_ignore
 do
 	printf "%s\t - Writing metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
 	write-metadata

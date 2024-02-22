@@ -47,7 +47,6 @@ function get-anilist-id () {
 	fi
 }
 function get-mal-id () {
-	invalid_mal_id=0
 	mal_id=$(jq '.data.Media.idMal' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
 	if [[ $mal_id == 'null' ]] || [[ $mal_id == 0 ]] || [[ -z $mal_id ]]
 	then
@@ -61,7 +60,6 @@ function get-mal-id () {
 		then
 			printf "%s\t\t - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
 			printf "%s - Missing MAL ID for Anilist ID : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
-			invalid_mal_id=1
 		fi
 	fi
 }
@@ -196,23 +194,20 @@ function get-score () {
 	fi
 }
 function get-mal-score () {
+	mal_id=""
+	anime_score=0
 	get-mal-id
-	if [[ $invalid_mal_id == 1 ]]
+	get-mal-infos
+	anime_score=0
+	anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json")
+	if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 	then
-		anime_score=0
-	else
+		rm "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json"
 		get-mal-infos
-		anime_score=0
 		anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json")
 		if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 		then
-			rm "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json"
-			get-mal-infos
-			anime_score=$(jq '.data.score' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json")
-			if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
-			then
-				anime_score=0
-			fi
+			anime_score=0
 		fi
 	fi
 }
@@ -512,9 +507,9 @@ function get-rating-1 () {
 	then
 		if [[ $RATING_1_SOURCE == "ANILIST" ]]
 		then
-			printf "%s\t\t - invalid rating for Anilist id : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
+			printf "%s\t\t - invalid rating for Anilist ID : %s skipping \n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 		else 
-			printf "%s\t\t - invalid rating for MAL id : %s skipping \n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
+			printf "%s\t\t - invalid rating for MAL ID : %s skipping \n" "$(date +%H:%M:%S)" "$mal_id" | tee -a "$LOG"
 		fi
 	else
 		score_1=$(printf '%.*f\n' 1 "$score_1")
@@ -861,20 +856,12 @@ function write-metadata () {
 	get-studios
 	printf "    studio: %s\n" "$studio" >> "$METADATA"
 	get-poster
-	if [[ $media_type == "animes" ]] && [[ $IGNORE_SEASONS != "Yes" ]]
+	if [[ $media_type == "animes" ]]
 	then
-		if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/config/$OVERRIDE" | grep -q -w "$anilist_id"
+		if [[ $IGNORE_SEASONS == "Yes" ]] || [[ $override_seasons_ignore == "Yes" ]]
 		then
-			line=$(awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/config/$OVERRIDE" | grep -w -n "$anilist_id" | cut -d : -f 1)
-			if sed -n "${line}p" "$SCRIPT_FOLDER/config/$OVERRIDE" | awk -F"\t" '{print $5}' | grep -q -i -w "Yes"
-			then
-				get-rating-1
-				get-rating-2
-			else
-				get-season-infos
-				check-rating-1-valid
-				check-rating-2-valid
-			fi
+			get-rating-1
+			get-rating-2
 		else
 			get-season-infos
 			check-rating-1-valid
@@ -888,4 +875,5 @@ function write-metadata () {
 	imdb_id=""
 	anilist_id=""
 	mal_id=""
+	override_seasons_ignore=""
 }
