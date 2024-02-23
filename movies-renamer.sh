@@ -82,7 +82,7 @@ anilist_id=""
 mal_id=""
 while IFS=$'\t' read -r imdb_id anilist_id plex_title asset_name
 do
-	printf "%s\t - Writing metadata for imdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$imdb_id" "$anilist_id" | tee -a "$LOG"
+	printf "%s\t - Writing metadata for %s / imdb : %s / Anilist : %s \n" "$(date +%H:%M:%S)" "$plex_title" "$imdb_id" "$anilist_id" | tee -a "$LOG"
 	write-metadata
 	printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 done < "$SCRIPT_FOLDER/config/ID/movies.tsv"

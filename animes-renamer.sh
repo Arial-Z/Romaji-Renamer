@@ -150,7 +150,7 @@ anilist_id=""
 mal_id=""
 while IFS=$'\t' read -r tvdb_id anilist_id plex_title asset_name seasons_list override_seasons_ignore
 do
-	printf "%s\t - Writing metadata for tvdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
+	printf "%s\t - Writing metadata for %s / tvdb : %s / Anilist : %s \n" "$(date +%H:%M:%S)" "$plex_title" "$tvdb_id" "$anilist_id" | tee -a "$LOG"
 	write-metadata
 	printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 done < "$SCRIPT_FOLDER/config/ID/animes.tsv"
