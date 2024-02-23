@@ -544,7 +544,7 @@ function get-season-rating-1 () {
 		score_1_season=$(printf '%.*f\n' 1 "$score_1_season")
 		if [[ "$score_1_season" == 0.0 ]]
 		then
-			((no_rating_seasons++))
+			((score_1_no_rating_seasons++))
 		fi
 	fi
 }
@@ -616,7 +616,7 @@ function get-season-rating-2 () {
 		score_2_season=$(printf '%.*f\n' 1 "$score_2_season")
 		if [[ "$score_2_season" == 0.0 ]]
 		then
-			((no_rating_seasons++))
+			((score_2_no_rating_seasons++))
 		fi
 	fi
 }
@@ -665,7 +665,8 @@ function get-season-infos () {
 		total_2_score=0
 		score_1_season=0
 		score_2_season=0
-		no_rating_seasons=0
+		score_1_no_rating_seasons=0
+		score_2_no_rating_seasons=0
 		season_loop=0
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
@@ -736,7 +737,7 @@ function get-season-infos () {
 		then
 			if [[ "$total_1_score" != 0 ]]
 			then
-				total_1_seasons=$((total_seasons - no_rating_seasons))
+				total_1_seasons=$((total_seasons - score_1_no_rating_seasons))
 				if [[ "$total_1_seasons" != 0 ]]
 				then
 					score_1=$(echo | awk -v v1="$total_1_score" -v v2="$total_1_seasons" '{print v1 / v2}')
@@ -752,7 +753,7 @@ function get-season-infos () {
 		then
 			if [[ "$total_2_score" != 0 ]]
 			then
-				total_2_seasons=$((total_seasons - no_rating_seasons))
+				total_2_seasons=$((total_seasons - score_2_no_rating_seasons))
 				if [[ "$total_2_seasons" != 0 ]]
 				then
 					score_2=$(echo | awk -v v1="$total_2_score" -v v2="$total_2_seasons" '{print v1 / v2}')
