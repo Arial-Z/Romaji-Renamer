@@ -672,7 +672,6 @@ function get-season-infos () {
 		IFS=","
 		for season_number in $seasons_list
 		do
-			season_loop=1
 			if [[ $season_number -eq 0 ]]
 			then
 				printf "      0:\n        label.remove: score\n" >> "$METADATA"
@@ -693,6 +692,7 @@ function get-season-infos () {
 					total-rating-2
 					get-season-poster
 				else
+					season_loop=1
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | head -n 1)
 					if [[ -n "$anilist_id" ]]
 					then
