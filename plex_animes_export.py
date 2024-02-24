@@ -6,7 +6,7 @@ import re
 
 
 # Find .env file
-basedir = Path.cwd()
+basedir = Path(__file__).parent
 load_dotenv(Path(basedir, "config/.env"))
 
 # General Config
