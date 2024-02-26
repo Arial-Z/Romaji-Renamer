@@ -76,7 +76,7 @@ function get-anilist-infos () {
 			curl -s 'https://graphql.anilist.co/' \
 			-X POST \
 			-H 'content-type: application/json' \
-			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { title { romaji(stylised:false), english(stylised:false), native(stylised:false) }, averageScore, genres, tags { name, rank },studios { edges { node { name, isAnimationStudio } } },startDate {year, month} season, seasonYear, coverImage { extraLarge }, status, idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+				--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } title { romaji(stylised: false) english(stylised: false) native(stylised: false) } averageScore genres tags { name rank } studios { edges { node { name isAnimationStudio } } } startDate { year month } season seasonYear coverImage { extraLarge } status idMal} }" }' > "anilist-$anilist_id.json" -D "anilist-limit-rate.txt"
 			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 				((wait_time++))
@@ -275,42 +275,6 @@ function get-animes-season-year () {
 		anime_season=$(printf "%s %s" "$name_season" "$year_season")
 	fi
 }
-function download-airing-info () {
-	if [ ! -f "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" ]
-	then
-		wait_time=0
-		while [ $wait_time -lt 5 ];
-		do
-		printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
-		curl -s 'https://graphql.anilist.co/' \
-		-X POST \
-		-H 'content-type: application/json' \
-		--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } } }" }' > "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-			rate_limit=0
-			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
-				((wait_time++))
-			if [[ -z $rate_limit ]]
-			then
-				printf "%s\t\t\t - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				sleep 61
-			elif [[ $rate_limit -ge 3 ]]
-			then
-				sleep 0.8
-				printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				break
-			elif [[ $rate_limit -lt 3 ]]
-			then
-				printf "%s\t\t\t - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				sleep 30
-				break
-			elif [[ $wait_time == 4 ]]
-			then
-				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				exit 1
-			fi
-		done
-	fi
-}
 function get-airing-status () {
 	if jq '.data.Media.status' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" | grep -q -w "NOT_YET_RELEASED"
 	then
@@ -328,8 +292,8 @@ function get-airing-status () {
 				:> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
 				while IFS=$'\n' read -r anilist_id
 				do
-					download-airing-info
-					cat "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json" >> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
+					get-anilist-infos
+					cat "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" >> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
 				done < "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
 				anilist_id=$anilist_multi_id_backup
 				sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json")
@@ -359,8 +323,8 @@ function get-airing-status () {
 					fi
 				fi
 			else
-				download-airing-info
-				sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/data/relations-$anilist_id.json")
+				get-anilist-infos
+				sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
 				if [ -z "$sequel_data" ]
 				then
 					airing_status="Ended"
