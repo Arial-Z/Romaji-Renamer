@@ -292,6 +292,7 @@ function get-airing-status () {
 				:> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
 				while IFS=$'\n' read -r anilist_id
 				do
+					printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 					get-anilist-infos
 					cat "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" >> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
 				done < "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
@@ -323,6 +324,7 @@ function get-airing-status () {
 					fi
 				fi
 			else
+				printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 				get-anilist-infos
 				sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
 				if [ -z "$sequel_data" ]
