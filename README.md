@@ -2,6 +2,8 @@
 
 A Bash script to import Anilist and MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMM) metadata file.<br/>
 
+Discord : [![Discord Shield](https://discordapp.com/api/guilds/1209232071902363779/widget.png?style=shield)](https://discord.com/invite/VCEEsp39nh)
+
 Here what will be imported for each of your animes :
 ```yml
 # TVDB_ID for PMM to import
