@@ -70,6 +70,9 @@ function get-anilist-infos () {
 			if [[ "$season_loop" == 1 ]]
 			then
 				printf "%s\t\t - Downloading data for S%s anilist : %s\n" "$(date +%H:%M:%S)" "$season_number" "$anilist_id" | tee -a "$LOG"
+			elif [[ "$airing_loop" == 1 ]]
+			then
+				printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 			else
 				printf "%s\t\t - Downloading data for anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 			fi
@@ -280,19 +283,20 @@ function get-airing-status () {
 	then
 		airing_status="Planned"
 	else
+		airing_loop=0
 		anilist_backup_id=$anilist_id
 		airing_status="Ended"
 		last_sequel_found=0
 		sequel_multi_check=0
 		while [ $last_sequel_found -lt 50 ];
 		do
+			airing_loop=1
 			if [[ $sequel_multi_check -gt 0 ]]
 			then
 				anilist_multi_id_backup=$anilist_id
 				:> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
 				while IFS=$'\n' read -r anilist_id
 				do
-					printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 					get-anilist-infos
 					cat "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" >> "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.json"
 				done < "$SCRIPT_FOLDER/config/tmp/airing_sequel_tmp.txt"
@@ -324,7 +328,6 @@ function get-airing-status () {
 					fi
 				fi
 			else
-				printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 				get-anilist-infos
 				sequel_data=$(jq '.data.Media.relations.edges[] | select ( .relationType == "SEQUEL" ) | .node | select ( .format == "TV" or .format == "ONA" or .format == "MOVIE" or .format == "OVA" )' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
 				if [ -z "$sequel_data" ]
@@ -354,6 +357,7 @@ function get-airing-status () {
 				fi
 			fi
 		done
+		airing_loop=0
 		anilist_id=$anilist_backup_id
 		if [[ $last_sequel_found -ge 50 ]]
 		then
