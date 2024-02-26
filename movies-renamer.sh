@@ -1,7 +1,6 @@
 #!/bin/bash
 
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-echo "$SCRIPT_FOLDER"
 media_type="movies"
 source "$SCRIPT_FOLDER/config/.env"
 source "$SCRIPT_FOLDER/functions.sh"
@@ -29,21 +28,21 @@ then
 fi
 :> "$SCRIPT_FOLDER/config/ID/movies.tsv"
 :> "$MATCH_LOG"
-printf "%s - Starting script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Starting movies script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # Download anime mapping json data
 download-anime-id-mapping
 
 
 # export movies list from plex
-printf "%s - Creating anime list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-printf "%s\t - Exporting Plex anime library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Creating animes list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s\t - Exporting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 python3 "$SCRIPT_FOLDER/plex_movies_export.py"
 printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )
 create-override
-printf "%s\t - Sorting Plex anime library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s\t - Sorting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 while IFS=$'\t' read -r imdb_id anilist_id title_override studio notes
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/movies.tsv" | grep -q -w "$imdb_id"
@@ -72,14 +71,18 @@ do
 		printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/config/ID/movies.tsv"
 	fi
 done < "$SCRIPT_FOLDER/config/tmp/plex_movies_export.tsv"
+printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # write PMM metadata file from ID/movies.tsv and jikan API
-printf "%s - Start wrinting the metadata file \n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+printf "%s - Start writing the metadata file \n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "metadata:\n" > "$METADATA"
+imdb_id=""
+anilist_id=""
+mal_id=""
 while IFS=$'\t' read -r imdb_id anilist_id plex_title asset_name
 do
-	printf "%s\t - Writing metadata for imdb id : %s / Anilist id : %s \n" "$(date +%H:%M:%S)" "$imdb_id" "$anilist_id" | tee -a "$LOG"
+	printf "%s\t - Writing metadata for %s / imdb : %s / Anilist : %s \n" "$(date +%H:%M:%S)" "$plex_title" "$imdb_id" "$anilist_id" | tee -a "$LOG"
 	write-metadata
 	printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 done < "$SCRIPT_FOLDER/config/ID/movies.tsv"

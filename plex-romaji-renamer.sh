@@ -3,6 +3,11 @@
 RUN_ANIMES_SCRIPT=0
 RUN_MOVIES_SCRIPT=0
 RUN_SEASONAL_SCRIPT=0
+SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
+source "$SCRIPT_FOLDER/config/.env"
+source "$SCRIPT_FOLDER/VERSION"
+source "$SCRIPT_FOLDER/functions.sh"
+printf "%s - Plex-Romaji-Renamer v%s\n" "$(date +%H:%M:%S)" "$version" | tee -a "$LOG"
 locale=$(locale -a | grep -i "utf" | head -n 1)
 if [ -z "$locale" ]
 then
@@ -11,8 +16,6 @@ then
 else
 	export LC_ALL="$locale"
 fi
-SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-LOG=$LOG_FOLDER/${media_type}_$(date +%Y.%m.%d).log
 if [ ! -d "$SCRIPT_FOLDER/config" ]
 then
 	printf "%s - Error config folder missing\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -28,8 +31,9 @@ curl -s "https://raw.githubusercontent.com/Arial-Z/Plex-Romaji-Renamer/dev/confi
 fi
 if [ ! -f "$SCRIPT_FOLDER/config/override-ID-movies.example.tsv" ]
 then
-curl -s "https://raw.githubusercontent.com/Arial-Z/Plex-Romaji-Renamer/dev/config/override-ID-movies.example.tsv" "$SCRIPT_FOLDER/config/override-ID-movies.example.tsv"
+curl -s "https://raw.githubusercontent.com/Arial-Z/Plex-Romaji-Renamer/dev/config/override-ID-movies.example.tsv" > "$SCRIPT_FOLDER/config/override-ID-movies.example.tsv"
 fi
+# sleep infinity
 if [ -f "$SCRIPT_FOLDER/config/.env" ]
 then
 	source "$SCRIPT_FOLDER/config/.env"

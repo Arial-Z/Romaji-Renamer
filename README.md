@@ -30,7 +30,7 @@ Here what will be imported for each of your animes :
     1:
       # Title from Anilist (Romaji or English from the title setting)
       title: "Yuru Camp△"
-      # Rating from Anilist or MAL (in settings)
+      # Rating 1 from Anilist or MAL (in settings)
       user_rating: 8.3
       # Add label score to use with PMM overlays and also add the season label (optionnal)
       label: Fall 2021, score
@@ -38,12 +38,14 @@ Here what will be imported for each of your animes :
     2:
       # Title from Anilist (Romaji or English from the title setting)
       title: "Yuru Camp△ SEASON 2"
-      # Rating from Anilist or MAL (in settings)
+      # Rating 1 from Anilist or MAL (in settings)
       user_rating: 8.5
       # Add label score to use PMM overlays and also add the season label (optionnal)
       label: Fall 2022,score
-  # Anime rating : average rating of the seasons (Or Anilist / MAL score if no seasons)
-  critic_rating: 8.4
+  # Rating 1 : average rating of the seasons (Anilist or MAL)
+    audience_rating: 8.2
+  # Rating 2 : average rating of the seasons (Anilist or MAL)
+    critic_rating: 8.4
 
 ```
 Anilist Posters for animes and seasons can also be downloaded and imported to plex with the PMM assets folder
@@ -95,6 +97,9 @@ RUN_ANIMES_SCRIPT=Yes
 # Plex animes library name need to be in a double quote (Needed for the animes script)
 ANIME_LIBRARY_NAME="Animes"
 # Path to the created animes metadata file (Needed for the animes script)
+# On docker don't modifify the path "$SCRIPT_FOLDER/pmm/" only the file name if you want
+# on python select the path of the pmm install like this :
+# PMM_Folder/config/metadata-animes.yml
 METADATA_ANIMES=$SCRIPT_FOLDER/pmm/metadata-animes.yml
 
 
@@ -103,6 +108,9 @@ RUN_MOVIES_SCRIPT=No
 # Plex movies animes library name need to be in a double quote (Needed for the movies script)
 MOVIE_LIBRARY_NAME="Animes Movies"
 # Path to the created movies metadata file (Needed for the movies script)
+# On docker don't modifify the path "$SCRIPT_FOLDER/pmm/" only the file name if you want
+# on python select the path of the pmm install like this :
+# PMM_Folder/config/metadata-animes-movies.yml
 METADATA_MOVIES=$SCRIPT_FOLDER/pmm/metadata-animes-movies.yml
 
 # Run the seasonal download script (Yes/No)
@@ -119,16 +127,24 @@ ASSET_FOLDER=$SCRIPT_FOLDER/pmm/assets
 LOG_FOLDER=$SCRIPT_FOLDER/config/logs
 
 
-# Type of rating used in Plex by Anilist (audience, critic, user / leave empty to disable)
-WANTED_RATING=audience
-# Source for RATING (MAL / ANILIST)
-RATING_SOURCE=ANILIST
+# Source for RATING 1 (main show and seasons) (MAL / ANILIST)
+RATING_1_SOURCE=ANILIST
+# Type of rating used in Plex for RATING 1 (audience, critic, user / leave empty to disable)
+RATING_1_TYPE=audience
+# Source for RATING 2 (main show only) (MAL / ANILIST or leave empty to disable)
+RATING_2_SOURCE=MAL
+# Type of rating used in Plex for RATING 2 (audience, critic, user / leave empty to disable)
+RATING_2_TYPE=critic
+# Allow renaming animes (Yes/No)
+ALLOW_RENAMING=Yes
 # Use the english name as title (and also sort_title) instead of the romaji one, the romaji title will be set as original title (Yes/No)
 MAIN_TITLE_ENG=No
 # Use the english name as sort_title instead of the romaji one (Yes/No)
 SORT_TITLE_ENG=No
 # Use the native name as original_title instead of the romaji/english one (Yes/No)
 ORIGINAL_TITLE_NATIVE=Yes
+# Rename season to the anilist title of that season (Yes/No)
+RENAME_SEASONS=Yes
 #Grab anilist tags higher or equal than percentage (0-100)
 ANILIST_TAGS_P=70
 # Download poster (Yes/No)
@@ -137,14 +153,18 @@ POSTER_DOWNLOAD=Yes
 POSTER_SEASON_DOWNLOAD=Yes
 # Source for poster (MAL / ANILIST)
 POSTER_SOURCE=ANILIST
-# Ignore seasons rating and poster (Yes/No)
+# Ignore seasons title, rating and poster (Yes/No)
 IGNORE_SEASONS=No
+# Ignore season 1 if it's the only season (Yes/No)
+IGNORE_S1=Yes
 # Anilist have some full uppercase title, this settings will remove them "86 EIGHTY-SIX" > "86 Eighty-Six" (Yes/No)
 REDUCE_TITLE_CAPS=Yes
 #Add the anime season to the season label in plex (Fall  2022, Spring 2021, ...)
 SEASON_YEAR=No
-# Anime metadata cache time (in days min : 1)
-DATA_CACHE_TIME=3
+# Disable anilist tags
+DISABLE_TAGS=No
+# Mal Data cache time (in days min : 1)
+DATA_CACHE_TIME=5
 ```
 
 ### Step 4 - Configure PMM 
