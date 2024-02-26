@@ -90,7 +90,12 @@ function get-anilist-infos () {
 			elif [[ $rate_limit -ge 3 ]]
 			then
 				sleep 0.8
-				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				if [[ "$airing_loop" == 1 ]]
+				then
+					printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				else
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				fi
 				break
 			elif [[ $rate_limit -lt 3 ]]
 			then
