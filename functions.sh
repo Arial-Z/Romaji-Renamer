@@ -854,7 +854,7 @@ function write-metadata () {
 	get-poster
 	if [[ $media_type == "animes" ]]
 	then
-		if [[ $IGNORE_SEASONS == "Yes" ]] || [[ $override_seasons_ignore == "Yes" ]]
+		if [[ $IGNORE_SEASONS == "Yes" ]] || [[ $override_seasons_ignore == "yes" ]] || [[ $override_seasons_ignore == "Yes" ]]
 		then
 			get-rating-1
 			get-rating-2
