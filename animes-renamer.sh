@@ -42,8 +42,13 @@ printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 # create ID/animes.tsv
 create-override
 printf "%s\t - Sorting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-while IFS=$'\t' read -r tvdb_id anilist_id title_override studio override_seasons_ignore	notes
+while IFS= read -r line
 do
+	tvdb_id=$(printf "%s" "$line" | awk -F"\t" '{print $1}')
+	anilist_id=$(printf "%s" "$line" | awk -F"\t" '{print $2}')
+	title_override=$(printf "%s" "$line" | awk -F"\t" '{print $3}')
+	studio=$(printf "%s" "$line" | awk -F"\t" '{print $4}')
+	override_seasons_ignore=$(printf "%s" "$line" | awk -F"\t" '{print $5}')
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/animes.tsv" | grep -q -w "$tvdb_id"
 	then
 		if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/tmp/plex_animes_export.tsv" | grep -q -w "$tvdb_id"
