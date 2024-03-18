@@ -280,7 +280,7 @@ function get-animes-season-year () {
 		then
 			name_season=Fall
 		fi
-		anime_season=$(printf "%s %s" "$name_season" "$year_season")
+		anime_season=$(printf "%s %s" "$year_season" "$name_season")
 	fi
 }
 function get-airing-status () {
