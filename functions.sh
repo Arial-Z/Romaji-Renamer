@@ -72,7 +72,7 @@ function get-anilist-infos () {
 				printf "%s\t\t\t - Downloading airing info for Anilist : %s\n" "$(date +%H:%M:%S)" "$anilist_id" | tee -a "$LOG"
 			elif [[ $cours_count_total -gt 1 ]]
 			then
-				printf "%s\t\t - Downloading data for S%s part%s Anilist : %s\n" "$(date +%H:%M:%S)" "$season_number" "$cours_count" "$anilist_id" | tee -a "$LOG"
+				printf "%s\t\t - Downloading data for S%s part-%s Anilist : %s\n" "$(date +%H:%M:%S)" "$season_number" "$cours_count" "$anilist_id" | tee -a "$LOG"
 			elif [[ "$season_loop" == 1 ]]
 			then
 				printf "%s\t\t - Downloading data for S%s anilist : %s\n" "$(date +%H:%M:%S)" "$season_number" "$anilist_id" | tee -a "$LOG"
@@ -125,7 +125,7 @@ function get-mal-infos () {
 		then
 			if [[ $cours_count_total -gt 1 ]]
 			then
-				printf "%s\t\t - Downloading data for S%s part%s MAL : %s\n" "$(date +%H:%M:%S)" "$season_number" "$cours_count" "$mal_id" | tee -a "$LOG"
+				printf "%s\t\t - Downloading data for S%s part-%s MAL : %s\n" "$(date +%H:%M:%S)" "$season_number" "$cours_count" "$mal_id" | tee -a "$LOG"
 			elif [[ "$season_loop" == 1 ]]
 			then
 				printf "%s\t\t - Downloading data for S%s MAL : %s\n" "$(date +%H:%M:%S)" "$season_number" "$mal_id" | tee -a "$LOG"
