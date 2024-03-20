@@ -769,8 +769,7 @@ function get-season-infos () {
 					anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | sort -n | paste -s -d, -)
 					if [[ -n "$anilist_id" ]]
 					then
-						anilist_backup_id_season=$(printf "%s" "$anilist_ids" | head -n 1 )
-						cours_count_total=$(echo "anilist_ids" | awk -F "," '{print NF}')
+						cours_count_total=$(printf %s "$anilist_ids" | awk -F "," '{print NF}')
 						total_1_cours_score=0
 						total_2_cours_score=0
 						score_1_no_rating_cours=0
