@@ -30,8 +30,9 @@ fi
 :> "$MATCH_LOG"
 printf "%s - Starting animes script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
-# Download animes mapping json data
+# Download animes mapping json data & anilist userlist
 download-anime-id-mapping
+get-anilist-userlist
 
 # export animes list from plex
 printf "%s - Creating animes list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"

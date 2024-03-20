@@ -9,7 +9,7 @@ source "$SCRIPT_FOLDER/VERSION"
 source "$SCRIPT_FOLDER/functions.sh"
 if ! grep -q -w "$version" "$SCRIPT_FOLDER/config/version_last_run.txt"
 then
-	rm $SCRIPT_FOLDER/config/data/*.json
+	rm "$SCRIPT_FOLDER/config/data/*.json"
 fi
 printf "%s" "$version" > "$SCRIPT_FOLDER/config/version_last_run.txt"
 printf "%s - Plex-Romaji-Renamer v%s\n" "$(date +%H:%M:%S)" "$version" | tee -a "$LOG"
