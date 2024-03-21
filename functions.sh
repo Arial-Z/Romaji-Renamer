@@ -762,6 +762,7 @@ function get-season-infos () {
 					cours_count=0
 					cour_status=""
 					all_cours_anime_season=""
+					season_userlist_type_add=""
 					IFS=','
 					for anilist_id in $anilist_ids
 					do
@@ -795,7 +796,6 @@ function get-season-infos () {
 						fi
 						total-cour-rating-1
 						total-cour-rating-2
-						season_userlist_type_add=""
 						for userlist_type in completed watching dropped paused planning
 						do
 							if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
