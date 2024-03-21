@@ -1016,7 +1016,12 @@ function write-metadata () {
 	if [[ $DISABLE_TAGS != "Yes" ]]
 	then
 		anime_tags=$(get-tags)
-		printf "    genre.sync: Anime,%s\n" "$anime_tags" >> "$METADATA"
+		if [[ "$ADD_ANIME_TAG" == "No" ]]
+		then
+			printf "    genre.sync: %s\n" "$anime_tags" >> "$METADATA"
+		else
+			printf "    genre.sync: Anime,%s\n" "$anime_tags" >> "$METADATA"
+		fi
 	fi
 	label_add=""
 	label_remove=""
