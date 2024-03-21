@@ -875,7 +875,7 @@ function get-season-infos () {
 							fi
 						fi
 					fi
-					if [[ -n "$seasons_userlist_type_add" ]]
+					if [[ -n "$season_userlist_type_add" ]]
 					then
 						if [[ -n "$season_label_add" ]]
 						then
@@ -895,7 +895,12 @@ function get-season-infos () {
 					fi
 					if [[ -n "$anime_season" ]]
 					then
-						season_label_add=$(printf "%s,%s" "$season_label_add" "$anime_season")
+						if [[ -n "$season_label_add" ]]
+						then
+							season_label_add=$(printf "%s,%s" "$season_label_add" "$anime_season")
+						else
+							season_label_add="$anime_season"
+						fi
 					fi
 					if [[ -n "$season_label_add" ]]
 					then
