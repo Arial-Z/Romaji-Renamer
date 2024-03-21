@@ -777,17 +777,18 @@ function get-season-infos () {
 								continue
 							fi
 							for userlist_type in completed watching dropped paused planning
-							do
-								if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
-								then
-									if [[ "${#season_userlist_type_add}" -gt 0 ]]
+								do
+									if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
 									then
-										season_userlist_type_add=$(printf "%s,%s" "$season_userlist_type_add" "$userlist_type")
-									else
-										season_userlist_type_add="$userlist_type"
+										userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
+										if [[ $userlist_type_count -gt 1 ]]
+										then
+											season_userlist_type_add=$(printf "%s,%s" "$season_userlist_type_add" "$userlist_type")
+										else
+											season_userlist_type_add="$userlist_type"
+										fi
 									fi
-								fi
-							done
+								done
 							get-cour-rating-1
 							get-cour-rating-2
 							if [[ $SEASON_YEAR == "Yes" ]]
@@ -1065,14 +1066,14 @@ function write-metadata () {
 	then
 		all_anilist_ids=""
 		userlist_type_add=""
-		userlist_type_remove=""
 		userlist_type_remove="completed,watching,dropped,paused,planning"
 		for userlist_type in completed watching dropped paused planning
 		do
 			all_anilist_ids=$(jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | paste -s -d, - | sed 's/,/\\|/g')
 			if grep -q -w "$all_anilist_ids" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
 			then
-				if [[ "${#userlist_type_add}" -gt 0 ]]
+				userlist_type_count=$(printf %s "$userlist_type_add" | awk -F "," '{print NF}')
+				if [[ $userlist_type_count -gt 1 ]]
 				then
 					userlist_type_add=$(printf "%s,%s" "$userlist_type_add" "$userlist_type")
 				else
