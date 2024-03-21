@@ -312,7 +312,7 @@ function get-studios() {
 	fi
 }
 function get-animes-season-year () {
-	anime_season=$( (jq '.data.Media.season' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq '.data.Media.seasonYear' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | paste -sd ' ' | tr '[:upper:]' '[:lower:]' | sed "s/\( \|^\)\(.\)/\1\u\2/g")
+	anime_season=$( (jq '.data.Media.seasonYear' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq '.data.Media.season' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | paste -sd ' ' | tr '[:upper:]' '[:lower:]' | sed "s/\( \|^\)\(.\)/\1\u\2/g")
 	if [ "$anime_season" == "Null Null" ]
 		then
 		year_season=$(jq '.data.Media.startDate.year' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json")
@@ -741,6 +741,7 @@ function get-season-infos () {
 		score_1_no_rating_seasons=0
 		score_2_no_rating_seasons=0
 		season_loop=0
+		anime_season=""
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
@@ -765,16 +766,19 @@ function get-season-infos () {
 					total-rating-2
 					get-season-poster
 				else
-					season_loop=1
-					anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | sort -n | paste -s -d, -)
 					if [[ -n "$anilist_id" ]]
 					then
+						season_loop=1
+						anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | sort -n | paste -s -d, -)
 						cours_count_total=$(printf %s "$anilist_ids" | awk -F "," '{print NF}')
 						total_1_cours_score=0
 						total_2_cours_score=0
 						score_1_no_rating_cours=0
 						score_2_no_rating_cours=0
 						cours_count=0
+						cour_status=""
+						season_userlist_type=""
+						season_userlist_type_count=""
 						all_cours_anime_season=""
 						IFS=','
 						for anilist_id in $anilist_ids
@@ -783,6 +787,12 @@ function get-season-infos () {
 							if [[ -n "$anilist_id" ]]
 							then
 								get-anilist-infos
+								if jq '.data.Media.status' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" | grep -q -w "NOT_YET_RELEASED"
+								then
+									((score_1_no_rating_cours++))
+									((score_2_no_rating_cours++))
+									continue
+								fi
 								get-cour-rating-1
 								get-cour-rating-2
 								if [[ $SEASON_YEAR == "Yes" ]]
@@ -803,6 +813,19 @@ function get-season-infos () {
 							fi
 							total-cour-rating-1
 							total-cour-rating-2
+							for userlist_type in completed watching dropped paused planning
+							do
+								if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
+								then
+									userlist_type_count=$(printf %s "$season_userlist_type" | awk -F "," '{print NF}')
+									if [[ $userlist_type_count -gt 1 ]]
+									then
+										season_userlist_type=$(printf "%s,%s" "$season_userlist_type" "$userlist_type")
+									else
+										season_userlist_type="$userlist_type"
+									fi
+								fi
+							done
 						done
 						anime_season=$all_cours_anime_season
 						if [[ $RATING_1_SOURCE == "ANILIST" || $RATING_1_SOURCE == "MAL" ]]
@@ -845,21 +868,45 @@ function get-season-infos () {
 						anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | head -n 1)
 						romaji_title=$(get-romaji-title)
 						english_title=$(get-english-title)
-						if [[ $SEASON_YEAR == "Yes" ]]
+						if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
 						then
-							if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
-							then
-								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: %s,score\n" "$season_number" "$romaji_title" "$score_1_season" "$anime_season" >> "$METADATA"
-							else
-								printf "      %s:\n        user_rating: %s\n        label: %s,score\n" "$season_number" "$score_1_season" "$anime_season" >> "$METADATA"
-							fi
+							printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_1_season" >> "$METADATA"
 						else
-							if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
+							printf "      %s:\n        user_rating: %s\n        label: score\n" "$season_number" "$score_1_season" >> "$METADATA"
+						fi
+						season_label_add=""
+						season_label_remove=""
+						if [[ $ANILIST_LISTS == "Yes" ]]
+						then
+							if [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]
 							then
-								printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_1_season" >> "$METADATA"
-							else
-								printf "      %s:\n        user_rating: %s\n        label: score\n" "$season_number" "$score_1_season" >> "$METADATA"
+								season_userlist_type_count=$(printf %s "$anilist_ids" | awk -F "," '{print NF}')
+								if [[ -n $season_userlist_type_count ]] && [[ $season_userlist_type_count -gt 0 ]]
+								then
+									seasons_other_lists_tags="completed,watching,dropped,paused,planning"
+									IFS=","
+									for userlist_type in $season_userlist_type
+									do
+										seasons_other_lists_tags=$(printf "%s" "$seasons_other_lists_tags" | sed s/"$userlist_type"// | sed 's/^,//' | sed 's/,,/,/g')
+									done
+									season_label_add="$season_userlist_type"
+									season_label_remove="$seasons_other_lists_tags"
+								fi
 							fi
+						fi
+						if [[ -n "$anime_season" ]]
+						then
+							season_label_add=$(printf "%s,%s" "$season_label_add" "$anime_season")
+						fi
+						if [[ -n "$season_label_add" ]]
+						then
+							printf "        label: score,%s\n" "$season_label_add" >> "$METADATA"
+						else
+							printf "        label: score\n" >> "$METADATA"
+						fi
+						if [[ -n "$season_label_remove" ]]
+						then
+							printf "        label.remove: %s\n" "$season_label_remove" >> "$METADATA"
 						fi
 						total-rating-1
 						total-rating-2
