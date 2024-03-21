@@ -864,8 +864,8 @@ function get-season-infos () {
 					then
 						if [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]
 						then
-							season_userlist_type_count=$(printf %s "$anilist_ids" | awk -F "," '{print NF}')
-							if [[ -n $season_userlist_type_count ]] && [[ $season_userlist_type_count -gt 0 ]]
+							season_userlist_type_count=$(printf %s "$season_userlist_type" | awk -F "," '{print NF}')
+							if [[ -n $season_userlist_type ]] && [[ $season_userlist_type_count -gt 0 ]]
 							then
 								seasons_userlist_type_remove="completed,watching,dropped,paused,planning"
 								IFS=","
@@ -1050,10 +1050,11 @@ function write-metadata () {
 	if [[ $ANILIST_LISTS_LEVEL == "show" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]
 	then
 		all_anilist_ids=""
+		userlist_type_add=""
+		userlist_type_remove=""
 		userlist_type_remove="completed,watching,dropped,paused,planning"
 		for userlist_type in completed watching dropped paused planning
 		do
-			userlist_type_count=""
 			all_anilist_ids=$(jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | paste -s -d, - | sed 's/,/\\|/g')
 			if grep -q -w "$all_anilist_ids" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
 			then
