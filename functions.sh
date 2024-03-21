@@ -863,8 +863,8 @@ function get-season-infos () {
 					then
 						if [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]
 						then
-							season_userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
-							if [[ -n $season_userlist_type_add ]] && [[ $season_userlist_type_count -gt 0 ]]
+							userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
+							if [[ -n $season_userlist_type_add ]] && [[ $userlist_type_count -gt 0 ]]
 							then
 								seasons_userlist_type_remove="completed,watching,dropped,paused,planning"
 								IFS=","
