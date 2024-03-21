@@ -795,12 +795,11 @@ function get-season-infos () {
 						fi
 						total-cour-rating-1
 						total-cour-rating-2
-						season_userlist_type=""
+						season_userlist_type_add=""
 						for userlist_type in completed watching dropped paused planning
 						do
 							if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
 							then
-								userlist_type_count=""
 								userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
 								if [[ $userlist_type_count -gt 1 ]]
 								then
