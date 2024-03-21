@@ -876,13 +876,13 @@ function get-season-infos () {
 							fi
 						fi
 					fi
-					if [[ -n "$seasons_userlist_type_remove" ]]
+					if [[ -n "$season_userlist_type_add" ]]
 					then
 						if [[ -n "$season_label_add" ]]
 						then
-							season_label_add=$(printf "%s,%s" "$eason_label_add" "$userlist_type_add")
+							season_label_add=$(printf "%s,%s" "$season_label_add" "$season_userlist_type_add")
 						else
-							season_label_add="$userlist_type_add"
+							season_label_add="$season_userlist_type_add"
 						fi
 					fi
 					if [[ -n "$seasons_userlist_type_remove" ]]
