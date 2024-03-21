@@ -776,6 +776,18 @@ function get-season-infos () {
 								((score_2_no_rating_cours++))
 								continue
 							fi
+							for userlist_type in completed watching dropped paused planning
+							do
+								if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
+								then
+									if [[ "${#season_userlist_type_add}" -gt 0 ]]
+									then
+										season_userlist_type_add=$(printf "%s,%s" "$season_userlist_type_add" "$userlist_type")
+									else
+										season_userlist_type_add="$userlist_type"
+									fi
+								fi
+							done
 							get-cour-rating-1
 							get-cour-rating-2
 							if [[ $SEASON_YEAR == "Yes" ]]
@@ -796,19 +808,6 @@ function get-season-infos () {
 						fi
 						total-cour-rating-1
 						total-cour-rating-2
-						for userlist_type in completed watching dropped paused planning
-						do
-							if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
-							then
-								userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
-								if [[ $userlist_type_count -gt 1 ]]
-								then
-									season_userlist_type_add=$(printf "%s,%s" "$season_userlist_type_add" "$userlist_type")
-								else
-									season_userlist_type_add="$userlist_type"
-								fi
-							fi
-						done
 					done
 					anime_season=$all_cours_anime_season
 					if [[ $RATING_1_SOURCE == "ANILIST" || $RATING_1_SOURCE == "MAL" ]]
@@ -875,7 +874,7 @@ function get-season-infos () {
 							fi
 						fi
 					fi
-					if [[ -n "$season_userlist_type_add" ]]
+					if [[ -n "$seasons_userlist_type_add" ]]
 					then
 						if [[ -n "$season_label_add" ]]
 						then
@@ -1073,8 +1072,7 @@ function write-metadata () {
 			all_anilist_ids=$(jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | paste -s -d, - | sed 's/,/\\|/g')
 			if grep -q -w "$all_anilist_ids" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
 			then
-				userlist_type_count=$(printf %s "$userlist_type_add" | awk -F "," '{print NF}')
-				if [[ $userlist_type_count -gt 1 ]]
+				if [[ "${#userlist_type_add}" -gt 0 ]]
 				then
 					userlist_type_add=$(printf "%s,%s" "$userlist_type_add" "$userlist_type")
 				else
