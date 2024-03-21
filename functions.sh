@@ -870,9 +870,9 @@ function get-season-infos () {
 						english_title=$(get-english-title)
 						if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
 						then
-							printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n        label: score\n" "$season_number" "$romaji_title" "$score_1_season" >> "$METADATA"
+							printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n" "$season_number" "$romaji_title" "$score_1_season" >> "$METADATA"
 						else
-							printf "      %s:\n        user_rating: %s\n        label: score\n" "$season_number" "$score_1_season" >> "$METADATA"
+							printf "      %s:\n        user_rating: %s\n" "$season_number" "$score_1_season" >> "$METADATA"
 						fi
 						season_label_add=""
 						season_label_remove=""
