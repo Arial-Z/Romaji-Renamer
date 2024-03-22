@@ -728,11 +728,12 @@ function get-season-infos () {
 	first_season=$(echo "$seasons_list" | awk -F "," '{print $1}')
 	last_season=$(echo "$seasons_list" | awk -F "," '{print $NF}')
 	total_seasons=$(echo "$seasons_list" | awk -F "," '{print NF}')
+	valid_anilist_id=$(jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json")
 	if [[ "$first_season" -eq 0 ]]
 	then
 		total_seasons=$((total_seasons - 1))
 	fi
-	if [[ $season_check != -1 ]]
+	if [ -n "$valid_anilist_id" ] && [[ $season_check != -1 ]]
 	then
 		total_1_score=0
 		total_2_score=0
