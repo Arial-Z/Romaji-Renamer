@@ -888,7 +888,7 @@ function get-season-infos () {
 					then
 						if [[ -n "$season_label_remove" ]]
 						then
-							season_label_remove=$(printf "%s,%s" "$eason_label_remove" "$seasons_userlist_type_remove")
+							season_label_remove=$(printf "%s,%s" "$season_label_remove" "$seasons_userlist_type_remove")
 						else
 							season_label_remove="$seasons_userlist_type_remove"
 						fi
