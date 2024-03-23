@@ -754,7 +754,7 @@ function get-season-infos () {
 				if [[ -n "$anilist_id" ]]
 				then
 					season_loop=1
-					anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | sort -n | paste -s -d, -)
+					anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '[.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number )] | sort_by(.tvdb_epoffset) | .[].anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | paste -s -d, -)
 					cours_count_total=$(printf %s "$anilist_ids" | awk -F "," '{print NF}')
 					total_1_cours_score=0
 					total_2_cours_score=0
@@ -803,8 +803,8 @@ function get-season-infos () {
 								fi
 							fi
 						else
-							printf "%s\t\t - Missing Anilist ID for tvdb : %s - Season : %s cour : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$season_number" "$cour_loop" "$plex_title" | tee -a "$LOG"
-							printf "%s\t\t - Missing Anilist ID for tvdb : %s - Season : %s cour : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$season_number" "$cour_loop" "$plex_title" >> "$MATCH_LOG"
+							printf "%s\t\t - Missing Anilist ID for tvdb : %s - Season : %s cour : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$season_number" "$cours_count" "$plex_title" | tee -a "$LOG"
+							printf "%s\t\t - Missing Anilist ID for tvdb : %s - Season : %s cour : %s / %s\n" "$(date +%H:%M:%S)" "$tvdb_id" "$season_number" "$cours_count" "$plex_title" >> "$MATCH_LOG"
 							((score_1_no_rating_cours++))
 							((score_2_no_rating_cours++))
 						fi
