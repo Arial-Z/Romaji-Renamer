@@ -145,7 +145,7 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/config/tmp/ongoing.tsv"
-printf "%s\t - Done\n\n" "$(date +%H:%M:%S)"
+printf "%s\t - Done\n" "$(date +%H:%M:%S)"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 
 # write PMM metadata file from ID/animes.tsv and jikan API
