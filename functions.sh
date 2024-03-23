@@ -861,7 +861,7 @@ function get-season-infos () {
 					season_label_remove=""
 					if [[ $ANILIST_LISTS == "Yes" ]]
 					then
-						if [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]
+						if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
 						then
 							userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
 							if [[ -n $season_userlist_type_add ]] && [[ $userlist_type_count -gt 0 ]]
@@ -1067,7 +1067,7 @@ function write-metadata () {
 			fi
 		fi
 	fi
-	if [[ $ANILIST_LISTS_LEVEL == "show" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]
+	if { [[ $ANILIST_LISTS_LEVEL == "show" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
 	then
 		all_anilist_ids=""
 		userlist_type_add=""
