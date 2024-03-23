@@ -764,6 +764,7 @@ function get-season-infos () {
 					cour_status=""
 					all_cours_anime_season=""
 					season_userlist_type_add=""
+					seasons_userlist_type_remove=""
 					IFS=','
 					for anilist_id in $anilist_ids
 					do
