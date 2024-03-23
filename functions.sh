@@ -83,9 +83,8 @@ function get-anilist-infos () {
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } title { romaji(stylised: false) english(stylised: false) native(stylised: false) } averageScore genres tags { name rank } studios { edges { node { name isAnimationStudio } } } startDate { year month } season seasonYear coverImage { extraLarge } status idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
-				((wait_time++))
+			((wait_time++))
 			if [[ -z $rate_limit ]]
 			then
 				printf "%s\t\t - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
