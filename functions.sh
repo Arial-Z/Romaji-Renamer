@@ -859,38 +859,35 @@ function get-season-infos () {
 					fi
 					season_label_add=""
 					season_label_remove=""
-					if [[ $ANILIST_LISTS == "Yes" ]]
+					if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
 					then
-						if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
+						userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
+						if [[ -n $season_userlist_type_add ]] && [[ $userlist_type_count -gt 0 ]]
 						then
-							userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
-							if [[ -n $season_userlist_type_add ]] && [[ $userlist_type_count -gt 0 ]]
+							seasons_userlist_type_remove="completed,watching,dropped,paused,planning"
+							IFS=","
+							for userlist_type in $season_userlist_type_add
+							do
+								seasons_userlist_type_remove=$(printf "%s" "$seasons_userlist_type_remove" | sed s/"$userlist_type"// | sed 's/^,//' | sed 's/,,/,/g')
+							done
+						fi
+						if [[ -n "$season_userlist_type_add" ]]
+						then
+							if [[ -n "$season_label_add" ]]
 							then
-								seasons_userlist_type_remove="completed,watching,dropped,paused,planning"
-								IFS=","
-								for userlist_type in $season_userlist_type_add
-								do
-									seasons_userlist_type_remove=$(printf "%s" "$seasons_userlist_type_remove" | sed s/"$userlist_type"// | sed 's/^,//' | sed 's/,,/,/g')
-								done
+								season_label_add=$(printf "%s,%s" "$season_label_add" "$season_userlist_type_add")
+							else
+								season_label_add="$season_userlist_type_add"
 							fi
 						fi
-					fi
-					if [[ -n "$season_userlist_type_add" ]]
-					then
-						if [[ -n "$season_label_add" ]]
+						if [[ -n "$seasons_userlist_type_remove" ]]
 						then
-							season_label_add=$(printf "%s,%s" "$season_label_add" "$season_userlist_type_add")
-						else
-							season_label_add="$season_userlist_type_add"
-						fi
-					fi
-					if [[ -n "$seasons_userlist_type_remove" ]]
-					then
-						if [[ -n "$season_label_remove" ]]
-						then
-							season_label_remove=$(printf "%s,%s" "$season_label_remove" "$seasons_userlist_type_remove")
-						else
-							season_label_remove="$seasons_userlist_type_remove"
+							if [[ -n "$season_label_remove" ]]
+							then
+								season_label_remove=$(printf "%s,%s" "$season_label_remove" "$seasons_userlist_type_remove")
+							else
+								season_label_remove="$seasons_userlist_type_remove"
+							fi
 						fi
 					fi
 					if [[ -n "$anime_season" ]]
