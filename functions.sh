@@ -723,12 +723,18 @@ function check-rating-2-valid () {
 	fi
 }
 function get-season-infos () {
+	override_id=""
 	anilist_backup_id=$anilist_id
 	season_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | .tvdb_season' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json")
 	first_season=$(echo "$seasons_list" | awk -F "," '{print $1}')
 	last_season=$(echo "$seasons_list" | awk -F "," '{print $NF}')
 	total_seasons=$(echo "$seasons_list" | awk -F "," '{print NF}')
 	valid_anilist_id=$(jq --arg tvdb_id "$tvdb_id" '.[] | select( .tvdb_id == $tvdb_id ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json")
+	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/config/$OVERRIDE" | grep -q -w "$anilist_backup_id" && [[ $last_season -eq 1 ]]
+	then
+		valid_anilist_id=1
+		override_id=$anilist_backup_id
+	fi
 	if [[ "$first_season" -eq 0 ]]
 	then
 		total_seasons=$((total_seasons - 1))
@@ -755,6 +761,10 @@ function get-season-infos () {
 				then
 					season_loop=1
 					anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '[.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number )] | sort_by(.tvdb_epoffset) | .[].anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | paste -s -d, -)
+					if [ -n "$override_id" ]
+					then
+						anilist_ids=$override_id
+					fi
 					cours_count_total=$(printf %s "$anilist_ids" | awk -F "," '{print NF}')
 					total_1_cours_score=0
 					total_2_cours_score=0
@@ -1126,7 +1136,7 @@ function write-metadata () {
 	get-poster
 	if [[ $media_type == "animes" ]]
 	then
-		if [[ $IGNORE_SEASONS == "Yes" ]] || [[ $override_seasons_ignore == "yes" ]] || [[ $override_seasons_ignore == "Yes" ]]
+		if [[ $IGNORE_SEASONS == "Yes" ]] || [[ $override_seasons_ignore == "yes" ]]
 		then
 			get-rating-1
 			get-rating-2
