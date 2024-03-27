@@ -924,20 +924,41 @@ function get-season-infos () {
 							printf "        label: score,%s\n" "$season_label_add" >> "$METADATA"
 						fi
 					else
-						printf "        label: score\n" >> "$METADATA"
+						if [[ $last_season -eq 1 ]]
+						then
+							if [[ $IGNORE_S1_ONLY_RATING == "No" ]]
+							then
+								printf "        label: score\n" >> "$METADATA"
+							fi
+						fi
 					fi
 					if [[ -n "$season_label_remove" ]]
 					then
+						if [[ $last_season -eq 1 ]]
+						then
+							if [[ $IGNORE_S1_ONLY_RATING != "No" ]]
+							then
+							printf "        label.remove: score,%s\n" "$season_label_remove" >> "$METADATA"
+							fi
+						fi
 						printf "        label.remove: %s\n" "$season_label_remove" >> "$METADATA"
+					else
+						if [[ $last_season -eq 1 ]]
+						then
+							if [[ $IGNORE_S1_ONLY_RATING != "No" ]]
+							then
+							printf "        label.remove: score\n" >> "$METADATA"
+							fi
+						fi
 					fi
 					if [[ $last_season -eq 1 ]]
 					then
 						if [[ $IGNORE_S1_ONLY_RATING == "No" ]]
 						then
-						printf "\n        user_rating: %s\n" "$score_1_season" >> "$METADATA"
+						printf "        user_rating: %s\n" "$score_1_season" >> "$METADATA"
 						fi
 					else
-						printf "\n        user_rating: %s\n" "$score_1_season" >> "$METADATA"
+						printf "        user_rating: %s\n" "$score_1_season" >> "$METADATA"
 					fi
 					total-rating-1
 					total-rating-2
