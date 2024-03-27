@@ -863,9 +863,10 @@ function get-season-infos () {
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | head -n 1)
 					romaji_title=$(get-romaji-title)
 					english_title=$(get-english-title)
+					printf "      %s:\n" "$season_number"  >> "$METADATA"
 					if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
 					then
-						printf "      %s:\n        title: |-\n          %s\n" "$season_number" "$romaji_title" >> "$METADATA"
+						printf "        title: |-\n          %s\n" "$season_number" "$romaji_title" >> "$METADATA"
 					fi
 					season_label_add=""
 					season_label_remove=""
@@ -933,10 +934,10 @@ function get-season-infos () {
 					then
 						if [[ $IGNORE_S1_ONLY_RATING == "No" ]]
 						then
-						printf "      %s:\n        user_rating: %s\n" "$season_number" "$score_1_season" >> "$METADATA"
+						printf "\n        user_rating: %s\n" "$score_1_season" >> "$METADATA"
 						fi
 					else
-						printf "      %s:\n        user_rating: %s\n" "$season_number" "$score_1_season" >> "$METADATA"
+						printf "\n        user_rating: %s\n" "$score_1_season" >> "$METADATA"
 					fi
 					total-rating-1
 					total-rating-2
