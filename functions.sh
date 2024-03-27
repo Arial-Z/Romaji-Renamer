@@ -865,9 +865,7 @@ function get-season-infos () {
 					english_title=$(get-english-title)
 					if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
 					then
-						printf "      %s:\n        title: |-\n          %s\n        user_rating: %s\n" "$season_number" "$romaji_title" "$score_1_season" >> "$METADATA"
-					else
-						printf "      %s:\n        user_rating: %s\n" "$season_number" "$score_1_season" >> "$METADATA"
+						printf "      %s:\n        title: |-\n          %s\n" "$season_number" "$romaji_title" >> "$METADATA"
 					fi
 					season_label_add=""
 					season_label_remove=""
@@ -913,13 +911,32 @@ function get-season-infos () {
 					fi
 					if [[ -n "$season_label_add" ]]
 					then
-						printf "        label: score,%s\n" "$season_label_add" >> "$METADATA"
+						if [[ $last_season -eq 1 ]]
+						then
+							if [[ $IGNORE_S1_ONLY_RATING == "No" ]]
+							then
+								printf "        label: score,%s\n" "$season_label_add" >> "$METADATA"
+							else
+								printf "        label: %s\n" "$season_label_add" >> "$METADATA"
+							fi
+						else
+							printf "        label: score,%s\n" "$season_label_add" >> "$METADATA"
+						fi
 					else
 						printf "        label: score\n" >> "$METADATA"
 					fi
 					if [[ -n "$season_label_remove" ]]
 					then
 						printf "        label.remove: %s\n" "$season_label_remove" >> "$METADATA"
+					fi
+					if [[ $last_season -eq 1 ]]
+					then
+						if [[ $IGNORE_S1_ONLY_RATING == "No" ]]
+						then
+						printf "      %s:\n        user_rating: %s\n" "$season_number" "$score_1_season" >> "$METADATA"
+						fi
+					else
+						printf "      %s:\n        user_rating: %s\n" "$season_number" "$score_1_season" >> "$METADATA"
 					fi
 					total-rating-1
 					total-rating-2
