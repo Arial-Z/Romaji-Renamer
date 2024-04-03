@@ -59,7 +59,7 @@ function get-anilist-userlist {
 				sleep 61
 			elif [[ $rate_limit -ge 3 ]]
 			then
-				sleep 0.6
+				sleep 0.8
 				printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				break
 			elif [[ $rate_limit -lt 3 ]]
@@ -136,7 +136,7 @@ function get-anilist-infos () {
 				sleep 61
 			elif [[ $rate_limit -ge 3 ]]
 			then
-				sleep 0.6
+				sleep 0.8
 				if [[ "$airing_loop" == 1 ]]
 				then
 					printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
