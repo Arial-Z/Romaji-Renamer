@@ -59,7 +59,7 @@ function get-anilist-userlist {
 				sleep 61
 			elif [[ $rate_limit -ge 3 ]]
 			then
-				sleep 0.8
+				sleep 1
 				printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				break
 			elif [[ $rate_limit -lt 3 ]]
@@ -136,7 +136,7 @@ function get-anilist-infos () {
 				sleep 61
 			elif [[ $rate_limit -ge 3 ]]
 			then
-				sleep 0.8
+				sleep 1
 				if [[ "$airing_loop" == 1 ]]
 				then
 					printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -763,7 +763,7 @@ function get-season-infos () {
 					anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '[.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number )] | sort_by(.tvdb_epoffset) | .[].anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | paste -s -d, -)
 					if [ -n "$override_id" ]
 					then
-						anilist_ids=$override_id
+						anilist_ids=$anilist_backup_id 
 					fi
 					cours_count_total=$(printf %s "$anilist_ids" | awk -F "," '{print NF}')
 					total_1_cours_score=0
@@ -788,7 +788,9 @@ function get-season-infos () {
 								((score_2_no_rating_cours++))
 								continue
 							fi
-							for userlist_type in completed watching dropped paused planning
+							if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
+							then
+								for userlist_type in completed watching dropped paused planning
 								do
 									if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
 									then
@@ -801,6 +803,7 @@ function get-season-infos () {
 										fi
 									fi
 								done
+							fi
 							get-cour-rating-1
 							get-cour-rating-2
 							if [[ $SEASON_YEAR == "Yes" ]]
@@ -861,6 +864,10 @@ function get-season-infos () {
 					fi
 					cours_count_total=0
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | head -n 1)
+					if [ -n "$override_id" ]
+					then
+						anilist_id=$anilist_backup_id 
+					fi
 					romaji_title=$(get-romaji-title)
 					english_title=$(get-english-title)
 					printf "      %s:\n" "$season_number"  >> "$METADATA"
