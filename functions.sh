@@ -945,8 +945,9 @@ function get-season-infos () {
 							else
 								printf "        label.remove: %s\n" "$season_label_remove" >> "$METADATA"
 							fi
+						else
+							printf "        label.remove: %s\n" "$season_label_remove" >> "$METADATA"
 						fi
-						printf "        label.remove: %s\n" "$season_label_remove" >> "$METADATA"
 					else
 						if [[ $last_season -eq 1 ]]
 						then
