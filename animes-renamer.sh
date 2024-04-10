@@ -82,9 +82,10 @@ printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # Create an ongoing list at $SCRIPT_FOLDER/config/data/ongoing.csv
 printf "%s - Creating Anilist airing list\n" "$(date +%H:%M:%S)"
-find "$SCRIPT_FOLDER/config/data/ongoing.tsv" -type f -mmin +720 -exec rm {} \;
-if [ ! -f "$SCRIPT_FOLDER/config/data/ongoing.tsv" ]
+if [ -f "$SCRIPT_FOLDER/config/data/ongoing.tsv" ]
 then
+	find "$SCRIPT_FOLDER/config/data/ongoing.tsv" -type f -mmin +720 -exec rm {} \;
+else
 	:> "$SCRIPT_FOLDER/config/tmp/ongoing-tmp.tsv"
 	ongoingpage=1
 	while [ $ongoingpage -lt 9 ];													# get the airing list from jikan API max 9 pages (225 animes)
