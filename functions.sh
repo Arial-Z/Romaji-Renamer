@@ -757,9 +757,9 @@ function get-season-infos () {
 				then
 					season_loop=1
 					anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '[.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number )] | sort_by(.tvdb_epoffset) | .[].anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | paste -s -d, -)
-					if [ -n "$override_id" ]
+					if [ -n "$override_id" ] && [[ $season_number -eq 1 ]]
 					then
-						anilist_ids=$anilist_backup_id 
+						anilist_ids=$anilist_backup_id
 					fi
 					cours_count_total=$(printf %s "$anilist_ids" | awk -F "," '{print NF}')
 					total_1_cours_score=0
@@ -777,6 +777,7 @@ function get-season-infos () {
 						((cours_count++))
 						if [[ -n "$anilist_id" ]]
 						then
+							echo "1"
 							get-anilist-infos
 							if jq '.data.Media.status' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" | grep -q -w "NOT_YET_RELEASED"
 							then
@@ -860,7 +861,7 @@ function get-season-infos () {
 					fi
 					cours_count_total=0
 					anilist_id=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number ) | select( .tvdb_epoffset == "0" ) | .anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | head -n 1)
-					if [ -n "$override_id" ]
+					if [ -n "$override_id" ] && [[ $season_number -eq 1 ]]
 					then
 						anilist_id=$anilist_backup_id 
 					fi
