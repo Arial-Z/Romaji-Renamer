@@ -777,7 +777,6 @@ function get-season-infos () {
 						((cours_count++))
 						if [[ -n "$anilist_id" ]]
 						then
-							echo "1"
 							get-anilist-infos
 							if jq '.data.Media.status' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" | grep -q -w "NOT_YET_RELEASED"
 							then
