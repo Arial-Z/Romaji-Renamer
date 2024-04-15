@@ -91,11 +91,6 @@ do
 	wait_time=0
 	while [ $wait_time -lt 5 ];
 	do
-		if [[ $wait_time == 4 ]]
-		then
-			printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			exit 1
-		fi
 		curl -s 'https://graphql.anilist.co/' \
 		-X POST \
 		-H 'content-type: application/json' \
@@ -103,7 +98,11 @@ do
 		rate_limit=0
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 		((wait_time++))
-		if [[ -z $rate_limit ]]
+		if [[ $wait_time == 4 ]]
+		then
+			printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			exit 1
+		elif [[ -z $rate_limit ]]
 		then
 			printf "%s\t - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 61
@@ -116,9 +115,9 @@ do
 		then
 			printf "%s\t - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 30
+			printf "%s\t - done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			break
 		fi
-		((wait_time++))
 	done
 	jq '.data.Page.media[].id' -r "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" >> "$SCRIPT_FOLDER/config/tmp/ongoing-tmp.tsv"		# store the mal ID of the ongoing show
 	if grep -q -w ":false}" "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json"														# stop if page is empty

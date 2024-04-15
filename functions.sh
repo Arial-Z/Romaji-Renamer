@@ -24,16 +24,15 @@ function download-anime-id-mapping () {
 			curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/list-movies-id.json" > "$SCRIPT_FOLDER/config/tmp/list-movies-id.json"
 			size=$(du -b "$SCRIPT_FOLDER/config/tmp/list-movies-id.json" | awk '{ print $1 }')
 		fi
-			((wait_time++))
-		if [[ $size -gt 1000 ]]
-		then
-			printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			break
-		fi
+		((wait_time++))
 		if [[ $wait_time == 4 ]]
 		then
 			printf "%s - Error can't download animes mapping file stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			exit 1
+		elif [[ $size -gt 1000 ]]
+		then
+			printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			break
 		fi
 		sleep 30
 	done
@@ -52,8 +51,12 @@ function get-anilist-userlist {
 			--data '{ "query": "{ MediaListCollection(userName: \"'"$ANILIST_USERNAME"'\" type:ANIME) {  lists {    name    entries {      mediaId    }  }}}" }' > "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
-				((wait_time++))
-			if [[ -z $rate_limit ]]
+			((wait_time++))
+			if [[ $wait_time == 4 ]]
+			then
+				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			elif [[ -z $rate_limit ]]
 			then
 				printf "%s\t - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 61
@@ -66,11 +69,8 @@ function get-anilist-userlist {
 			then
 				printf "%s\t - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 30
+				printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				break
-			elif [[ $wait_time == 4 ]]
-			then
-				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				exit 1
 			fi
 		done
 		printf "%s\t - Sorting Anilist userlist\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -130,7 +130,11 @@ function get-anilist-infos () {
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } title { romaji(stylised: false) english(stylised: false) native(stylised: false) } averageScore genres tags { name rank } studios { edges { node { name isAnimationStudio } } } startDate { year month } season seasonYear coverImage { extraLarge } status idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 			((wait_time++))
-			if [[ -z $rate_limit ]]
+			if [[ $wait_time == 4 ]]
+			then
+				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			elif [[ -z $rate_limit ]]
 			then
 				printf "%s\t\t - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 61
@@ -148,11 +152,13 @@ function get-anilist-infos () {
 			then
 				printf "%s\t\t - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 30
+				if [[ "$airing_loop" == 1 ]]
+				then
+					printf "%s\t\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				else
+					printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				fi
 				break
-			elif [[ $wait_time == 4 ]]
-			then
-				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				exit 1
 			fi
 		done
 	fi
@@ -182,6 +188,7 @@ function get-mal-infos () {
 				printf "%s - Jikan API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 30
 				curl -s -o "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" -w "%{http_code}" "https://api.jikan.moe/v4/anime/$mal_id" > "$SCRIPT_FOLDER/config/tmp/jikan-limit-rate.txt"
+				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			fi
 			sleep 1.1
 				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
