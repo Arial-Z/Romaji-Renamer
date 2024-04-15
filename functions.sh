@@ -259,6 +259,8 @@ function get-score () {
 		if [[ "$anime_score" == "null" ]] || [[ "$anime_score" == "" ]]
 		then
 			anime_score=0
+		else
+			anime_score=$(printf %s "$anime_score" | awk '{print $1 / 10}')
 		fi
 	else
 		anime_score=$(printf %s "$anime_score" | awk '{print $1 / 10}')
