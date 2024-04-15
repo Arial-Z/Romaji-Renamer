@@ -1,9 +1,8 @@
 ---
-version: "2.1"
 services:
-  plex-romaji-renamer:
-    image: arialz/plex-romaji-renamer:dev
-    container_name: plex-romaji-renamer
+  romaji-renamer:
+    image: arialz/romaji-renamer:dev
+    container_name: romaji-renamer
     environment:
       - PUID=1000
       - PGID=1000
