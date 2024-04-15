@@ -1,4 +1,4 @@
-# Plex-Romaji-Renamer
+# Romaji-Renamer
 
 A Bash script to import Anilist and MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMM) metadata file.<br/>
 
@@ -55,13 +55,13 @@ The seasonal-animes-download.sh can create a list of the new seasonal animes (Ne
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is unsupported</b>
   
  ## How it works:
-  - Plex-Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
+  - Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
   - Then it will then retrieve their MAL/Anilist IDs from my mapping list https://github.com/Arial-Z/Animes-ID
   - Use the Anilist API and Jikan API to get metadata from Anilist and MAL
   - Create and update a PMM metadata file to import everything in to your Plex when PMM runs.
 
 ### Docker container avalaible here
-https://hub.docker.com/r/arialz/plex-romaji-renamer
+https://hub.docker.com/r/arialz/romaji-renamer
 
 ### Step 1 - Prerequisites
 First you need a GNU/Linux OS to run bash script<br/>
@@ -78,7 +78,7 @@ First you need a GNU/Linux OS to run bash script<br/>
   ```
 
 ### Step 2 - Download and extract the script
-Git clone the **main** branch or get lastest release : https://github.com/Arial-Z/Plex-Romaji-Renamer/releases/latest
+Git clone the **main** branch or get lastest release : https://github.com/Arial-Z/Romaji-Renamer/releases/latest
 
 ### Step 3 - Configure the script
   - Extract the script on a desired location.<br/>
@@ -179,7 +179,7 @@ Configuration finished.
 
 Run the script with bash:<br/>
 ```
-bash path/to/plex-romaji-renamer.sh
+bash path/to/romaji-renamer.sh
 ```
 You can also add it to CRON and make sure to run it before PMM (be careful it take a little time to run due to API limit rate)
 
