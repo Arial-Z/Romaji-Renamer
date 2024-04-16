@@ -1146,6 +1146,27 @@ function write-metadata () {
 			printf "    genre.sync: Anime,%s\n" "$anime_tags" >> "$METADATA"
 		fi
 	fi
+	get-studios
+	if [[ -n "$studio" ]]
+	then
+		printf "    studio: %s\n" "$studio" >> "$METADATA"
+	fi
+	get-poster
+	if [[ $media_type == "animes" ]]
+	then
+		if [[ $IGNORE_SEASONS == "Yes" ]] || [[ $override_seasons_ignore == "yes" ]]
+		then
+			get-rating-1
+			get-rating-2
+		else
+			get-season-infos
+			check-rating-1-valid
+			check-rating-2-valid
+		fi
+	else
+		get-rating-1
+		get-rating-2
+	fi
 	label_add=""
 	label_remove=""
 	if [[ "$cr_awards_anime" -eq 1 ]]
@@ -1230,27 +1251,6 @@ function write-metadata () {
 	if [[ -n "$label_remove" ]]
 	then
 		printf "    label.remove: %s\n" "$label_remove" >> "$METADATA"
-	fi
-	get-studios
-	if [[ -n "$studio" ]]
-	then
-		printf "    studio: %s\n" "$studio" >> "$METADATA"
-	fi
-	get-poster
-	if [[ $media_type == "animes" ]]
-	then
-		if [[ $IGNORE_SEASONS == "Yes" ]] || [[ $override_seasons_ignore == "yes" ]]
-		then
-			get-rating-1
-			get-rating-2
-		else
-			get-season-infos
-			check-rating-1-valid
-			check-rating-2-valid
-		fi
-	else
-		get-rating-1
-		get-rating-2
 	fi
 	tvdb_id=""
 	imdb_id=""
