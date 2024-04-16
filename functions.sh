@@ -364,7 +364,6 @@ function get-animes-award () {
 	if jq -e --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id )' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" > /dev/null
 	then
 		cr_awards_season=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)
-		cr_awards_anime=1
 	fi
 }
 function get-airing-status () {
@@ -915,6 +914,7 @@ function get-season-infos () {
 					season_label_remove=""
 					if [[ -n "$cr_awards_season" ]]
 					then
+						cr_awards_anime=1
 						if [[ -n "$season_label_add" ]]
 						then
 							season_label_add=$(printf "%s,%s" "$season_label_add" "$cr_awards_season")
@@ -1169,13 +1169,13 @@ function write-metadata () {
 	fi
 	label_add=""
 	label_remove=""
-	if [[ "$cr_awards_anime" -eq 1 ]]
+	if [[ $cr_awards_anime -eq 1 ]]
 	then
 		if [[ -n "$label_add" ]]
 		then
-			label_add=$(printf "%s,%s" "$label_add" "Anime Awards Winner")
+			label_add=$(printf "AA Winner,%s" "$label_add")
 		else
-			label_add="Anime Awards Winner"
+			label_add="AA Winner"
 		fi
 	fi
 	if [[ $media_type == "animes" ]]
