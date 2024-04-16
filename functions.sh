@@ -1169,15 +1169,6 @@ function write-metadata () {
 	fi
 	label_add=""
 	label_remove=""
-	if [[ $cr_awards_anime -eq 1 ]]
-	then
-		if [[ -n "$label_add" ]]
-		then
-			label_add=$(printf "AA Winner,%s" "$label_add")
-		else
-			label_add="AA Winner"
-		fi
-	fi
 	if [[ $media_type == "animes" ]]
 	then
 		printf "%s\t\t - Writing airing status\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
@@ -1198,6 +1189,15 @@ function write-metadata () {
 				label_remove="Planned,Airing"
 				printf "%s\t\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			fi
+		fi
+	fi
+	if [[ $cr_awards_anime -eq 1 ]]
+	then
+		if [[ -n "$label_add" ]]
+		then
+			label_add=$(printf "AA Winner,%s" "$label_add")
+		else
+			label_add="AA Winner"
 		fi
 	fi
 	if { [[ $ANILIST_LISTS_LEVEL == "show" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
