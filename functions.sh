@@ -31,6 +31,24 @@ function download-anime-id-mapping () {
 			exit 1
 		elif [[ $size -gt 1000 ]]
 		then
+			printf "%s - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			break
+		fi
+		sleep 30
+	done
+	wait_time=0
+	while [ $wait_time -lt 5 ];
+	do
+		printf "%s - Downloading animes awards data\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+		curl -s "https://raw.githubusercontent.com/Arial-Z/Animes-ID/main/cr-award/cr-award.json" > "$SCRIPT_FOLDER/config/tmp/cr-award.json"
+		size=$(du -b "$SCRIPT_FOLDER/config/tmp/cr-award.json" | awk '{ print $1 }')
+		((wait_time++))
+		if [[ $wait_time == 4 ]]
+		then
+			printf "%s - Error can't download animes awards file stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			exit 1
+		elif [[ $size -gt 1000 ]]
+		then
 			printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			break
 		fi
@@ -340,6 +358,13 @@ function get-animes-season-year () {
 			name_season=Fall
 		fi
 		anime_season=$(printf "%s %s" "$year_season" "$name_season")
+	fi
+}
+function get-animes-award () {
+	if jq -e --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id )' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" > /dev/null
+	then
+		cr_awards_season=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)
+		cr_awards_anime=1
 	fi
 }
 function get-airing-status () {
@@ -754,6 +779,7 @@ function get-season-infos () {
 		score_2_no_rating_seasons=0
 		season_loop=0
 		anime_season=""
+		cr_awards_anime=""
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
@@ -780,6 +806,7 @@ function get-season-infos () {
 					all_cours_anime_season=""
 					season_userlist_type_add=""
 					seasons_userlist_type_remove=""
+					cr_awards_season=""
 					IFS=','
 					for anilist_id in $anilist_ids
 					do
@@ -811,6 +838,10 @@ function get-season-infos () {
 							fi
 							get-cour-rating-1
 							get-cour-rating-2
+							if [[ $ANIME_AWARDS == "Yes" ]]
+							then
+								get-animes-award
+							fi
 							if [[ $SEASON_YEAR == "Yes" ]]
 							then
 								get-animes-season-year
@@ -882,6 +913,15 @@ function get-season-infos () {
 					fi
 					season_label_add=""
 					season_label_remove=""
+					if [[ -n "$cr_awards_season" ]]
+					then
+						if [[ -n "$season_label_add" ]]
+						then
+							season_label_add=$(printf "%s,%s" "$season_label_add" "$cr_awards_season")
+						else
+							season_label_add="$cr_awards_season"
+						fi
+					fi
 					if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
 					then
 						seasons_userlist_type_remove="completed,watching,dropped,paused,planning"
@@ -1108,6 +1148,15 @@ function write-metadata () {
 	fi
 	label_add=""
 	label_remove=""
+	if [[ "$cr_awards_anime" -eq 1 ]]
+	then
+		if [[ -n "$label_add" ]]
+		then
+			label_add=$(printf "%s,%s" "$label_add" "Anime Awards Winner")
+		else
+			label_add="Anime Awards Winner"
+		fi
+	fi
 	if [[ $media_type == "animes" ]]
 	then
 		printf "%s\t\t - Writing airing status\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
