@@ -361,9 +361,17 @@ function get-animes-season-year () {
 	fi
 }
 function get-animes-award () {
-	if jq -e --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id )' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" > /dev/null
+	if [[ $ANIME_AWARDS_NO_FVA == "Yes" ]]
 	then
-		cr_awards_season=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)
+		if jq -e --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | select( .cr_award == "Best VA Performance (Japanese)" )' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" > /dev/null
+		then
+			cr_awards_season=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | select( .cr_award == "Best VA Performance (Japanese)" ) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)
+		fi
+	else
+		if jq -e --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id )' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" > /dev/null
+		then
+			cr_awards_season=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)
+		fi
 	fi
 }
 function get-airing-status () {
