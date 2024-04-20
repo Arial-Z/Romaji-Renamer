@@ -361,26 +361,20 @@ function get-animes-season-year () {
 	fi
 }
 function get-animes-award () {
-	if jq -e --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id )' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" > /dev/null
+	award_check=""
+	cr_awards=""
+	if [[ $ANIME_AWARDS_NO_FVA == "Yes" ]]
 	then
-		cr_awards_season=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)
-		if [[ $ANIME_AWARDS_NO_FVA == "Yes" ]]
+		award_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | select(.cr_award | contains("English") or contains("Arabic") or contains("Spanish") or contains("Castilian") or contains("French")or contains("German") or contains("Italian") or contains("Portuguese") or contains("Russian")  | not) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)  > /dev/null
+		if [[ -n $award_check ]]
 		then
-			awards_list=""
-			IFS=","
-			for awards in $cr_awards_season
-			do
-				if ! echo "$awards" | grep -q -w 'English\|Arabic\|Spanish\|Castilian\|French\|German\|Italian\|Portuguese\|Russian'
-				then
-					if [[ -n "$awards_list" ]]
-					then
-						awards_list=$(printf "%s,%s" "$awards_list" "$awards")
-					else
-						awards_list="$awards"
-					fi
-					cr_awards_season="$awards_list"
-				fi
-			done
+			cr_awards=$award_check
+		fi
+	else
+		award_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)  > /dev/null
+		if [[ -n $award_check ]]
+		then
+			cr_awards=$award_check
 		fi
 	fi
 }
@@ -796,7 +790,6 @@ function get-season-infos () {
 		score_2_no_rating_seasons=0
 		season_loop=0
 		anime_season=""
-		cr_awards_anime=""
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
@@ -823,7 +816,6 @@ function get-season-infos () {
 					all_cours_anime_season=""
 					season_userlist_type_add=""
 					seasons_userlist_type_remove=""
-					cr_awards_season=""
 					IFS=','
 					for anilist_id in $anilist_ids
 					do
@@ -930,14 +922,13 @@ function get-season-infos () {
 					fi
 					season_label_add=""
 					season_label_remove=""
-					if [[ -n "$cr_awards_season" ]]
+					if [[ -n "$cr_awards" ]]
 					then
-						cr_awards_anime=1
 						if [[ -n "$season_label_add" ]]
 						then
-							season_label_add=$(printf "%s,%s" "$season_label_add" "$cr_awards_season")
+							season_label_add=$(printf "%s,AA Winner" "$season_label_add")
 						else
-							season_label_add="$cr_awards_season"
+							season_label_add="AA Winner"
 						fi
 					fi
 					if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
@@ -1209,13 +1200,24 @@ function write-metadata () {
 			fi
 		fi
 	fi
-	if [[ $cr_awards_anime -eq 1 ]]
+	if [[ -n $cr_awards ]]
 	then
 		if [[ -n "$label_add" ]]
 		then
 			label_add=$(printf "AA Winner,%s" "$label_add")
 		else
 			label_add="AA Winner"
+		fi
+	else
+		get-animes-award
+		if [[ -n $cr_awards ]]
+		then
+			if [[ -n "$label_add" ]]
+			then
+				label_add=$(printf "AA Winner,%s" "$label_add")
+			else
+				label_add="AA Winner"
+			fi
 		fi
 	fi
 	if { [[ $ANILIST_LISTS_LEVEL == "show" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
