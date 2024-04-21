@@ -365,13 +365,13 @@ function get-animes-award () {
 	cr_awards=""
 	if [[ $ANIME_AWARDS_NO_FVA == "Yes" ]]
 	then
-		award_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | select(.cr_award | contains("English") or contains("Arabic") or contains("Spanish") or contains("Castilian") or contains("French")or contains("German") or contains("Italian") or contains("Portuguese") or contains("Russian")  | not) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)  > /dev/null
+		award_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | select(.cr_award | contains("English") or contains("Arabic") or contains("Spanish") or contains("Castilian") or contains("French")or contains("German") or contains("Italian") or contains("Portuguese") or contains("Russian")  | not) | "AA " + .year + " " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)  > /dev/null
 		if [[ -n $award_check ]]
 		then
 			cr_awards=$award_check
 		fi
 	else
-		award_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | "AA " + .year + " - " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)  > /dev/null
+		award_check=$(jq --arg anilist_id "$anilist_id" '.[] | select( .anilist_id == $anilist_id ) | "AA " + .year + " " + .cr_award' -r "$SCRIPT_FOLDER/config/tmp/cr-award.json" | paste -s -d, -)  > /dev/null
 		if [[ -n $award_check ]]
 		then
 			cr_awards=$award_check
@@ -790,6 +790,8 @@ function get-season-infos () {
 		score_2_no_rating_seasons=0
 		season_loop=0
 		anime_season=""
+		award_check=""
+		cr_awards=""
 		printf "    seasons:\n" >> "$METADATA"
 		IFS=","
 		for season_number in $seasons_list
@@ -1277,4 +1279,6 @@ function write-metadata () {
 	anilist_id=""
 	mal_id=""
 	override_seasons_ignore=""
+	award_check=""
+	cr_awards=""
 }
