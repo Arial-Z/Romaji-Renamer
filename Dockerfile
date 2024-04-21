@@ -20,4 +20,4 @@ RUN echo "**** install system packages ****" \
  && rm -rf /requirements.txt /tmp/* /var/tmp/* /var/lib/apt/lists/*
 VOLUME /config
 VOLUME /pmm
-ENTRYPOINT ["/tini", "-s", "bash", "plex-romaji-renamer.sh", "--"]
+ENTRYPOINT ["/tini", "-s", "bash", "romaji-renamer.sh", "--"]
