@@ -19,7 +19,7 @@ with open(Path(basedir, "config/tmp/plex_movies_export.tsv"), "w") as export_ple
 	for video in movies.search():
 		title = str(video.title)
 		ids = str(video.guids)
-		imdbid = re.search("(?<=imdb://)(tt\d+)", ids)
+		imdbid = re.search("(?<=imdb://)(tt\\d+)", ids)
 		if ( imdbid ) :
 			imdb = str(imdbid.group(1))
 			location = str(video.locations)[2:-2]

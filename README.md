@@ -68,21 +68,20 @@ First you need a GNU/Linux OS to run bash script<br/>
   Requirements: Plex Media Server, Plex-Meta-Manager, Python and JQ<br/>
   - Install and configure Plex-Meta-Manager: https://github.com/meisnate12/Plex-Meta-Manager<br/>
   - Install JQ is a json parser see: https://stedolan.github.io/jq/ (Present by default on unRAID 6.10.0 and later.)<br/>
-  - install python plexapi
-  ```
-  pip install plexapi
-  ```
-  - install python-dotenv
-  ```
-  pip install python-dotenv
-  ```
 
 ### Step 2 - Download and extract the script
 Git clone the **main** branch or get lastest release : https://github.com/Arial-Z/Romaji-Renamer/releases/latest
 
-### Step 3 - Configure the script
+### Step 3 - Install python modules and configure the script
   - Extract the script on a desired location.<br/>
   - Navigate to its location.<br/>
+  - install python plexapi and python-dotenv with a virtual environment
+  ```
+  cd into the script folder
+  python3 -m venv romaji-renamer-venv
+  source romaji-renamer-venv/bin/activate
+  pip install plexapi python-dotenv
+  ```
   - Copy default.env to config/.env<br/>
   - cd into the config folder and edit .env to fill out the variables.<br/>
 ```env

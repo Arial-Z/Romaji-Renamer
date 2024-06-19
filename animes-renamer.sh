@@ -37,7 +37,12 @@ get-anilist-userlist
 # export animes list from plex
 printf "%s - Creating animes list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s\t - Exporting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-python3 "$SCRIPT_FOLDER/plex_animes_export.py"
+if [ -f "$SCRIPT_FOLDER/romaji-renamer-venv/bin/python3" ]
+then
+	"$SCRIPT_FOLDER/romaji-renamer-venv/bin/python3" "$SCRIPT_FOLDER/plex_animes_export.py"
+else
+	python3 "$SCRIPT_FOLDER/plex_animes_export.py"
+fi
 printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # create ID/animes.tsv

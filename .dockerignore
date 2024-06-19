@@ -12,6 +12,7 @@ LICENSE
 .github
 Dockerfile
 docker-compose.yml
+romaji-renamer-venv
 venv
 .env
 config/tmp
