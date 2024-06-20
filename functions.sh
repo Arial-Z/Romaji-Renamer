@@ -92,11 +92,11 @@ function get-anilist-userlist {
 			fi
 		done
 		printf "%s\t - Sorting Anilist userlist\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Completed" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-completed.tsv"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Watching" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-watching.tsv"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Dropped" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-dropped.tsv"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Paused" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-paused.tsv"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Planning" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-planning.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Completed" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Completed.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Watching" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Watching.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Dropped" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Dropped.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Paused" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Paused.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Planning" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Planning.tsv"
 		printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		printf "%s - done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 	fi
