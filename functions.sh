@@ -831,7 +831,7 @@ function get-season-infos () {
 						fi
 						if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
 						then
-							for userlist_type in completed watching dropped paused planning
+							for userlist_type in Completed Watching Dropped Paused Planning
 							do
 								if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
 								then
@@ -935,7 +935,7 @@ function get-season-infos () {
 					fi
 					if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
 					then
-						seasons_userlist_type_remove="completed,watching,dropped,paused,planning"
+						seasons_userlist_type_remove="Completed,Watching,Dropped,Paused,Planning"
 						userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
 						if [[ -n $season_userlist_type_add ]] && [[ $userlist_type_count -gt 0 ]]
 						then
@@ -1226,8 +1226,8 @@ function write-metadata () {
 	then
 		all_anilist_ids=""
 		userlist_type_add=""
-		userlist_type_remove="completed,watching,dropped,paused,planning"
-		for userlist_type in completed watching dropped paused planning
+		userlist_type_remove="Completed,Watching,Dropped,Paused,Planning"
+		for userlist_type in Completed Watching Dropped Paused Planning
 		do
 			if [[ $media_type == "animes" ]]
 			then
