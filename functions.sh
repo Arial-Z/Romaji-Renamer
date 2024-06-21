@@ -92,11 +92,11 @@ function get-anilist-userlist {
 			fi
 		done
 		printf "%s\t - Sorting Anilist userlist\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Completed" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-completed.tsv"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Watching" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-watching.tsv"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Dropped" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-dropped.tsv"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Paused" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-paused.tsv"
-		jq '.data.MediaListCollection.lists | .[] | select( .name == "Planning" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-planning.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Completed" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Completed.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Watching" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Watching.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Dropped" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Dropped.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Paused" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Paused.tsv"
+		jq '.data.MediaListCollection.lists | .[] | select( .name == "Planning" ) | .entries | .[].mediaId ' -r "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" | paste -s -d, - > "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-Planning.tsv"
 		printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 		printf "%s - done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 	fi
@@ -839,7 +839,7 @@ function get-season-infos () {
 							fi
 							if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
 							then
-								for userlist_type in completed watching dropped paused planning
+								for userlist_type in Completed Watching Dropped Paused Planning
 								do
 									if grep -q -w "$anilist_id" "$SCRIPT_FOLDER/config/data/anilist-$ANILIST_USERNAME-$userlist_type.tsv"
 									then
@@ -941,7 +941,7 @@ function get-season-infos () {
 					fi
 					if { [[ $ANILIST_LISTS_LEVEL == "season" ]] || [[ $ANILIST_LISTS_LEVEL == "both" ]]; } && [[ $ANILIST_LISTS == "Yes" ]]
 					then
-						seasons_userlist_type_remove="completed,watching,dropped,paused,planning"
+						seasons_userlist_type_remove="Completed,Watching,Dropped,Paused,Planning"
 						userlist_type_count=$(printf %s "$season_userlist_type_add" | awk -F "," '{print NF}')
 						if [[ -n $season_userlist_type_add ]] && [[ $userlist_type_count -gt 0 ]]
 						then
@@ -987,17 +987,17 @@ function get-season-infos () {
 							then
 								printf "        label: %s\n" "$season_label_add" >> "$METADATA"
 							else
-								printf "        label: score,%s\n" "$season_label_add" >> "$METADATA"
+								printf "        label: Score,%s\n" "$season_label_add" >> "$METADATA"
 							fi
 						else
-							printf "        label: score,%s\n" "$season_label_add" >> "$METADATA"
+							printf "        label: Score,%s\n" "$season_label_add" >> "$METADATA"
 						fi
 					else
 						if [[ $last_season -eq 1 ]]
 						then
 							if [[ $IGNORE_S1_ONLY_RATING != "Yes" ]]
 							then
-								printf "        label: score\n" >> "$METADATA"
+								printf "        label: Score\n" >> "$METADATA"
 							fi
 						fi
 					fi
@@ -1007,7 +1007,7 @@ function get-season-infos () {
 						then
 							if [[ $IGNORE_S1_ONLY_RATING == "Yes" ]]
 							then
-								printf "        label.remove: score,%s\n" "$season_label_remove" >> "$METADATA"
+								printf "        label.remove: Score,%s\n" "$season_label_remove" >> "$METADATA"
 							else
 								printf "        label.remove: %s\n" "$season_label_remove" >> "$METADATA"
 							fi
@@ -1019,7 +1019,7 @@ function get-season-infos () {
 						then
 							if [[ $IGNORE_S1_ONLY_RATING == "Yes" ]]
 							then
-							printf "        label.remove: score\n" >> "$METADATA"
+							printf "        label.remove: Score\n" >> "$METADATA"
 							fi
 						fi
 					fi
@@ -1229,8 +1229,8 @@ function write-metadata () {
 	then
 		all_anilist_ids=""
 		userlist_type_add=""
-		userlist_type_remove="completed,watching,dropped,paused,planning"
-		for userlist_type in completed watching dropped paused planning
+		userlist_type_remove="Completed,Watching,Dropped,Paused,Planning"
+		for userlist_type in Completed Watching Dropped Paused Planning
 		do
 			if [[ $media_type == "animes" ]]
 			then
