@@ -147,6 +147,12 @@ function get-anilist-infos () {
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } title { romaji(stylised: false) english(stylised: false) native(stylised: false) } averageScore genres tags { name rank } studios { edges { node { name isAnimationStudio } } } startDate { year month } season seasonYear coverImage { extraLarge } status idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
+			if jq '.errors[].status' -r "$SCRIPT_FOLDER/data/anilist-$anilist_id.json" | grep -q -w "403"
+			then
+				rm "$SCRIPT_FOLDER/data/anilist-$anilist_id.json"
+				printf "%s - Error AniList API down, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			fi
 			((wait_time++))
 			if [[ $wait_time == 4 ]]
 			then
