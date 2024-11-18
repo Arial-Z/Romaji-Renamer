@@ -67,6 +67,12 @@ function get-anilist-userlist {
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ MediaListCollection(userName: \"'"$ANILIST_USERNAME"'\" type:ANIME) {  lists {    name    entries {      mediaId    }  }}}" }' > "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json"
+			then
+				rm "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json"
+				printf "%s - Error AniList API down, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			fi
 			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 			((wait_time++))
@@ -146,6 +152,12 @@ function get-anilist-infos () {
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } title { romaji(stylised: false) english(stylised: false) native(stylised: false) } averageScore genres tags { name rank } studios { edges { node { name isAnimationStudio } } } startDate { year month } season seasonYear coverImage { extraLarge } status idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json"
+			then
+				rm "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json"
+				printf "%s - Error AniList API down, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			fi
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 			((wait_time++))
 			if [[ $wait_time == 4 ]]

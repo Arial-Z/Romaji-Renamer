@@ -100,6 +100,12 @@ do
 		-X POST \
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json"
+			then
+				rm "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json"
+				printf "%s - Error AniList API down, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			fi
 		rate_limit=0
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 		((wait_time++))
