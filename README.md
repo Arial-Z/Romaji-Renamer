@@ -170,7 +170,7 @@ DATA_CACHE_TIME=5
   - Within your (PMM) config.yml add the following metadata_path, it should look like this with the default filepath:
 ```yml
   Animes:
-    metadata_path:
+    metadata_files:
     - file: config/metadata-animes.yml
 ```
 Configuration finished.
