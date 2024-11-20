@@ -30,20 +30,31 @@ fi
 :> "$MATCH_LOG"
 printf "%s - Starting animes script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
-# Download animes mapping json data
+# Download animes mapping json data & anilist userlist
 download-anime-id-mapping
+get-anilist-userlist
 
 # export animes list from plex
 printf "%s - Creating animes list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s\t - Exporting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-python3 "$SCRIPT_FOLDER/plex_animes_export.py"
+if [ -f "$SCRIPT_FOLDER/romaji-renamer-venv/bin/python3" ]
+then
+	"$SCRIPT_FOLDER/romaji-renamer-venv/bin/python3" "$SCRIPT_FOLDER/plex_animes_export.py"
+else
+	python3 "$SCRIPT_FOLDER/plex_animes_export.py"
+fi
 printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # create ID/animes.tsv
 create-override
 printf "%s\t - Sorting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-while IFS=$'\t' read -r tvdb_id anilist_id title_override studio override_seasons_ignore	notes
+while IFS= read -r line
 do
+	tvdb_id=$(printf "%s" "$line" | awk -F"\t" '{print $1}')
+	anilist_id=$(printf "%s" "$line" | awk -F"\t" '{print $2}')
+	title_override=$(printf "%s" "$line" | awk -F"\t" '{print $3}')
+	studio=$(printf "%s" "$line" | awk -F"\t" '{print $4}')
+	override_seasons_ignore=$(printf "%s" "$line" | awk -F"\t" '{print $5}')
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/animes.tsv" | grep -q -w "$tvdb_id"
 	then
 		if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/tmp/plex_animes_export.tsv" | grep -q -w "$tvdb_id"
@@ -89,27 +100,34 @@ do
 		-X POST \
 		-H 'content-type: application/json' \
 		--data '{ "query": "{ Page(page: '"$ongoingpage"', perPage: 50) { pageInfo { hasNextPage } media(type: ANIME, status_in: RELEASING, sort: POPULARITY_DESC) { id } } }" }' > "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
+			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json"
+			then
+				rm "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json"
+				printf "%s - Error AniList API down, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				exit 1
+			fi
 		rate_limit=0
 		rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 		((wait_time++))
-		if [[ -z $rate_limit ]]
+		if [[ $wait_time == 4 ]]
+		then
+			printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+			exit 1
+		elif [[ -z $rate_limit ]]
 		then
 			printf "%s\t - Cloudflare limit rate reached watiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 61
 		elif [[ $rate_limit -ge 3 ]]
 		then
-			sleep 0.8
+			sleep 1
 			printf "%s\t - done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			break
 		elif [[ $rate_limit -lt 3 ]]
 		then
 			printf "%s\t - Anilist API limit reached watiting 30s" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			sleep 30
+			printf "%s\t - done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			break
-		elif [[ $wait_time == 4 ]]
-		then
-			printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-			exit 1
 		fi
 	done
 	jq '.data.Page.media[].id' -r "$SCRIPT_FOLDER/config/tmp/ongoing-anilist.json" >> "$SCRIPT_FOLDER/config/tmp/ongoing-tmp.tsv"		# store the mal ID of the ongoing show
@@ -139,7 +157,7 @@ do
 		fi
 	fi
 done < "$SCRIPT_FOLDER/config/tmp/ongoing.tsv"
-printf "%s\t - Done\n\n" "$(date +%H:%M:%S)"
+printf "%s\t - Done\n" "$(date +%H:%M:%S)"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)"
 
 # write PMM metadata file from ID/animes.tsv and jikan API

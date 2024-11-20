@@ -30,14 +30,19 @@ fi
 :> "$MATCH_LOG"
 printf "%s - Starting movies script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
-# Download anime mapping json data
+# Download animes mapping json data & anilist userlist
 download-anime-id-mapping
-
+get-anilist-userlist
 
 # export movies list from plex
 printf "%s - Creating animes list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s\t - Exporting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-python3 "$SCRIPT_FOLDER/plex_movies_export.py"
+if [ -f "$SCRIPT_FOLDER/romaji-renamer-venv/bin/python3" ]
+then
+	"$SCRIPT_FOLDER/romaji-renamer-venv/bin/python3" "$SCRIPT_FOLDER/plex_movies_export.py"
+else
+	python3 "$SCRIPT_FOLDER/plex_movies_export.py"
+fi
 printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )

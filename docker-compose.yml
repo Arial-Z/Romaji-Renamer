@@ -1,7 +1,6 @@
 ---
-version: "2.1"
 services:
-  plex-romaji-renamer:
+  romaji-renamer:
     image: arialz/romaji-renamer:dev
     container_name: romaji-renamer
     environment:
