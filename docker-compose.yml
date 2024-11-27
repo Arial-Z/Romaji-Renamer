@@ -1,7 +1,7 @@
 ---
 services:
   romaji-renamer:
-    image: arialz/romaji-renamer:dev
+    image: arialz/romaji-renamer
     container_name: romaji-renamer
     environment:
       - PUID=1000
