@@ -3,6 +3,7 @@
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
 media_type="movies"
 source "$SCRIPT_FOLDER/config/.env"
+source "$SCRIPT_FOLDER/VERSION"
 source "$SCRIPT_FOLDER/functions.sh"
 METADATA=$METADATA_MOVIES
 OVERRIDE=override-ID-$media_type.tsv
@@ -81,7 +82,8 @@ printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 # write PMM metadata file from ID/movies.tsv and jikan API
 printf "%s - Start writing the metadata file \n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-printf "metadata:\n" > "$METADATA"
+printf "# Romaji-Renamer v%s\n" "$version" > "$METADATA"
+printf "metadata:\n" >> "$METADATA"
 imdb_id=""
 anilist_id=""
 mal_id=""
