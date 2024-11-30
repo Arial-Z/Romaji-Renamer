@@ -21,9 +21,9 @@ fi
 printf "%s - Starting script\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 download-anime-id-mapping
 printf "%s - checking current season\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-curl -s -L -A "Mozilla/5.0 (X11; Linux x86_64)" "https://anidb.net/anime/season/" -o "$SCRIPT_FOLDER/config/tmp/this-season.html"
-season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/config/tmp/this-season.html" | awk '{print $4}'| tr '[:lower:]' '[:upper:]')
-year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/config/tmp/this-season.html" | awk '{print $5}')
+curl -s -L -A "Mozilla/5.0 (X11; Linux x86_64)" "https://myanimelist.net/anime/season" -o "$SCRIPT_FOLDER/config/tmp/this-season.html"
+season=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/config/tmp/this-season.html" | awk '{print $1}'| tr '[:lower:]' '[:upper:]'| tr -d '\n')
+year=$(awk -v IGNORECASE=1 -v RS='</title' 'RT{gsub(/.*<title[^>]*>/,"");print;exit}' "$SCRIPT_FOLDER/config/tmp/this-season.html" | awk '{print $2}'| tr -d '\n')
 printf "%s - Current season : %s %s\n\n" "$(date +%H:%M:%S)" "$season" "$year" | tee -a "$LOG"
 printf "%s - Creating seasonal list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s\t - Downloading anilist season list\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
