@@ -810,7 +810,7 @@ function get-season-infos () {
 		do
 			if [[ $season_number -eq 0 ]]
 			then
-				printf "      0:\n        label.remove: score\n" >> "$METADATA"
+				printf "      0:\n        label.remove: Score\n" >> "$METADATA"
 			else
 				season_loop=1
 				anilist_ids=$(jq --arg tvdb_id "$tvdb_id" --arg season_number "$season_number" '[.[] | select( .tvdb_id == $tvdb_id ) | select( .tvdb_season == $season_number )] | sort_by(.tvdb_epoffset) | .[].anilist_id' -r "$SCRIPT_FOLDER/config/tmp/list-animes-id.json" | paste -s -d, -)
