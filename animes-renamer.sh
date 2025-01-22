@@ -60,7 +60,7 @@ do
 	then
 		if awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/tmp/plex_animes_export.tsv" | grep -q -w "$tvdb_id"
 		then
-			if [ "$anilist_id" == "ignore" ]
+			if [ "$anilist_id" == 'ignore' ]
 			then
 				printf "%s\t\t - Found ignored tvdb id : %s\n" "$(date +%H:%M:%S)" "$tvdb_id" | tee -a "$LOG"
 			else
