@@ -60,9 +60,9 @@ do
 			then
 				if [ -z "$ignore_list" ]
 				then
-					ignore_list="$tvdb_id"
+					ignore_list="$imdb_id"
 				else
-					ignore_list=$(printf "%s,%s" "$ignore_list" "$tvdb_id")
+					ignore_list=$(printf "%s,%s" "$ignore_list" "$imdb_id")
 				fi
 			else
 				line=$(awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/tmp/plex_movies_export.tsv" | grep -w -n "$imdb_id" | cut -d : -f 1)
