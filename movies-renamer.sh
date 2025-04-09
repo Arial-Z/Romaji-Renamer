@@ -49,6 +49,7 @@ printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 # create ID/movies.tsv ( imdb_id | mal_id | anime_title | plex_title )
 create-override
 printf "%s\t - Sorting Plex animes library\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+ignore_list=""
 while IFS=$'\t' read -r imdb_id anilist_id title_override studio notes
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/movies.tsv" | grep -q -w "$imdb_id"
@@ -57,7 +58,12 @@ do
 		then
 			if [[ "$anilist_id" == 'ignore' ]]
 			then
-				printf "%s\t\t - Found ignored imdb id : %s\n" "$(date +%H:%M:%S)" "$tvdb_id" | tee -a "$LOG"
+				if [ -z "$ignore_list" ]
+				then
+					ignore_list="$tvdb_id"
+				else
+					ignore_list=$(printf "%s,%s" "$ignore_list" "$tvdb_id")
+				fi
 			else
 				line=$(awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/tmp/plex_movies_export.tsv" | grep -w -n "$imdb_id" | cut -d : -f 1)
 				plex_title=$(sed -n "${line}p" "$SCRIPT_FOLDER/config/tmp/plex_movies_export.tsv" | awk -F"\t" '{print $2}')
@@ -71,15 +77,20 @@ done < "$SCRIPT_FOLDER/config/override-ID-movies.tsv"
 while IFS=$'\t' read -r imdb_id plex_title asset_name													# then get the other ID from the ID mapping and download json data
 do
 	if ! awk -F"\t" '{print $1}' "$SCRIPT_FOLDER/config/ID/movies.tsv" | grep -q -w "$imdb_id"
-		then
+	then
 		anilist_id=$(get-anilist-id)
-		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]								# Ignore anime with no tvdb to mal id conversion show in the error log you need to add them by hand in override
+		if [[ "$anilist_id" == 'null' ]] || [[ "${#anilist_id}" == '0' ]]				# Ignore anime with no anilist id
 		then
-			printf "%s\t\t - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" | tee -a "$LOG"
-			printf "%s - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" >> "$MATCH_LOG"
-			continue
+			if echo "$ignore_list" | grep -q -w "$imdb_id"
+			then
+				printf "%s\t\t - Found ignored imdb id : %s\n" "$(date +%H:%M:%S)" "$imdb_id" | tee -a "$LOG"
+			else
+				printf "%s\t\t - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" | tee -a "$LOG"
+				printf "%s - Missing Anilist ID for imdb : %s / %s\n" "$(date +%H:%M:%S)" "$imdb_id" "$plex_title" >> "$MATCH_LOG"
+			fi
+		else
+			printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/config/ID/movies.tsv"
 		fi
-		printf "%s\t%s\t%s\t%s\t%s\n" "$imdb_id" "$mal_id" "$anilist_id" "$plex_title" "$asset_name" >> "$SCRIPT_FOLDER/config/ID/movies.tsv"
 	fi
 done < "$SCRIPT_FOLDER/config/tmp/plex_movies_export.tsv"
 printf "%s\t - Done\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
