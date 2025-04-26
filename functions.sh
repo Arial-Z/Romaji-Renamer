@@ -68,10 +68,10 @@ function get-anilist-userlist {
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ MediaListCollection(userName: \"'"$ANILIST_USERNAME"'\" type:ANIME) {  lists {    name    entries {      mediaId    }  }}}" }' > "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json"
+			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json"
 			then
 				((anilist_api_retry++))
-				rm "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json"
+				rm "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json"
 				printf "%s - Invalid json from AniList API down, waiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				sleep 61
 			fi
