@@ -60,23 +60,25 @@ function get-anilist-userlist {
 	then
 		printf "%s - Creating Anilist userlist for : %s\n" "$(date +%H:%M:%S)" "$ANILIST_USERNAME" | tee -a "$LOG"
 		wait_time=0
-		while [ $wait_time -lt 5 ];
+		anilist_api_retry=0
+		while [ $wait_time -lt 5 ] || [ $anilist_api_retry -lt 5 ];
 		do
 			printf "%s\t - Downloading Anilist userlist\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 			curl -s 'https://graphql.anilist.co/' \
 			-X POST \
 			-H 'content-type: application/json' \
 			--data '{ "query": "{ MediaListCollection(userName: \"'"$ANILIST_USERNAME"'\" type:ANIME) {  lists {    name    entries {      mediaId    }  }}}" }' > "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
-			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json"
+			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json"
 			then
-				rm "$SCRIPT_FOLDER/config/tmp/anilist-$ANILIST_USERNAME.json"
-				printf "%s - Error AniList API down, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				exit 1
+				((anilist_api_retry++))
+				rm "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json"
+				printf "%s - Invalid json from AniList API down, waiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 61
 			fi
 			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 			((wait_time++))
-			if [[ $wait_time == 4 ]]
+			if [[ $wait_time == 4 ]] || [[ $anilist_api_retry == 4 ]]
 			then
 				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				exit 1
@@ -134,7 +136,8 @@ function get-anilist-infos () {
 	if [ ! -f "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" ]
 	then
 		wait_time=0
-		while [ $wait_time -lt 5 ];
+		anilist_api_retry=0
+		while [ $wait_time -lt 5 ] || [ $anilist_api_retry -lt 5 ];
 		do
 			if [[ "$airing_loop" == 1 ]]
 			then
@@ -154,13 +157,15 @@ function get-anilist-infos () {
 			--data '{ "query": "{ Media(type: ANIME, id: '"$anilist_id"') { relations { edges { relationType node { id type format title { romaji } status } } } title { romaji(stylised: false) english(stylised: false) native(stylised: false) } averageScore genres tags { name rank } studios { edges { node { name isAnimationStudio } } } startDate { year month } season seasonYear coverImage { extraLarge } status idMal} }" }' > "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" -D "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt"
 			if grep -q -w '"data": null' "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json"
 			then
+				((anilist_api_retry++))
 				rm "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json"
-				printf "%s - Error AniList API down, exiting\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
-				exit 1
+				printf "%s - Invalid json from AniList API down, waiting 60s\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
+				sleep 61
 			fi
+			rate_limit=0
 			rate_limit=$(grep -oP '(?<=x-ratelimit-remaining: )[0-9]+' "$SCRIPT_FOLDER/config/tmp/anilist-limit-rate.txt")
 			((wait_time++))
-			if [[ $wait_time == 4 ]]
+			if [[ $wait_time == 4 ]] || [[ $anilist_api_retry == 4 ]]
 			then
 				printf "%s - Error can't download anilist data stopping script\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 				exit 1
