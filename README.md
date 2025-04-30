@@ -7,16 +7,16 @@ Discord : [![Discord Shield](https://discordapp.com/api/guilds/12092320719023637
  ## Okay but how does it look in plex ?
 Library view :
 
-<img src="https://github.com/Arial-Z/Romaji-Renamer/blob/dev/docs/library.jpg?raw=true" width="600" alt="Library view">
+<img src="https://github.com/Arial-Z/Romaji-Renamer/blob/dev/docs/library.jpg?raw=true" width="1200" alt="Library view">
 
 
 Collection view :
 
-<img src="https://raw.githubusercontent.com/Arial-Z/Romaji-Renamer/refs/heads/dev/docs/collections.jpg" width="600" alt="Collection view">
+<img src="https://raw.githubusercontent.com/Arial-Z/Romaji-Renamer/refs/heads/dev/docs/collections.jpg" width="1200" alt="Collection view">
 
 Season view :
 
-<img src="https://github.com/Arial-Z/Romaji-Renamer/blob/dev/docs/seasons.jpg?raw=true" width="600" alt="Season view">
+<img src="https://github.com/Arial-Z/Romaji-Renamer/blob/dev/docs/seasons.jpg?raw=true" width="1200" alt="Season view">
 
  ## Here what will be imported for each of your animes :
 ```yml
