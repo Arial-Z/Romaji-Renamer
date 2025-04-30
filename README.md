@@ -1,6 +1,6 @@
 # Romaji-Renamer
 
-A Bash script to import Anilist and MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMM) metadata file.<br/>
+A Bash script to import Anilist and MAL data to your Plex Media Server. This is done with a kometa metadata file.<br/>
 
 Discord : [![Discord Shield](https://discordapp.com/api/guilds/1209232071902363779/widget.png?style=shield)](https://discord.com/invite/VCEEsp39nh)
 
