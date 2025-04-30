@@ -4,48 +4,66 @@ A Bash script to import Anilist and MAL data to your Plex Media Server. This is 
 
 Discord : [![Discord Shield](https://discordapp.com/api/guilds/1209232071902363779/widget.png?style=shield)](https://discord.com/invite/VCEEsp39nh)
 
-Here what will be imported for each of your animes :
+ ## Okay but how does it look in plex ?
+Library view :
+
+<img src="https://github.com/Arial-Z/Romaji-Renamer/blob/dev/docs/library.jpg?raw=true" width="1200" alt="Library view">
+
+
+Collection view :
+
+<img src="https://raw.githubusercontent.com/Arial-Z/Romaji-Renamer/refs/heads/dev/docs/collections.jpg" width="1200" alt="Collection view">
+
+Season view :
+
+<img src="https://github.com/Arial-Z/Romaji-Renamer/blob/dev/docs/seasons.jpg?raw=true" width="1200" alt="Season view">
+
+ ## Here what will be imported for each of your animes :
 ```yml
 # TVDB_ID for PMM to import
-330692:
+421069:
   # Title : either Romaji title or English title (in settings) (from Anilist)
-  title: "Yuru Camp△"
+  title: |-
+    [Oshi no Ko]
   # Sort Title : either Romaji title or English title (in settings) (from Anilist)
-  sort_title: "Yuru Camp△"
+  sort_title: |-
+    [Oshi no Ko]
   # original_title : English title or Native Title (from Anilist)
-  original_title: "ゆるキャン△"
+  original_title: |-
+    Oshi No Ko
   # Genre ands tags from Anilist (genres, and tag above > 70% can be changed in settings)
-  genre.sync: Anime,Slice of Life,CGDCT,Iyashikei
-  # Airing status add as a label : Planned, Airing or Ended (from Anilist)
-  label: Planned
-  label.remove: Airing,Ended
+  genre.sync: Drama,Mystery,Psychological,Supernatural,Acting,Tragedy,Idol,Revenge,Twins,Male Protagonist,Urban,Reincarnation,Pregnancy,Detective,Seinen,Tsundere,Boys' Love,Female Protagonist,Coming of Age,Anti-Hero,Time Skip,Orphan,Age Regression,Ensemble Cast,Filmmaking
+  # Add label to build collections and overlays Anilist Airing status (Planned, Airing or Ended) Anime Award winner and Anilist userlist status
+  label: AA Winner,Planned,Completed
+  label.remove: Airing,Ended,Watching,Dropped,Paused,Planning
   # Studio from Anilist                               
-  studio: C-Station
+  studio: Doga Kobo
   # Season import
   seasons:
-    # Season 0 import
-    0:
-      label.remove: score
     # Season 1 import
     1:
       # Title from Anilist (Romaji or English from the title setting)
-      title: "Yuru Camp△"
+      title: |-
+        [Oshi no Ko]
       # Rating 1 from Anilist or MAL (in settings)
-      user_rating: 8.3
+      user_rating: 8.4
       # Add label score to use with PMM overlays and also add the season label (optionnal)
-      label: Fall 2021, score
+      label: Score,AA Winner,Completed,2023 Spring
+      label.remove: Watching,Dropped,Paused,Planning
     # Season 2 import
     2:
       # Title from Anilist (Romaji or English from the title setting)
-      title: "Yuru Camp△ SEASON 2"
+      title: |-
+        [Oshi no Ko] 2nd Season
       # Rating 1 from Anilist or MAL (in settings)
       user_rating: 8.5
       # Add label score to use PMM overlays and also add the season label (optionnal)
-      label: Fall 2022,score
+      label: Score,Completed,2024 Summer
+      label.remove: Watching,Dropped,Paused,Planning
   # Rating 1 : average rating of the seasons (Anilist or MAL)
-    audience_rating: 8.2
+  audience_rating: 8.4
   # Rating 2 : average rating of the seasons (Anilist or MAL)
-    critic_rating: 8.4
+  critic_rating: 8.6
 
 ```
 Anilist Posters for animes and seasons can also be downloaded and imported to plex with the PMM assets folder
@@ -53,7 +71,7 @@ Anilist Posters for animes and seasons can also be downloaded and imported to pl
 The seasonal-animes-download.sh can create a list of the new seasonal animes (New as not a sequel anime) and make a collection yml to add them to sonarr.
 
 Designed for Plex TV agent / Plex Movie Agent, <b>Hama is unsupported</b>
-  
+
  ## How it works:
   - Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
   - Then it will then retrieve their MAL/Anilist IDs from my mapping list https://github.com/Arial-Z/Animes-ID
@@ -188,19 +206,23 @@ Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 #### Animes
 to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
 you can also use the override file, in the config folder copy `override-ID-animes.tsv.example` to `override-ID-animes.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title, studio and ignore_seasons are optional and can be used to force corresponding string)
+you can also ignore an anime so the script will not make any change to it (see the last line)
 ```tsv
 tvdb-id	anilist-id	Title	Studio	ignore_seasons	notes
 114801	6702		A-1 Pictures	yes	Fairy Tail
 79685	263	Hajime no Ippo		
 76013	627	Major			
+82099	ignore				
 ```
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
 to fix movies ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
 you can also use the override file, in the config folder copy `override-ID-movies.tsv.example` to `override-ID-movies.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title and studio are optional and can be used to force corresponding string)
+you can also ignore a movie so the script will not make any change to it (see the last line)
 ```tsv
 imdb-id	anilist-id	Title	Studio	notes
 tt0110008	1030		Studio Ghibli	Pompoko
+tt3666024	ignore			
 ```
 create a new line and manually enter the IMDB-ID and MAL-ID, MAL-TITLE
 
