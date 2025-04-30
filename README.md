@@ -206,19 +206,23 @@ Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 #### Animes
 to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
 you can also use the override file, in the config folder copy `override-ID-animes.tsv.example` to `override-ID-animes.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title, studio and ignore_seasons are optional and can be used to force corresponding string)
+you can also ignore an anime so the script will not make any change to it (see the last line)
 ```tsv
 tvdb-id	anilist-id	Title	Studio	ignore_seasons	notes
 114801	6702		A-1 Pictures	yes	Fairy Tail
 79685	263	Hajime no Ippo		
 76013	627	Major			
+82099	ignore				
 ```
 create a new line and manually enter the TVDB-ID and MAL-ID, MAL-TITLE<br/>
 #### Movies
 to fix movies ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
 you can also use the override file, in the config folder copy `override-ID-movies.tsv.example` to `override-ID-movies.tsv` and add new entries, it look like this, be carreful to use **tab** as separator even the empty one (title and studio are optional and can be used to force corresponding string)
+you can also ignore a movie so the script will not make any change to it (see the last line)
 ```tsv
 imdb-id	anilist-id	Title	Studio	notes
 tt0110008	1030		Studio Ghibli	Pompoko
+tt3666024	ignore			
 ```
 create a new line and manually enter the IMDB-ID and MAL-ID, MAL-TITLE
 
