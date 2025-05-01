@@ -228,9 +228,9 @@ create a new line and manually enter the IMDB-ID and MAL-ID, MAL-TITLE
 
 ### Thanks
   - To Plex for Plex
-  - To meisnate12 for Plex-Meta-Manager.
+  - To meisnate12 for Kometa
   - To plexapi
-  - To https://jikan.moe/ for their MAL API.
-  - To MAL for being here.
-  - To Anilist for being here too.
-  - And to a lot of random people from everywhere for all my copy / paste code.
+  - To https://jikan.moe/ for their MAL API
+  - To MAL for being here
+  - To Anilist for being here too
+  - And to a lot of random people from everywhere for all my copy / paste code
