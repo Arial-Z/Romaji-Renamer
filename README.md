@@ -1,6 +1,6 @@
 # Romaji-Renamer
 
-A Bash script to import Anilist and MAL data to your Plex Media Server. This is done with a Plex-Meta-Manager (PMM) metadata file.<br/>
+A Bash script to import Anilist and MAL data to your Plex Media Server. This is done with a kometa metadata file.<br/>
 
 Discord : [![Discord Shield](https://discordapp.com/api/guilds/1209232071902363779/widget.png?style=shield)](https://discord.com/invite/VCEEsp39nh)
 
@@ -20,7 +20,7 @@ Season view :
 
  ## Here what will be imported for each of your animes :
 ```yml
-# TVDB_ID for PMM to import
+# TVDB_ID for Kometa to import
 421069:
   # Title : either Romaji title or English title (in settings) (from Anilist)
   title: |-
@@ -47,7 +47,7 @@ Season view :
         [Oshi no Ko]
       # Rating 1 from Anilist or MAL (in settings)
       user_rating: 8.4
-      # Add label score to use with PMM overlays and also add the season label (optionnal)
+      # Add label score to use with kometa overlays and also add the season label (optionnal)
       label: Score,AA Winner,Completed,2023 Spring
       label.remove: Watching,Dropped,Paused,Planning
     # Season 2 import
@@ -57,7 +57,7 @@ Season view :
         [Oshi no Ko] 2nd Season
       # Rating 1 from Anilist or MAL (in settings)
       user_rating: 8.5
-      # Add label score to use PMM overlays and also add the season label (optionnal)
+      # Add label score to use kometa overlays and also add the season label (optionnal)
       label: Score,Completed,2024 Summer
       label.remove: Watching,Dropped,Paused,Planning
   # Rating 1 : average rating of the seasons (Anilist or MAL)
@@ -66,7 +66,7 @@ Season view :
   critic_rating: 8.6
 
 ```
-Anilist Posters for animes and seasons can also be downloaded and imported to plex with the PMM assets folder
+Anilist Posters for animes and seasons can also be downloaded and imported to plex with the Kometa assets folder
 
 The seasonal-animes-download.sh can create a list of the new seasonal animes (New as not a sequel anime) and make a collection yml to add them to sonarr.
 
@@ -76,7 +76,7 @@ Designed for Plex TV agent / Plex Movie Agent, <b>Hama is unsupported</b>
   - Romaji-Renamer will export your Animes and TVDB/IMDB IDs from Plex with python plexapi
   - Then it will then retrieve their MAL/Anilist IDs from my mapping list https://github.com/Arial-Z/Animes-ID
   - Use the Anilist API and Jikan API to get metadata from Anilist and MAL
-  - Create and update a PMM metadata file to import everything in to your Plex when PMM runs.
+  - Create and update a Kometa metadata file to import everything in to your Plex when Kometa runs.
 
 ### Docker container avalaible here
 https://hub.docker.com/r/arialz/romaji-renamer
@@ -115,8 +115,8 @@ RUN_ANIMES_SCRIPT=Yes
 ANIME_LIBRARY_NAME="Animes"
 # Path to the created animes metadata file (Needed for the animes script)
 # On docker don't modifify the path "$SCRIPT_FOLDER/pmm/" only the file name if you want
-# on python select the path of the pmm install like this :
-# PMM_Folder/config/metadata-animes.yml
+# on python select the path of the kometa install like this :
+# Kometa_Folder/config/metadata-animes.yml
 METADATA_ANIMES=$SCRIPT_FOLDER/pmm/metadata-animes.yml
 
 
@@ -126,8 +126,8 @@ RUN_MOVIES_SCRIPT=No
 MOVIE_LIBRARY_NAME="Animes Movies"
 # Path to the created movies metadata file (Needed for the movies script)
 # On docker don't modifify the path "$SCRIPT_FOLDER/pmm/" only the file name if you want
-# on python select the path of the pmm install like this :
-# PMM_Folder/config/metadata-animes-movies.yml
+# on python select the path of the kometa install like this :
+# Kometa_Folder/config/metadata-animes-movies.yml
 METADATA_MOVIES=$SCRIPT_FOLDER/pmm/metadata-animes-movies.yml
 
 # Run the seasonal download script (Yes/No)
@@ -138,7 +138,7 @@ DOWNLOAD_LIMIT=20
 DOWNLOAD_ANIMES_COLLECTION=$SCRIPT_FOLDER/pmm/seasonal-animes-download.yml
 
 
-# PMM Asset Folder to import posters (Needed)
+# Kometa Asset Folder to import posters (Needed)
 ASSET_FOLDER=$SCRIPT_FOLDER/pmm/assets
 # Folder where the logs of script are kept (Default is okay change if you want)
 LOG_FOLDER=$SCRIPT_FOLDER/config/logs
@@ -184,8 +184,8 @@ DISABLE_TAGS=No
 DATA_CACHE_TIME=5
 ```
 
-### Step 4 - Configure PMM 
-  - Within your (PMM) config.yml add the following metadata_path, it should look like this with the default filepath:
+### Step 4 - Configure Kometa 
+  - Within your (Kometa) config.yml add the following metadata_path, it should look like this with the default filepath:
 ```yml
   Animes:
     metadata_files:
@@ -198,10 +198,10 @@ Run the script with bash:<br/>
 ```
 bash path/to/romaji-renamer.sh
 ```
-You can also add it to CRON and make sure to run it before PMM (be careful it take a little time to run due to API limit rate)
+You can also add it to CRON and make sure to run it before Kometa (be careful it take a little time to run due to API limit rate)
 
 ### override-ID
-Some animes won't be matched and the metadata will be missing, you can see them error in the log, in PMM metadata files or plex directly<br/>
+Some animes won't be matched and the metadata will be missing, you can see them error in the log, in Kometa metadata files or plex directly<br/>
 Cause are missing MAL ID for the TVDB ID / IMDB ID<br/>
 #### Animes
 to fix animes ID you can create a request at https://github.com/Anime-Lists/anime-lists/<br/>
@@ -228,9 +228,9 @@ create a new line and manually enter the IMDB-ID and MAL-ID, MAL-TITLE
 
 ### Thanks
   - To Plex for Plex
-  - To meisnate12 for Plex-Meta-Manager.
+  - To meisnate12 for Kometa
   - To plexapi
-  - To https://jikan.moe/ for their MAL API.
-  - To MAL for being here.
-  - To Anilist for being here too.
-  - And to a lot of random people from everywhere for all my copy / paste code.
+  - To https://jikan.moe/ for their MAL API
+  - To MAL for being here
+  - To Anilist for being here too
+  - And to a lot of random people from everywhere for all my copy / paste code
