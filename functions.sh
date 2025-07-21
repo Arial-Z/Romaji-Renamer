@@ -937,12 +937,21 @@ function get-season-infos () {
 					((score_1_no_rating_seasons++))
 					((score_2_no_rating_seasons++))
 				else
+					printf "      %s:\n" "$season_number"  >> "$METADATA"
 					romaji_title=$(get-romaji-title)
 					english_title=$(get-english-title)
-					printf "      %s:\n" "$season_number"  >> "$METADATA"
+					if [ "$english_title" == "null" ]
+					then
+						english_title=$romaji_title
+					fi
 					if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
 					then
+						if [[ $MAIN_TITLE_ENG == "Yes" ]]
+						then
+						printf "        title: |-\n          %s\n" "$english_title" >> "$METADATA"
+						else
 						printf "        title: |-\n          %s\n" "$romaji_title" >> "$METADATA"
+						fi
 					fi
 					season_label_add=""
 					season_label_remove=""
