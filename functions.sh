@@ -332,7 +332,7 @@ else
 fi
 }
 function get-anilist-tags () {
-	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq --argjson anilist_tags_p "$ANILIST_TAGS_P" '.data.Media.tags | .[] | select( .rank >= $anilist_tags_p ) | .name' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -sd ','
+	anime_tags=$( (jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq --argjson anilist_tags_p "$ANILIST_TAGS_P" '.data.Media.tags | .[] | select( .rank >= $anilist_tags_p ) | .name' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -sd ',')
 }
 function get-mal-tags () {
 	mal_id=""
@@ -343,7 +343,7 @@ function get-mal-tags () {
 		printf "%s - Missing MAL ID for Anilist : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
 	else
 		get-mal-infos
-		(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json") | awk '{print $0}' | paste -s -d, -
+		anime_tags=$( (jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json") | awk '{print $0}' | paste -s -d, -)
 	fi
 }
 function get-studios() {
@@ -1191,9 +1191,9 @@ function write-metadata () {
 	then
 		if [[ "$TAG_SOURCE" == "MAL" ]]
 		then
-			anime_tags=$(get-mal-tags)
+			get-mal-tags
 		else
-			anime_tags=$(get-anilist-tags)
+			get-anilist-tags
 		fi
 		if [[ "$ADD_ANIME_TAG" == "No" ]]
 		then
