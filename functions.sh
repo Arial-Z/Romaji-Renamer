@@ -342,6 +342,7 @@ function get-mal-tags () {
 		printf "%s\t\t - Missing MAL ID for Anilist : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
 		printf "%s - Missing MAL ID for Anilist : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
 	else
+		get-mal-infos
 		(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json") | awk '{print $0}' | paste -s -d, -
 	fi
 }
