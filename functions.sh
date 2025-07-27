@@ -335,7 +335,7 @@ function get-anilist-tags () {
 	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq --argjson anilist_tags_p "$ANILIST_TAGS_P" '.data.Media.tags | .[] | select( .rank >= $anilist_tags_p ) | .name' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -sd ','
 }
 function get-mal-tags () {
-	(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/data/MAL-$mal_id.json") | awk '{print $0}' | paste -s -d, -
+	(jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json") | awk '{print $0}' | paste -s -d, -
 }
 function get-studios() {
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/config/$OVERRIDE" | grep -q -w "$anilist_id"
