@@ -2,7 +2,7 @@
 
 # SCRIPT VARIABLES
 SCRIPT_FOLDER=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &>/dev/null && pwd)
-media_type=seasonal
+media_type=animes
 source "$SCRIPT_FOLDER/config/.env"
 source "$SCRIPT_FOLDER/functions.sh"
 
@@ -58,7 +58,7 @@ done < "$SCRIPT_FOLDER/config/tmp/seasonal-anilist.tsv"
 printf "%s - Done\n\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 
 
-tvdb_list=$(awk '{printf("%s,",$0)}' "$SCRIPT_FOLDER/config/data/seasonal.tsv" | sed 's/,\s*$//')
+tvdb_list=$(awk '{printf("%s, ",$0 )}' "$SCRIPT_FOLDER/config/data/seasonal.tsv" | sed 's/,\s*$//')
 printf "%s - Wrinting seasonal collection\n" "$(date +%H:%M:%S)" | tee -a "$LOG"
 printf "%s - Seasonal list : tvdb id added : %s\n" "$(date +%H:%M:%S)" "$tvdb_list"| tee -a "$LOG"
 printf "collections:\n  seasonal animes download:\n    tvdb_show: %s\n    sync_mode: append\n    sonarr_add_missing: true\n    build_collection: false\n" "$tvdb_list" > "$DOWNLOAD_ANIMES_COLLECTION"
