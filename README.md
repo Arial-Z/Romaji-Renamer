@@ -31,7 +31,7 @@ Season view :
   # original_title : English title or Native Title (from Anilist)
   original_title: |-
     Oshi No Ko
-  # Genre ands tags from Anilist (genres, and tag above > 70% can be changed in settings)
+  # Anilist genre ands tags (genres, and tag above > 70% can be changed in settings) or from MAL genres, demographics and themes
   genre.sync: Drama,Mystery,Psychological,Supernatural,Acting,Tragedy,Idol,Revenge,Twins,Male Protagonist,Urban,Reincarnation,Pregnancy,Detective,Seinen,Tsundere,Boys' Love,Female Protagonist,Coming of Age,Anti-Hero,Time Skip,Orphan,Age Regression,Ensemble Cast,Filmmaking
   # Add label to build collections and overlays Anilist Airing status (Planned, Airing or Ended) Anime Award winner and Anilist userlist status
   label: AA Winner,Planned,Completed
@@ -146,7 +146,7 @@ LOG_FOLDER=$SCRIPT_FOLDER/config/logs
 
 # Source for RATING 1 (main show and seasons) (MAL / ANILIST)
 RATING_1_SOURCE=ANILIST
-# Type of rating used in Plex for RATING 1 (audience, critic, user / leave empty to disable)
+# Type of rating used in Plex for RATING 1 (audience, critic, user)
 RATING_1_TYPE=audience
 # Source for RATING 2 (main show only) (MAL / ANILIST or leave empty to disable)
 RATING_2_SOURCE=MAL
@@ -160,8 +160,16 @@ MAIN_TITLE_ENG=No
 SORT_TITLE_ENG=No
 # Use the native name as original_title instead of the romaji/english one (Yes/No)
 ORIGINAL_TITLE_NATIVE=Yes
-# Rename season to the anilist title of that season (Yes/No)
+# Rename season to the anilist title of that season (use the same setting as MAIN_TITLE) (Yes/No)
 RENAME_SEASONS=Yes
+# Anilist have some full uppercase title, this settings will remove them "86 EIGHTY-SIX" > "86 Eighty-Six" (Yes/No)
+REDUCE_TITLE_CAPS=Yes
+# Disable tags import (Yes/No)
+DISABLE_TAGS=No
+# Source for tags (MAL / ANILIST)
+TAG_SOURCE=ANILIST
+# Add a default "Anime" tag to everything (Yes/No)
+ADD_ANIME_TAG=Yes
 #Grab anilist tags higher or equal than percentage (0-100)
 ANILIST_TAGS_P=70
 # Download poster (Yes/No)
@@ -172,14 +180,20 @@ POSTER_SEASON_DOWNLOAD=Yes
 POSTER_SOURCE=ANILIST
 # Ignore seasons title, rating and poster (Yes/No)
 IGNORE_SEASONS=No
-# Ignore season 1 if it's the only season (Yes/No)
-IGNORE_S1=Yes
-# Anilist have some full uppercase title, this settings will remove them "86 EIGHTY-SIX" > "86 Eighty-Six" (Yes/No)
-REDUCE_TITLE_CAPS=Yes
-#Add the anime season to the season label in plex (Fall  2022, Spring 2021, ...)
+# Add the anime season to the season label in plex (Fall  2022, Spring 2021, ...)
 SEASON_YEAR=No
-# Disable anilist tags
-DISABLE_TAGS=No
+# Ignore season rating for animmes with only 1 season (Yes/No)
+IGNORE_S1_ONLY_RATING=Yes
+# Add Anime Awards winner for seasons and shows
+ANIME_AWARDS=Yes
+# Ignore non japanese voice actor awards (Yes/No)
+ANIME_AWARDS_NO_FVA=Yes
+# Add tags based on userlists from anilist (Completed, wathcing) (Yes/No)
+ANILIST_LISTS=No
+# Anilist username
+ANILIST_USERNAME=Arialz
+# For Shows the level tags should be added ("show", "season" or "both") 
+ANILIST_LISTS_LEVEL=show
 # Mal Data cache time (in days min : 1)
 DATA_CACHE_TIME=5
 ```
@@ -232,5 +246,5 @@ create a new line and manually enter the IMDB-ID and MAL-ID, MAL-TITLE
   - To plexapi
   - To https://jikan.moe/ for their MAL API
   - To MAL for being here
-  - To Anilist for being here too
+  - To Anilist for their API and being here too
   - And to a lot of random people from everywhere for all my copy / paste code
