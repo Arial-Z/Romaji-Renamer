@@ -331,8 +331,20 @@ else
 	fi
 fi
 }
-function get-tags () {
-	(jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq --argjson anilist_tags_p "$ANILIST_TAGS_P" '.data.Media.tags | .[] | select( .rank >= $anilist_tags_p ) | .name' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -sd ','
+function get-anilist-tags () {
+	anime_tags=$( (jq '.data.Media.genres | .[]' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json" && jq --argjson anilist_tags_p "$ANILIST_TAGS_P" '.data.Media.tags | .[] | select( .rank >= $anilist_tags_p ) | .name' -r "$SCRIPT_FOLDER/config/data/anilist-$anilist_id.json") | awk '{print $0}' | paste -sd ',')
+}
+function get-mal-tags () {
+	mal_id=""
+	get-mal-id
+	if [[ $mal_id == 'null' ]] || [[ -z $mal_id ]]
+	then
+		printf "%s\t\t - Missing MAL ID for Anilist : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" | tee -a "$LOG"
+		printf "%s - Missing MAL ID for Anilist : %s / %s\n" "$(date +%H:%M:%S)" "$anilist_id" "$plex_title" >> "$MATCH_LOG"
+	else
+		get-mal-infos
+		anime_tags=$( (jq '.data.genres  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.demographics  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json" && jq '.data.themes  | .[] | .name' -r "$SCRIPT_FOLDER/config/data/MAL-$mal_id.json") | awk '{print $0}' | paste -sd ',')
+	fi
 }
 function get-studios() {
 	if awk -F"\t" '{print $2}' "$SCRIPT_FOLDER/config/$OVERRIDE" | grep -q -w "$anilist_id"
@@ -937,12 +949,21 @@ function get-season-infos () {
 					((score_1_no_rating_seasons++))
 					((score_2_no_rating_seasons++))
 				else
+					printf "      %s:\n" "$season_number"  >> "$METADATA"
 					romaji_title=$(get-romaji-title)
 					english_title=$(get-english-title)
-					printf "      %s:\n" "$season_number"  >> "$METADATA"
+					if [ "$english_title" == "null" ]
+					then
+						english_title=$romaji_title
+					fi
 					if [[ $ALLOW_RENAMING == "Yes" && $RENAME_SEASONS == "Yes" ]]
 					then
+						if [[ $MAIN_TITLE_ENG == "Yes" ]]
+						then
+						printf "        title: |-\n          %s\n" "$english_title" >> "$METADATA"
+						else
 						printf "        title: |-\n          %s\n" "$romaji_title" >> "$METADATA"
+						fi
 					fi
 					season_label_add=""
 					season_label_remove=""
@@ -1168,7 +1189,12 @@ function write-metadata () {
 	fi
 	if [[ $DISABLE_TAGS != "Yes" ]]
 	then
-		anime_tags=$(get-tags)
+		if [[ "$TAG_SOURCE" == "MAL" ]]
+		then
+			get-mal-tags
+		else
+			get-anilist-tags
+		fi
 		if [[ "$ADD_ANIME_TAG" == "No" ]]
 		then
 			printf "    genre.sync: %s\n" "$anime_tags" >> "$METADATA"
